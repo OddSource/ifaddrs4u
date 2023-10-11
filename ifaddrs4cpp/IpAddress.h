@@ -75,6 +75,7 @@ namespace OddSource::Interfaces
          *
          * @return a string.
          */
+        [[nodiscard]]
         virtual inline operator ::std::string() const; // NOLINT(*-explicit-constructor)
 
         /**
@@ -82,6 +83,7 @@ namespace OddSource::Interfaces
          *
          * @return a string.
          */
+        [[nodiscard]]
         virtual inline operator char const *() const; // NOLINT(*-explicit-constructor)
 
         /**
@@ -205,11 +207,20 @@ namespace OddSource::Interfaces
 
         ~IPv4Address() override;
 
+        [[nodiscard]]
         inline operator in_addr const *() const; // NOLINT(*-explicit-constructor)
 
+        [[nodiscard]]
         inline IPAddressVersion version() const final;
 
+        [[nodiscard]]
         inline uint8_t maximum_prefix_length() const final;
+
+        [[nodiscard]]
+        inline bool operator==(IPv4Address const &) const;
+
+        [[nodiscard]]
+        inline bool operator!=(IPv4Address const &) const;
 
     protected:
         [[nodiscard]]
@@ -240,10 +251,11 @@ namespace OddSource::Interfaces
         // conversion constructor
         IPv6Address(
             in6_addr const *,
-            ::std::optional<::std::string const> const & scope_id = ::std::nullopt);
+            ::std::optional<::std::string const> const & scope_id = ::std::nullopt); // NOLINT(*-explicit-constructor)
 
         ~IPv6Address() override;
 
+        [[nodiscard]]
         inline operator in6_addr const *() const; // NOLINT(*-explicit-constructor)
 
         /**
@@ -257,6 +269,7 @@ namespace OddSource::Interfaces
          *
          * @return a normalized copy of this address.
          */
+        [[nodiscard]]
         IPv6Address normalize() const;
 
         /**
@@ -324,9 +337,17 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         inline bool is_multicast_flag_enabled(MulticastV6Flag flag) const;
 
+        [[nodiscard]]
         inline IPAddressVersion version() const final;
 
+        [[nodiscard]]
         inline uint8_t maximum_prefix_length() const final;
+
+        [[nodiscard]]
+        inline bool operator==(IPv6Address const &) const;
+
+        [[nodiscard]]
+        inline bool operator!=(IPv6Address const &) const;
 
     protected:
         [[nodiscard]]
@@ -339,10 +360,13 @@ namespace OddSource::Interfaces
             ::std::optional<::std::string const> const & scope_id,
             bool);
 
+        [[nodiscard]]
         static ::std::string_view strip_scope(::std::string_view const &);
 
+        [[nodiscard]]
         static ::std::optional<::std::string_view> extract_scope(::std::string_view const &);
 
+        [[nodiscard]]
         static ::std::string add_scope(
             ::std::string const & repr,
             ::std::optional<::std::string const> const & scope_id);

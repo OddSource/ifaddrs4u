@@ -78,7 +78,7 @@ assert_true(bool test, ::std::optional<::std::string const> message, char const 
     {
         if (!message)
         {
-            message.emplace("The boolean condition was false");
+            message.emplace("The boolean condition was unexpectedly false");
         }
         this->failure(*message, file, line);
         throw TestAssertFailureAbort();
@@ -97,10 +97,71 @@ assert_true(
     {
         if (!message)
         {
-            message.emplace("The predicate returned false");
+            message.emplace("The predicate unexpectedly returned false");
         }
         this->failure(*message, file, line);
         throw TestAssertFailureAbort();
+    }
+}
+
+inline void
+OddSource::Interfaces::Tests::Test::
+assert_false(bool test, ::std::optional<::std::string const> message, char const * file, int line)
+{
+    this->_assertion_count++;
+    if (test)
+    {
+        if (!message)
+        {
+            message.emplace("The boolean condition was unexpectedly true");
+        }
+        this->failure(*message, file, line);
+        throw TestAssertFailureAbort();
+    }
+}
+
+inline void
+OddSource::Interfaces::Tests::Test::
+assert_false(
+    ::std::function<bool()> const & test,
+    ::std::optional<::std::string const> message,
+    char const * file, int line)
+{
+    this->_assertion_count++;
+    if (test())
+    {
+        if (!message)
+        {
+            message.emplace("The predicate unexpectedly returned true");
+        }
+        this->failure(*message, file, line);
+        throw TestAssertFailureAbort();
+    }
+}
+
+template<class E>
+inline void
+OddSource::Interfaces::Tests::Test::
+assert_except(
+    ::std::function<void()> const & predicate,
+    ::std::optional<::std::string const> message,
+    char const * file,
+    int line)
+{
+    try
+    {
+        predicate();
+        if (!message)
+        {
+            message.emplace((::std::ostringstream() << "Expected exception of type "
+                                                    << demangle(typeid(E).name())
+                                                    << ", but no exception thrown.").str());
+        }
+        this->failure(*message, file, line);
+    }
+    catch(E const &)
+    {
+        // expected
     }
 }
 

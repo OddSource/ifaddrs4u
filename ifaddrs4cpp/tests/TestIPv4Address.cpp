@@ -9,6 +9,7 @@ public:
     TestIPv4Address()
         : Test()
     {
+        add_test(test_equals);
         add_test(test_string_round_trip);
         add_test(test_in_addr_round_trip);
         add_test(test_unspecified_address);
@@ -17,6 +18,13 @@ public:
         add_test(test_multicast_addresses);
         add_test(test_private_addresses);
         add_test(test_other_reserved_addresses);
+    }
+
+    void test_equals()
+    {
+        assert_equals(IPv4Address("4.3.5.6"), IPv4Address("4.3.5.6"));
+        assert_equals(IPv4Address("4.3.5.6"), IPv4Address("0x04.0x03.0x05.0x06"));
+        assert_not_equals(IPv4Address("172.19.52.141"), IPv4Address("172.19.52.140"));
     }
 
     void test_string_round_trip()

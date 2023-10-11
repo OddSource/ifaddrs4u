@@ -57,6 +57,21 @@ namespace OddSource::Interfaces::Tests
 #define assert_that_without_message(v) this->assert_true(v, ::std::nullopt, __FILE__, __LINE__)
 #define assert_that(...) GET_1_OR_2_MACRO(__VA_ARGS__, assert_that_with_message, assert_that_without_message, UNUSED)(__VA_ARGS__)
 
+        inline void assert_false(bool, ::std::optional<::std::string const>, char const *, int);
+
+        inline void assert_false(::std::function<bool()> const &, ::std::optional<::std::string const>, char const *, int);
+
+#define assert_not_that_with_message(v, message) this->assert_false(v, message, __FILE__, __LINE__)
+#define assert_not_that_without_message(v) this->assert_false(v, ::std::nullopt, __FILE__, __LINE__)
+#define assert_not_that(...) GET_1_OR_2_MACRO(__VA_ARGS__, assert_not_that_with_message, assert_not_that_without_message, UNUSED)(__VA_ARGS__)
+
+        template<class E>
+        inline void assert_except(::std::function<void()> const &, ::std::optional<::std::string const>, char const *, int);
+
+#define assert_throws_with_message(p, E, message) this->assert_except<E>([&]() -> void {p;}, message, __FILE__, __LINE__)
+#define assert_throws_without_message(p, E) this->assert_except<E>([&]() -> void {p;}, ::std::nullopt, __FILE__, __LINE__)
+#define assert_throws(...) GET_2_OR_3_MACRO(__VA_ARGS__, assert_throws_with_message, assert_throws_without_message, UNUSED)(__VA_ARGS__)
+
 #define fail_test(message) this->assert_true(false, message, __FILE__, __LINE__)
 
         using create_function = ::std::unique_ptr<Test>();
@@ -69,6 +84,9 @@ namespace OddSource::Interfaces::Tests
         template<typename T>
         class Registrar
         {
+            static_assert(::std::is_base_of_v<Test, T>,
+                          "the template parameter T must derive from Test.");
+
         public:
             explicit Registrar(::std::string const &);
 
@@ -92,6 +110,9 @@ namespace OddSource::Interfaces::Tests
 
         uint64_t _assertion_count;
         uint16_t _test_count;
+        uint16_t _pass_test_count;
+        uint16_t _fail_test_count;
+        uint16_t _error_test_count;
         ::std::vector<::std::string const> _failures;
         ::std::vector<::std::string const> _errors;
     };

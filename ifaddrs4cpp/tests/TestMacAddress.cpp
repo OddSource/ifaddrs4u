@@ -9,8 +9,17 @@ public:
     TestMacAddress()
         : Test()
     {
+        add_test(test_equals);
         add_test(test_string_round_trip);
         add_test(test_data_round_trip);
+    }
+
+    void test_equals()
+    {
+        assert_equals(MacAddress("a4:83:e7:2e:a1:67"), MacAddress("a4:83:e7:2e:a1:67"));
+        assert_equals(MacAddress("a4:83:e7:2e:a1:67"), MacAddress("A4:83:E7:2E:A1:67"));
+        assert_not_equals(MacAddress("b2:fb:b8:5b:84:e8"), MacAddress("b2:fb:b8:5b:84:e8:ff"));
+        assert_not_equals(MacAddress("b2:fb:b8:5b:84:e8:fe"), MacAddress("b2:fb:b8:5b:84:e8:ff"));
     }
 
     void test_string_round_trip()
@@ -20,6 +29,8 @@ public:
             ::strcmp((char const *)MacAddress("b2:fb:b8:5b:84:e8:ff"), "b2:fb:b8:5b:84:e8:ff"),
             0,
             "The C strings do not match");
+
+        assert_equals(::std::string(MacAddress("a4-83-e7-2e-a1-67")), "a4-83-e7-2e-a1-67");
 
         ::std::ostringstream oss;
         oss << MacAddress("82:1c:78:44:5c:05");

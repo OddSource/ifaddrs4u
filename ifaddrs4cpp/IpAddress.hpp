@@ -267,6 +267,21 @@ maximum_prefix_length() const
     return 32;
 }
 
+inline bool
+OddSource::Interfaces::IPv4Address::
+operator==(OddSource::Interfaces::IPv4Address const & other) const
+{
+    return (*reinterpret_cast<uint32_t const *>(this->_data) ==
+            *reinterpret_cast<uint32_t const *>(other._data));
+}
+
+inline bool
+OddSource::Interfaces::IPv4Address::
+operator!=(OddSource::Interfaces::IPv4Address const & other) const
+{
+    return !this->operator==(other);
+}
+
 inline OddSource::Interfaces::IPAddressVersion
 OddSource::Interfaces::IPv6Address::
 version() const
@@ -342,6 +357,30 @@ OddSource::Interfaces::IPv6Address::
 is_multicast_flag_enabled(OddSource::Interfaces::MulticastV6Flag flag) const
 {
     return this->_multicast_flags && (*this->_multicast_flags & flag) == flag;
+}
+
+inline bool
+OddSource::Interfaces::IPv6Address::
+operator==(OddSource::Interfaces::IPv6Address const & other) const
+{
+    auto data1 = reinterpret_cast<uint8_t const *>(this->_data);
+    auto data2 = reinterpret_cast<uint8_t const *>(other._data);
+    auto length = this->data_length();
+    for(size_t i(0); i < length; i++)
+    {
+        if (data1[i] != data2[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+inline bool
+OddSource::Interfaces::IPv6Address::
+operator!=(OddSource::Interfaces::IPv6Address const & other) const
+{
+    return !this->operator==(other);
 }
 
 inline ::std::ostream &

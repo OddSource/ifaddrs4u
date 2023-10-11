@@ -26,8 +26,32 @@ length() const
     return this->_data_length;
 }
 
-inline
-::std::ostream &
+inline bool
+OddSource::Interfaces::MacAddress::
+operator==(MacAddress const & other) const
+{
+    if (this->_data_length != other._data_length)
+    {
+        return false;
+    }
+    for (uint8_t i(0); i < this->_data_length; i++)
+    {
+        if (this->_data[i] != other._data[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+inline bool
+OddSource::Interfaces::MacAddress::
+operator!=(MacAddress const & other) const
+{
+    return !this->operator==(other);
+}
+
+inline ::std::ostream &
 OddSource::Interfaces::
 operator<<(::std::ostream & os, MacAddress const & address)
 {

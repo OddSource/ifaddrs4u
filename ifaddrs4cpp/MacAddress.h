@@ -6,11 +6,13 @@
 #include <string>
 #include <string_view>
 
+#ifndef MIN_ADAPTER_ADDRESS_LENGTH
+#define MIN_ADAPTER_ADDRESS_LENGTH 6
+#endif
+
 #ifndef MAX_ADAPTER_ADDRESS_LENGTH
 #define MAX_ADAPTER_ADDRESS_LENGTH 8
 #endif /* MAX_ADAPTER_ADDRESS_LENGTH */
-
-#define ADAPTER_ADDRESS_FROM_REPR_LENGTH 6
 
 namespace OddSource::Interfaces
 {
@@ -39,19 +41,31 @@ namespace OddSource::Interfaces
 
         ~MacAddress();
 
+        [[nodiscard]]
         inline operator ::std::string() const; // NOLINT(*-explicit-constructor)
 
+        [[nodiscard]]
         inline operator char const *() const; // NOLINT(*-explicit-constructor)
 
+        [[nodiscard]]
         inline operator uint8_t const *() const; // NOLINT(*-explicit-constructor)
 
+        [[nodiscard]]
         inline uint8_t length() const;
+
+        [[nodiscard]]
+        inline bool operator==(MacAddress const &) const;
+
+        [[nodiscard]]
+        inline bool operator!=(MacAddress const &) const;
 
     private:
         MacAddress(::std::string_view const &, uint8_t const *, uint8_t);
 
+        [[nodiscard]]
         static uint8_t const * from_repr(::std::string_view const &);
 
+        [[nodiscard]]
         static ::std::string to_repr(uint8_t const [MAX_ADAPTER_ADDRESS_LENGTH], uint8_t);
 
         ::std::string const _representation;

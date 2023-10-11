@@ -136,12 +136,10 @@ namespace OddSource::Interfaces
                     flags |= IsUp;
                     flags |= IsRunning;
                 }
-                // this might lead os to BroadcastAddressSet, have to determine later
-                /*PIP_ADAPTER_PREFIX pre = ifa->FirstPrefix;
-                while (pre)
+                if (has_broadcast(ifa->FirstPrefix))
                 {
-                    pre = pre->Next;
-                }*/
+                    flagn |= BroadcastAddressSet;
+                }
                 if (ifa->Flags & IP_ADAPTER_NO_MULTICAST != IP_ADAPTER_NO_MULTICAST)
                 {
                     flags |= SupportsMulticast;
@@ -150,7 +148,8 @@ namespace OddSource::Interfaces
                     ifa->IfIndex,
                     ::std::wstring_convert<::std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(ifa->FriendlyName),
                     ifa->AdapterName.substr(1, uuid.length() - 2), // strip {}
-                    flags)
+                    flags,
+                    ifa->Mtu);
 
                 if (ifa->PhysicalAddress)
                 {
@@ -224,8 +223,10 @@ namespace OddSource::Interfaces
                 if (found == interfaces.end())
                 {
                     uint32_t index(::if_nametoindex(ifa->ifa_name));
-                    // Do something if index == 0 unexpectedly? That means the OS is misbehaving.
-                    interfaces.emplace(name, Interface(index, name, ifa->ifa_flags));
+                    assert(index > 0);
+                    interfaces.emplace(
+                        name,
+                        Interface(index, name, ifa->ifa_flags, InterfacesHelper::get_mtu(ifa->ifa_name)));
                     indexes_to_names.emplace(index, name);
                     found = interfaces.find(name);
                 }
@@ -279,6 +280,32 @@ namespace OddSource::Interfaces
 
     private:
 #ifdef IS_WINDOWS
+        static bool has_broadcast(PIP_ADAPTER_PREFIX pre)
+        {
+            while (pre)
+            {
+                LPSOCKADDR candidate = pre->Address.lpSockaddr;
+                if (candidate->sa_family == AF_INET)
+                {
+                    auto cand = reinterpret_cast<sockaddr_in *>(candidate);
+                    auto cand_bytes = reinterpret_cast<uint8_t * bytes>(cand.sin_addr.s_addr);
+                    uint8_t i, first_byte_with_bcast(0);
+                    for (i = 3; i >= 0; i--)
+                    {
+                        if (cand_bytes[i] == 0xff)
+                        {
+                            first_byte_with_bcast = i;
+                        }
+                    }
+                    if (first_byte_with_bcast >= 1)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         static void add_ipv4_address(
             LPSOCKADDR sa, PIP_ADAPTER_PREFIX pre, Interface & interface,
             uint8_t prefix_length = 0)
@@ -359,6 +386,25 @@ namespace OddSource::Interfaces
 
         PIP_ADAPTER_ADDRESSES _pAddresses;
 #else /* IS_WINDOWS */
+        static ::std::optional<uint64_t const> get_mtu(char const * if_name)
+        {
+            ::std::optional<uint64_t const> mtu;
+#ifdef SIOCGIFMTU
+            ifreq ifr {};
+            ::strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
+            int sock(::socket(AF_INET, SOCK_DGRAM, 0));
+            if (sock < 0)
+            {
+                // TODO print error?
+            }
+            else if (::ioctl(sock, SIOCGIFMTU, &ifr) >= 0)
+            {
+                mtu.emplace(ifr.ifr_mtu);
+            }
+#endif
+            return mtu;
+        }
+
         static void set_mac_address(ifaddrs *ifa, Interface & interface)
         {
 #ifdef AF_LINK
@@ -368,8 +414,12 @@ namespace OddSource::Interfaces
             // actually unsigned. (This is because addr->sdl_data contains two sets
             // of data in a signed char, and LLADDR merely extracts the one we need.)
             // So we have to cast to unsigned in order to make use of the data.
-            auto data = reinterpret_cast<uint8_t const *>(LLADDR(addr));
             auto data_length = addr->sdl_alen; // should always be 6, but you never know
+            if (data_length < MIN_ADAPTER_ADDRESS_LENGTH)
+            {
+                return;
+            }
+            auto data = reinterpret_cast<uint8_t const *>(LLADDR(addr));
 #else /* AF_LINK */
             assert(ifa->ifa_addr->sa_family == AF_PACKET);
             auto addr = reinterpret_cast<sockaddr_ll *>(ifa->ifa_addr);
@@ -377,10 +427,22 @@ namespace OddSource::Interfaces
             {
                 return;
             }
-            auto data = addr->sll_addr[i];
             auto data_length = addr->sll_halen; // should always be 6, but you never know
+            if (data_length < MIN_ADAPTER_ADDRESS_LENGTH)
+            {
+                return;
+            }
+            auto data = addr->sll_addr[i];
 #endif /* !AF_LINK */
-            interface._mac_address.emplace(data, data_length);
+            for (uint8_t i(0); i < data_length; i++)
+            {
+                if (data[i] > 0)
+                {
+                    // make sure at least one byte is nonzero
+                    interface._mac_address.emplace(data, data_length);
+                    return;
+                }
+            }
         }
 
         static void add_ipv4_address(ifaddrs *ifa, Interface & interface)
@@ -494,6 +556,16 @@ namespace OddSource::Interfaces
     };
 }
 
+OddSource::Interfaces::InterfaceBrowser::
+InterfaceBrowser()
+    : _storage_mutex(),
+      _storage_filled(false),
+      _interface_vector(),
+      _index_map(),
+      _name_map()
+{
+}
+
 bool
 OddSource::Interfaces::InterfaceBrowser::
 for_each_interface(::std::function<bool(Interface const &)> & do_this)
@@ -524,7 +596,6 @@ get_interfaces()
     this->populate_interface_storage();
     ::std::shared_lock<::std::shared_mutex> shared(this->_storage_mutex);
     return this->_interface_vector;
-
 }
 
 OddSource::Interfaces::Interface const &
@@ -600,6 +671,7 @@ populate_and_maybe_more_unsafe(::std::function<bool(Interface const &)> * do_thi
     this->_interface_vector = ::std::move(temp_vector);
     this->_index_map = ::std::move(temp_index_map);
     this->_name_map = ::std::move(temp_name_map);
+    this->_storage_filled = true;
     return return_internal;
 }
 

@@ -69,7 +69,11 @@ add_executable(${PROJECT_NAME}_tests
                tests/main.cpp
                tests/TestIPv4Address.cpp
                tests/TestIPv6Address.cpp
-               tests/TestMacAddress.cpp)
+               tests/TestMacAddress.cpp
+               tests/TestInterface.cpp
+               tests/TestInterfaceIPAddress.cpp
+               tests/TestVersionInfo.cpp
+               tests/TestInterfaceBrowser.cpp)
 target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}_compiler_flags)
 target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}-static)
 target_include_directories(${PROJECT_NAME}_tests PUBLIC "${PROJECT_BINARY_DIR}")

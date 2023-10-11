@@ -37,9 +37,25 @@ MacAddress(MacAddress && other) noexcept
 {
 }
 
+namespace
+{
+    uint8_t predict_repr_length(::std::string_view const & repr)
+    {
+        uint8_t count(0);
+        for (char const & c: repr)
+        {
+            if (c == ':' || c == '-')
+            {
+                count++;
+            }
+        }
+        return count + 1;
+    }
+}
+
 OddSource::Interfaces::MacAddress::
 MacAddress(::std::string_view const & repr)
-    : MacAddress(repr, MacAddress::from_repr(repr), ADAPTER_ADDRESS_FROM_REPR_LENGTH)
+    : MacAddress(repr, MacAddress::from_repr(repr), predict_repr_length(repr))
 {
 }
 
@@ -80,11 +96,27 @@ from_repr(::std::string_view const & repr)
     // GNUC has ether_aton_r, which is thread-safe, but BSD systems have
     // ether_aton, which is not thread safe and basically cannot safely be used.
     // Windows has no built-in method until C#. So ... let's try something simple-ish.
-    auto data = new uint8_t [ADAPTER_ADDRESS_FROM_REPR_LENGTH];
+    auto predicted_length(predict_repr_length(repr));
+    if (predicted_length > MAX_ADAPTER_ADDRESS_LENGTH)
+    {
+        throw InvalidMacAddress((
+            ::std::ostringstream() << "MAC address length (" << predicted_length
+                                   << " bytes) too long (max " << MAX_ADAPTER_ADDRESS_LENGTH
+                                   << " bytes).").str());
+    }
+    if (predicted_length < MIN_ADAPTER_ADDRESS_LENGTH)
+    {
+        throw InvalidMacAddress((
+            ::std::ostringstream() << "MAC address length (" << predicted_length
+                                   << " bytes) too short (min " << MIN_ADAPTER_ADDRESS_LENGTH
+                                   << " bytes).").str());
+    }
+
+    auto data = new uint8_t [MAX_ADAPTER_ADDRESS_LENGTH];
     size_t size;
     auto c = repr.begin();
     auto end = repr.end();
-    for (size = 0; size < ADAPTER_ADDRESS_FROM_REPR_LENGTH; size++)
+    for (size = 0; size < predicted_length; size++)
     {
         uint8_t byte;
 
@@ -95,22 +127,22 @@ from_repr(::std::string_view const & repr)
         if (c != end)
         {
             ch = (char)::std::tolower(*c);
-            if ((size < ADAPTER_ADDRESS_FROM_REPR_LENGTH - 1 && ch != ':') ||
-                (size == ADAPTER_ADDRESS_FROM_REPR_LENGTH - 1 && !::std::isspace(ch)))
+            if ((size < predicted_length - 1 && ch != ':' && ch != '-') ||
+                (size == predicted_length - 1 && !::std::isspace(ch)))
             {
                 c++;
                 WRONG_CHAR_THROW
                 byte <<= 4;
                 byte += ::std::isdigit (ch) ? (ch - '0') : (ch - 'a' + 10);
                 ch = *c;
-                if (size < ADAPTER_ADDRESS_FROM_REPR_LENGTH -1 && ch != ':')
+                if (size < predicted_length -1 && ch != ':' && ch != '-')
                 {
                     delete[] data;
-                    throw InvalidMacAddress("Malformed MAC address, expected ':' between bytes.");
+                    throw InvalidMacAddress("Malformed MAC address, expected ':' or '-' between bytes.");
                 }
             }
         }
-        else if(size < ADAPTER_ADDRESS_FROM_REPR_LENGTH - 1)
+        else if(size < predicted_length - 1)
         {
             throw InvalidMacAddress("Malformed MAC address is not long enough.");
         }

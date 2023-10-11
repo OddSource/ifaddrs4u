@@ -9,6 +9,7 @@ public:
     TestIPv6Address()
         : Test()
     {
+        add_test(test_equals);
         add_test(test_string_round_trip_unscoped);
         add_test(test_string_round_trip_scoped);
         add_test(test_in_addr_round_trip_unscoped);
@@ -24,6 +25,13 @@ public:
         add_test(test_v4_translated_addresses);
         add_test(test_v4_compatible_addresses);
         add_test(test_6to4_addresses);
+    }
+
+    void test_equals()
+    {
+        assert_equals(IPv6Address("2001::dead:beef"), IPv6Address("2001::DEAD:BEEF"));
+        assert_equals(IPv6Address("2001::dead:beef"), IPv6Address("2001:0:0:0:0:0:dead:beef"));
+        assert_not_equals(IPv6Address("2001::dead:beef"), IPv6Address("2001::de:ad:be:ef"));
     }
 
     void test_string_round_trip_unscoped()

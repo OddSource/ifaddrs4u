@@ -24,7 +24,7 @@ IPAddress(::std::string_view const & repr)
 }
 
 OddSource::Interfaces::IPAddress::
-IPAddress(const OddSource::Interfaces::IPAddress & other)
+IPAddress(OddSource::Interfaces::IPAddress const & other)
     : _representation(other._representation)
 {
 }
@@ -54,7 +54,8 @@ namespace
 
 OddSource::Interfaces::IPv4Address::
 IPv4Address(OddSource::Interfaces::IPv4Address const & other)
-    : IPAddress(other)
+    : IPAddress(other),
+      _data(nullptr)
 {
     delete this->_data;
     this->_data = copy_in_addr(other._data);
@@ -170,7 +171,8 @@ OddSource::Interfaces::IPv4Address::
 
 OddSource::Interfaces::IPv6Address::
 IPv6Address(OddSource::Interfaces::IPv6Address const & other)
-    : IPAddress(other)
+    : IPAddress(other),
+      _data(nullptr)
 {
     delete this->_data;
     this->_data = copy_in_addr(other._data);

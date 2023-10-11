@@ -37,6 +37,8 @@ namespace OddSource::Interfaces
     class OddSource_Export InterfaceBrowser
     {
     public:
+        InterfaceBrowser();
+
         InterfaceBrowser(InterfaceBrowser const &) = delete;
 
         InterfaceBrowser &

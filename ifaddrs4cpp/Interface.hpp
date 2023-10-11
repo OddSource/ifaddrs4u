@@ -47,9 +47,79 @@ InterfaceIPAddress(
 {
 }
 
+namespace
+{
+    struct InterfaceIPFlagDisplayInfo
+    {
+        ::std::string display;
+        OddSource::Interfaces::InterfaceIPAddressFlag flag;
+    };
+}
+
+template<class IPAddressT>
+::std::ostream &
+OddSource::Interfaces::
+operator<<(::std::ostream & os, OddSource::Interfaces::InterfaceIPAddress<IPAddressT> const & address)
+{
+    static ::std::vector<InterfaceIPFlagDisplayInfo const> const flag_displays {
+        {"autoconf", AutoConfigured},
+        {"deprecated", Deprecated},
+        {"secured", Secured},
+        {"temporary", Temporary},
+        {"anycast", Anycast},
+        {"detached", Detached},
+        {"duplicated", Duplicated},
+        {"dynamic", Dynamic},
+        {"optimistic", Optimistic},
+        {"tentative", Tentative},
+        {"nodad", NoDad},
+    };
+
+    using namespace OddSource::Interfaces;
+    os << address._address;
+    if (address._prefix_length)
+    {
+        os << "/" << ::std::to_string(*address._prefix_length);
+    }
+    if (address._broadcast)
+    {
+        os << " broadcast " << *address._broadcast;
+    }
+    else if(address._point_to_point)
+    {
+        os << " destination " << *address._point_to_point;
+    }
+    if (address._flags)
+    {
+        for (auto const & flag_display : flag_displays)
+        {
+            if ((address._flags & flag_display.flag) == flag_display.flag)
+            {
+                os << " " << flag_display.display;
+            }
+        }
+    }
+    return os;
+}
+
 template<class IPAddressT>
 inline
-IPAddressT const &
+OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
+operator ::std::string() const
+{
+    return (::std::ostringstream() << *this).str();
+}
+
+template<class IPAddressT>
+inline
+OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
+operator char const *() const
+{
+    return this->operator::std::string().c_str();
+}
+
+template<class IPAddressT>
+inline IPAddressT const &
 OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
 address() const
 {
@@ -57,8 +127,7 @@ address() const
 }
 
 template<class IPAddressT>
-inline
-::std::optional<uint8_t> const &
+inline ::std::optional<uint8_t> const &
 OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
 prefix_length() const
 {
@@ -66,8 +135,7 @@ prefix_length() const
 }
 
 template<class IPAddressT>
-inline
-::std::optional<IPAddressT const> const &
+inline ::std::optional<IPAddressT const> const &
 OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
 broadcast_address() const
 {
@@ -75,8 +143,7 @@ broadcast_address() const
 }
 
 template<class IPAddressT>
-inline
-::std::optional<IPAddressT const> const &
+inline ::std::optional<IPAddressT const> const &
 OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
 point_to_point_destination() const
 {
@@ -84,24 +151,41 @@ point_to_point_destination() const
 }
 
 template<class IPAddressT>
-inline
-bool
+inline bool
 OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
 is_flag_enabled(OddSource::Interfaces::InterfaceIPAddressFlag flag) const
 {
     return (this->_flags & flag) == flag;
 }
 
-inline
-uint32_t
+template<class IPAddressT>
+inline bool
+OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
+operator==(InterfaceIPAddress <IPAddressT> const & other) const
+{
+    return this->_flags == other._flags &&
+           this->_prefix_length == other._prefix_length &&
+           this->_address == other._address &&
+           this->_broadcast == other._broadcast &&
+           this->_point_to_point == other._point_to_point;
+}
+
+template<class IPAddressT>
+inline bool
+OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
+operator!=(InterfaceIPAddress <IPAddressT> const & other) const
+{
+    return !this->operator==(other);
+}
+
+inline uint32_t
 OddSource::Interfaces::Interface::
 index() const
 {
     return this->_index;
 }
 
-inline
-::std::string
+inline ::std::string
 OddSource::Interfaces::Interface::
 name() const
 {
@@ -109,8 +193,7 @@ name() const
 }
 
 #ifdef IS_WINDOWS
-inline
-::std::string
+inline ::std::string
 OddSource::Interfaces::Interface::
 windows_uuid() const
 {
@@ -118,56 +201,56 @@ windows_uuid() const
 }
 #endif /* IS_WINDOWS */
 
-inline
-bool
+inline bool
 OddSource::Interfaces::Interface::
 is_flag_enabled(InterfaceFlag flag) const
 {
     return (this->_flags & flag) == flag;
 }
 
-inline
-bool
+inline ::std::optional<uint64_t const> const &
+OddSource::Interfaces::Interface::
+mtu() const
+{
+    return this->_mtu;
+}
+
+inline bool
 OddSource::Interfaces::Interface::
 is_up() const
 {
     return this->is_flag_enabled(IsUp);
 }
 
-inline
-bool
+inline bool
 OddSource::Interfaces::Interface::
 is_loopback() const
 {
     return this->is_flag_enabled(IsLoopback);
 }
 
-inline
-bool
+inline bool
 OddSource::Interfaces::Interface::
 has_mac_address() const
 {
     return static_cast<bool>(this->_mac_address);
 }
 
-inline
-::std::optional<OddSource::Interfaces::MacAddress const> const &
+inline ::std::optional<OddSource::Interfaces::MacAddress const> const &
 OddSource::Interfaces::Interface::
 mac_address() const
 {
     return this->_mac_address;
 }
 
-inline
-::std::vector<OddSource::Interfaces::InterfaceIPAddress<OddSource::Interfaces::IPv4Address const> const> const &
+inline ::std::vector<OddSource::Interfaces::InterfaceIPAddress<OddSource::Interfaces::IPv4Address> const> const &
 OddSource::Interfaces::Interface::
 ipv4_addresses() const
 {
     return this->_ipv4_addresses;
 }
 
-inline
-::std::vector<OddSource::Interfaces::InterfaceIPAddress<OddSource::Interfaces::IPv6Address const> const> const &
+inline ::std::vector<OddSource::Interfaces::InterfaceIPAddress<OddSource::Interfaces::IPv6Address> const> const &
 OddSource::Interfaces::Interface::
 ipv6_addresses() const
 {

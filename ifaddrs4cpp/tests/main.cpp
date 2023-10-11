@@ -1,7 +1,6 @@
 #include "main.h"
 
 #include <chrono>
-#include <cmath>
 #include <cstring>
 #include <cstdio>
 #include <unistd.h>
@@ -49,7 +48,11 @@ demangle(char const * name)
 OddSource::Interfaces::Tests::Test::
 Test()
     : _tests(),
+      _assertion_count(0),
       _test_count(0),
+      _pass_test_count(0),
+      _fail_test_count(0),
+      _error_test_count(0),
       _failures(),
       _errors()
 {
@@ -72,18 +75,22 @@ registry()
     return impl;
 }
 
-void
-OddSource::Interfaces::Tests::Test::
-run()
+namespace
 {
     bool const is_tty(::isatty(::fileno(::stdin)));
     char const * RED = is_tty ? "\033[0;31m" : "";
     char const * ORANGE = is_tty ? "\033[0;33m" : "";
+    char const * GREEN = is_tty ? "\033[0;32m" : "";
     char const * RESET = is_tty ? "\033[0m" : "";
     char const * ERROR = is_tty ? "\033[0;31mERROR\033[0m" : "ERROR";
     char const * FAIL = is_tty ? "\033[0;33mFAIL\033[0m" : "FAIL";
     char const * PASS = is_tty ? "\033[0;32mPASS\033[0m" : "PASS";
+}
 
+void
+OddSource::Interfaces::Tests::Test::
+run()
+{
     for (auto const & [name, test_function] : this->_tests)
     {
         ::std::cout << "  ::" << name << " ... " << ::std::flush;
@@ -104,9 +111,23 @@ run()
                 ::std::ostringstream() << "Exception '" << type_id_string(e)
                                        << "' occurred: " << e.what()).str());
         }
-        ::std::cout << (error_count != this->_errors.size() ? ERROR :
-                           (failure_count != this->_failures.size() ? FAIL : PASS))
-                    << ::std::endl;
+
+        if (error_count != this->_errors.size())
+        {
+            this->_error_test_count++;
+            ::std::cout << ERROR << ::std::endl;
+        }
+        else if (failure_count != this->_failures.size())
+        {
+            this->_fail_test_count++;
+            ::std::cout << FAIL << ::std::endl;
+        }
+        else
+        {
+            this->_pass_test_count++;
+            ::std::cout << PASS << ::std::endl;
+        }
+
         for(; error_count < this->_errors.size(); error_count++)
         {
             ::std::cerr << RED << "    ERROR: " << this->_errors[error_count] << RESET << ::std::endl;
@@ -123,6 +144,9 @@ OddSource::Interfaces::Tests::Test::
 run_all_registered_test_cases(::std::vector<::std::string const> const & matching)
 {
     uint32_t total_test_count(0);
+    uint32_t total_pass_count(0);
+    uint32_t total_fail_count(0);
+    uint32_t total_error_count(0);
     uint64_t total_assertion_count(0);
     ::std::chrono::steady_clock::time_point start_time(::std::chrono::steady_clock::now());
     auto end = matching.end();
@@ -148,6 +172,9 @@ run_all_registered_test_cases(::std::vector<::std::string const> const & matchin
             ret = 1;
         }
         total_test_count += test->_test_count;
+        total_pass_count += test->_pass_test_count;
+        total_fail_count += test->_fail_test_count;
+        total_error_count += test->_error_test_count;
         total_assertion_count += test->_assertion_count;
     }
 
@@ -159,20 +186,30 @@ run_all_registered_test_cases(::std::vector<::std::string const> const & matchin
     {
         oss.precision(9);
         auto elapsed_seconds(elapsed_microseconds / 1'000'000.0);
-        oss << elapsed_seconds << " seconds";
+        oss << elapsed_seconds << "s";
     }
     else if (elapsed_microseconds > 1'000)
     {
         auto elapsed_milliseconds(elapsed_microseconds / 1'000.0);
-        oss << elapsed_milliseconds << " milliseconds";
+        oss << elapsed_milliseconds << "ms";
     }
     else
     {
-        oss << elapsed_microseconds << " microseconds";
+        oss << elapsed_microseconds << "µs";
     }
     ::std::string elapsed(oss.str());
     ::std::cout << "Ran " << total_test_count << " tests (" << total_assertion_count
                 << " assertions) in " << elapsed << "." << ::std::endl;
+
+    if (total_pass_count > 0)
+    {
+        ::std::cout << GREEN;
+    }
+    ::std::cout << "  " << total_pass_count << " tests passed" << RESET << ::std::endl
+                << "  " << (total_fail_count > 0 ? ORANGE : GREEN) << total_fail_count
+                        << " tests failed" << RESET << ::std::endl
+                << "  " << (total_error_count > 0 ? RED : GREEN) << total_error_count
+                        << " tests experienced errors" << RESET << ::std::endl;
 
     return ret;
 }
