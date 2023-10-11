@@ -45,6 +45,8 @@ namespace OddSource::Interfaces
 
         inline operator uint8_t const *() const; // NOLINT(*-explicit-constructor)
 
+        inline uint8_t length() const;
+
     private:
         MacAddress(::std::string_view const &, uint8_t const *, uint8_t);
 

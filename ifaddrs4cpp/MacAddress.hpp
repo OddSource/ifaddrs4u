@@ -19,6 +19,13 @@ operator uint8_t const *() const
     return this->_data;
 }
 
+inline uint8_t
+OddSource::Interfaces::MacAddress::
+length() const
+{
+    return this->_data_length;
+}
+
 inline
 ::std::ostream &
 OddSource::Interfaces::

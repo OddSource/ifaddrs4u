@@ -40,14 +40,24 @@ OddSource::Interfaces::IPAddress::
 {
 }
 
+namespace
+{
+    template<typename Addr, typename = OddSource::Interfaces::Enable_If_Addr<Addr>>
+    Addr const *
+    copy_in_addr(Addr const * data)
+    {
+        auto new_data = new Addr;
+        ::std::memcpy(new_data, data, sizeof(Addr));
+        return new_data;
+    }
+}
+
 OddSource::Interfaces::IPv4Address::
 IPv4Address(OddSource::Interfaces::IPv4Address const & other)
     : IPAddress(other)
 {
-    auto data = new in_addr;
-    ::std::memcpy(data, other._data, sizeof(in_addr));
     delete this->_data;
-    this->_data = data;
+    this->_data = copy_in_addr(other._data);
 }
 
 OddSource::Interfaces::IPv4Address::
@@ -60,24 +70,30 @@ IPv4Address(OddSource::Interfaces::IPv4Address && other) noexcept
 
 OddSource::Interfaces::IPv4Address::
 IPv4Address(::std::string_view const & repr)
-    : IPv4Address(repr, IPAddress::from_repr<in_addr>(repr))
+    : IPv4Address(IPAddress::from_repr<in_addr>(repr), false)
 {
 }
 
 OddSource::Interfaces::IPv4Address::
 IPv4Address(in_addr const * data)
-    : IPv4Address(IPAddress::to_repr(data), data)
+    : IPv4Address(data, true)
 {
 }
 
 OddSource::Interfaces::IPv4Address::
-IPv4Address(::std::string_view const & repr, in_addr const * data)
+IPv4Address(in_addr const * data, bool copy_data)
+    : IPv4Address(IPAddress::to_repr(data), data, copy_data)
+{
+}
+
+OddSource::Interfaces::IPv4Address::
+IPv4Address(::std::string_view const & repr, in_addr const * data, bool copy_data)
     : IPAddress(repr),
-      _data(data)
+      _data(copy_data ? copy_in_addr(data) : data)
 {
     auto bytes = BYTES;
 
-    if (reinterpret_cast<uint32_t const *>(this->_data) == 0) // 0.0.0.0 NOLINT(*-use-nullptr)
+    if (*reinterpret_cast<uint32_t const *>(this->_data) == 0)
     {
         this->_is_unspecified = true;
         this->_is_reserved = true;
@@ -110,7 +126,7 @@ IPv4Address(::std::string_view const & repr, in_addr const * data)
     }
     // various other reserved ranges, see https://en.wikipedia.org/wiki/Reserved_IP_addresses
     else if (bytes[0] == 0 || // 0.0.0.0/8
-             (bytes[0] == 192 && bytes[1] == 1 && bytes[2] == 2) || // 192.0.2.0/24
+             (bytes[0] == 192 && bytes[1] == 0 && bytes[2] == 2) || // 192.0.2.0/24
              (bytes[0] == 192 && bytes[1] == 88 && bytes[2] == 99) || // 192.88.99.0/24
              (bytes[0] == 198 && bytes[1] == 51 && bytes[2] == 100) || // 198.51.100.0/24
              (bytes[0] == 203 && bytes[1] == 0 && bytes[2] == 113) || // 203.0.113.0/24
@@ -156,10 +172,8 @@ OddSource::Interfaces::IPv6Address::
 IPv6Address(OddSource::Interfaces::IPv6Address const & other)
     : IPAddress(other)
 {
-    auto data = new in6_addr;
-    ::std::memcpy(data, other._data, sizeof(in6_addr));
     delete this->_data;
-    this->_data = data;
+    this->_data = copy_in_addr(other._data);
 }
 
 OddSource::Interfaces::IPv6Address::
@@ -172,7 +186,7 @@ IPv6Address(OddSource::Interfaces::IPv6Address && other) noexcept
 
 OddSource::Interfaces::IPv6Address::
 IPv6Address(::std::string_view const & repr)
-    : IPv6Address(repr, IPAddress::from_repr<in6_addr>(IPv6Address::strip_scope(repr)))
+    : IPv6Address(repr, IPAddress::from_repr<in6_addr>(IPv6Address::strip_scope(repr)), ::std::nullopt, false)
 {
 }
 
@@ -180,7 +194,7 @@ OddSource::Interfaces::IPv6Address::
 IPv6Address(
     in6_addr const * data,
     ::std::optional<::std::string const> const & scope_id)
-    : IPv6Address(IPAddress::to_repr(data), data, scope_id)
+    : IPv6Address(IPv6Address::add_scope(IPAddress::to_repr(data), scope_id), data, scope_id, true)
 {
 }
 
@@ -188,9 +202,10 @@ OddSource::Interfaces::IPv6Address::
 IPv6Address(
     ::std::string_view const & repr,
     in6_addr const * data,
-    ::std::optional<::std::string const> const & scope_id)
+    ::std::optional<::std::string const> const & scope_id,
+    bool copy_data)
     : IPAddress(repr),
-      _data(data),
+      _data(copy_data ? copy_in_addr(data) : data),
       _scope_id(scope_id ? scope_id : IPv6Address::extract_scope(repr)),
       _without_scope(IPv6Address::strip_scope(repr))
 {
@@ -208,7 +223,8 @@ IPv6Address(
         this->_is_loopback = true;
         this->_is_reserved = true;
     }
-    else if(IN6_IS_ADDR_LINKLOCAL(this->_data))
+    else if(IN6_IS_ADDR_LINKLOCAL(this->_data) && // some impls erroneously check *only* fe80
+            words[1] == 0 && words[2] == 0 && words[3] == 0)
     {
         this->_is_link_local = true;
         this->_is_reserved = true;
@@ -290,24 +306,40 @@ OddSource::Interfaces::IPv6Address::
     delete this->_data;
 }
 
+OddSource::Interfaces::IPv6Address
+OddSource::Interfaces::IPv6Address::
+normalize() const
+{
+    return {this->_data, this->_scope_id};
+}
+
 ::std::string_view
-OddSource::Interfaces::IPv6Address::strip_scope(::std::string_view const & repr)
+OddSource::Interfaces::IPv6Address::
+strip_scope(::std::string_view const & repr)
 {
     size_t i = repr.find('%');
     if (i != ::std::string_view::npos)
     {
-        return repr.substr(0, repr.size() - i);
+        return repr.substr(0, i);
     }
     return repr;
 }
 
 ::std::optional<::std::string_view>
-OddSource::Interfaces::IPv6Address::extract_scope(::std::string_view const & repr)
+OddSource::Interfaces::IPv6Address::
+extract_scope(::std::string_view const & repr)
 {
     size_t i = repr.find('%');
     if (i != ::std::string_view::npos)
     {
         return repr.substr(i + 1);
     }
-    return nullptr;
+    return ::std::nullopt;
+}
+
+::std::string
+OddSource::Interfaces::IPv6Address::
+add_scope(::std::string const & repr, ::std::optional<::std::string const> const & scope_id)
+{
+    return scope_id ? repr + "%" + *scope_id : repr;
 }

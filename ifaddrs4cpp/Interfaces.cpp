@@ -581,7 +581,7 @@ populate_and_maybe_more_unsafe(::std::function<bool(Interface const &)> * do_thi
     ::std::unordered_map<::std::string, ::std::shared_ptr<Interface const>> temp_name_map;
     ::std::function<bool(Interface &)> do_this_internal = [&](auto interface)
     {
-        if (do_this)
+        if (return_internal && do_this)
         {
             return_internal = (*do_this)(interface);
         }

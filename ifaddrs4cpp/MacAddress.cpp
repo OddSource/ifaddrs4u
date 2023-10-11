@@ -8,16 +8,25 @@
 
 #include "MacAddress.h"
 
+namespace
+{
+    uint8_t const *
+    copy_hw_addr(uint8_t const data[MAX_ADAPTER_ADDRESS_LENGTH], uint8_t data_length)
+    {
+        auto new_data = new uint8_t[data_length];
+        ::std::memcpy(new_data, data, data_length);
+        return new_data;
+    }
+}
+
 OddSource::Interfaces::MacAddress::
 MacAddress(MacAddress const & other)
     : _representation(other._representation),
       _data(nullptr),
       _data_length(other._data_length)
 {
-    auto data = new uint8_t[other._data_length];
-    ::std::memcpy(data, other._data, other._data_length);
     delete[] this->_data;
-    this->_data = data;
+    this->_data = copy_hw_addr(other._data, other._data_length);
 }
 
 OddSource::Interfaces::MacAddress::
@@ -36,7 +45,7 @@ MacAddress(::std::string_view const & repr)
 
 OddSource::Interfaces::MacAddress::
 MacAddress(uint8_t const data[MAX_ADAPTER_ADDRESS_LENGTH], uint8_t data_length)
-    : MacAddress(MacAddress::to_repr(data, data_length), data, data_length)
+    : MacAddress(MacAddress::to_repr(data, data_length), copy_hw_addr(data, data_length), data_length)
 {
 }
 

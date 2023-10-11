@@ -54,7 +54,7 @@ namespace OddSource::Interfaces
         DynamicallyAssigned = 0b0001,
         PrefixBased = 0b0010,
         RendezvousEmbedded = 0b0100,
-        ReservedFlag = 0b1000 // unused, here for clarify
+        ReservedFlag = 0b1000 // unused, here for clarity and unit testing
     };
 
     class IPAddress;
@@ -104,7 +104,7 @@ namespace OddSource::Interfaces
 
         /**
          * Indicates whether this address represents a link-local address
-         * (169.254.0.0/16 or fe80::/64 from fe80::/10).
+         * (169.254.0.0/16 or fe80::/64).
          *
          * @return true or false.
          */
@@ -216,7 +216,9 @@ namespace OddSource::Interfaces
         inline size_t data_length() const final;
 
     private:
-        IPv4Address(::std::string_view const &, in_addr const *);
+        IPv4Address(in_addr const *, bool);
+
+        IPv4Address(::std::string_view const &, in_addr const *, bool);
 
         in_addr const * _data;
     };
@@ -238,11 +240,24 @@ namespace OddSource::Interfaces
         // conversion constructor
         IPv6Address(
             in6_addr const *,
-            ::std::optional<::std::string const> const & scope_id = ::std::nullopt); // NOLINT(*-explicit-constructor)
+            ::std::optional<::std::string const> const & scope_id = ::std::nullopt);
 
         ~IPv6Address() override;
 
         inline operator in6_addr const *() const; // NOLINT(*-explicit-constructor)
+
+        /**
+         * Returns a copy of this address with a normalized string representation.
+         * For example, an address with multiple consecutive zeros, such as
+         * 2001:0:0:0:de:ad:be:ef, would be normalized to 2001::de:ad:be:ef. As
+         * another example, a v4-translated address, such as ::ffff:0:127.0.0.1,
+         * would be normalized to ::ffff:0:7f00:1. However, v4-mapped and
+         * v4-compatible addresses do not similarly change representation when
+         * normalized. As part of normalization, all characters become lowercase.
+         *
+         * @return a normalized copy of this address.
+         */
+        IPv6Address normalize() const;
 
         /**
          * Indicates whether this address represents a unique-local address,
@@ -321,11 +336,16 @@ namespace OddSource::Interfaces
         IPv6Address(
             ::std::string_view const &,
             in6_addr const *,
-            ::std::optional<::std::string const> const & scope_id = ::std::nullopt);
+            ::std::optional<::std::string const> const & scope_id,
+            bool);
 
         static ::std::string_view strip_scope(::std::string_view const &);
 
         static ::std::optional<::std::string_view> extract_scope(::std::string_view const &);
+
+        static ::std::string add_scope(
+            ::std::string const & repr,
+            ::std::optional<::std::string const> const & scope_id);
 
         in6_addr const * _data;
         ::std::optional<::std::string> const _scope_id;

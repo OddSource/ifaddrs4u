@@ -20,7 +20,7 @@ OddSource::Interfaces::IPAddress::from_repr(::std::string_view const & repr)
         throw InvalidIPAddress("Invalid empty IP address string.");
     }
 
-    size_t size;
+    /*size_t size;
     if constexpr (::std::is_same_v<Addr, in6_addr>)
     {
         size = 16;
@@ -28,9 +28,9 @@ OddSource::Interfaces::IPAddress::from_repr(::std::string_view const & repr)
     else
     {
         size = 4;
-    }
+    }*/
 
-    auto data = new Addr[size];
+    auto data = new Addr[sizeof(Addr)];
     int success;
     if constexpr (::std::is_same_v<Addr, in6_addr>)
     {
@@ -86,17 +86,31 @@ OddSource::Interfaces::IPAddress::to_repr(const Addr * data)
 
     static const size_t host_length(100);
     char host_chars[host_length];
-    auto ptr = ::inet_ntop(family, data, host_chars, sizeof(Addr));
+    auto ptr = ::inet_ntop(family, data, host_chars, host_length);
     if (ptr == nullptr)
     {
 #ifdef IS_WINDOWS
-        auto err = ::WSAGetLastError();
+        auto err_no(::WSAGetLastError());
+        wchar_t * s = nullptr;
+        ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            nullptr, err_no,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPWSTR)&s, 0, nullptr);
+        ::std::string err(
+            s == nullptr ?
+            ::std::string("") :
+            ::std::wstring_convert<::std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(::std::wstring(s)));
+        LocalFree(s);
 #else /* IS_WINDOWS */
-        auto err = ::gai_strerror(errno);
+        auto err_no(errno);
+        char const * err(
+            err_no == EAFNOSUPPORT ? "Address family not supported" :
+                (err_no == ENOSPC ? "Converted address would exceed string size" :
+                    ::gai_strerror(errno)));
 #endif /* IS_WINDOWS */
         throw InvalidIPAddress(
-            (::std::ostringstream() << "Malformed IP address or inet_ntop system error: "
-                                    << err).str()
+            (::std::ostringstream() << "Malformed in_addr data or inet_ntop system error: "
+                                    << err_no << " (" << err << ")").str()
         );
     }
     return host_chars;
@@ -323,15 +337,14 @@ scope_id() const
     return this->_scope_id;
 }
 
-inline
-bool OddSource::Interfaces::IPv6Address::
+inline bool
+OddSource::Interfaces::IPv6Address::
 is_multicast_flag_enabled(OddSource::Interfaces::MulticastV6Flag flag) const
 {
     return this->_multicast_flags && (*this->_multicast_flags & flag) == flag;
 }
 
-inline
-::std::ostream &
+inline ::std::ostream &
 OddSource::Interfaces::
 operator<<(::std::ostream & os, OddSource::Interfaces::IPAddress const & address)
 {
