@@ -1,0 +1,51 @@
+[project]
+name = "ifaddrs4py"
+description = "A Python 3 + C++ extension for retrieving detailed information about system network interfaces."
+readme = "README.rst"
+authors = [
+    {name = "Nick Williams", email = "nicholas@nicholaswilliams.net"},
+]
+keywords = ["ifaddrs", "getifaddrs", "GetAdaptersAddresses", "network", "interfaces", "addresses"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: BSD",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: C++",
+    "Topic :: Software Development",
+]
+license = {file = "LICENSE"}
+requires-python = ">=3.7"
+dependencies = []
+#version = "0.1.0"
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/OddSource/ifaddrs4u"
+"Python Source" = "https://github.com/OddSource/ifaddrs4u/blob/master/ifaddrs4cpp"
+"Issue Tracker" = "https://github.com/OddSource/ifaddrs4u/issues"
+
+[project.optional-dependencies]
+test = ["pytest"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["source/python/production"]
+include = ["ifaddrs4py*"]
+namespaces = false
+
+[tool.setuptools.dynamic]
+version = {attr = "ifaddrs4py.version.__VERSION__"}
+
+[build-system]
+requires = ["setuptools >= 65.7.0"]

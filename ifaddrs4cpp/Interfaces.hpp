@@ -2,6 +2,10 @@ inline ::std::string
 OddSource::Interfaces::VersionInfo::
 version()
 {
+    if constexpr (std::char_traits<char>::length(IFADDRS4CPP_VERSION_SUFFIX) > 0)
+    {
+        return ::std::string(IFADDRS4CPP_VERSION) + "-" + IFADDRS4CPP_VERSION_SUFFIX;
+    }
     return IFADDRS4CPP_VERSION;
 }
 

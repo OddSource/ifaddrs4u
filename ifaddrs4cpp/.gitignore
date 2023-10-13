@@ -2,4 +2,5 @@ cmake-build-debug
 cmake-build-opt
 cmake-build-release
 cmake-build-test
+cmake-external-build
 .idea

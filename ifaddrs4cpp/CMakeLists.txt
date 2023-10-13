@@ -5,7 +5,26 @@ project(ifaddrs4cpp
         DESCRIPTION "A C++17 library for cross-platform access to network interfaces and their addresses"
         HOMEPAGE_URL "https://github.com/OddSource/ifaddrs4u"
         LANGUAGES CXX)
-set(PROJECT_VERSION_SUFFIX "alpha.0")
+set(PROJECT_VERSION_SUFFIX "alpha0")
+
+option(ENABLE_TESTS
+       "If enabled, tests will be build and prepared for running with CTest or ifaddrs4cpp_tests."
+        False)
+option(BUILD_STATIC_ONLY
+       "If enabled, only a static library will be built, otherwise both static and dynamic will be built."
+       False)
+option(BUILD_DYNAMIC_ONLY
+       "If enabled, only a dynamic library will be built, otherwise both static and dynamic will be built."
+       False)
+
+if(${BUILD_STATIC_ONLY} AND ${BUILD_DYNAMIC_ONLY})
+    message(FATAL_ERROR
+            "Options BUILD_STATIC_ONLY and BUILD_DYNAMIC_ONLY are mutually exclusive. Only one may be specified at a time.")
+endif()
+if(${BUILD_DYNAMIC_ONLY} AND ${ENABLE_TESTS})
+    message(FATAL_ERROR
+            "Options ENABLE_TESTS and BUILD_DYNAMIC_ONLY are mutually exclusive. Only one may be specified at a time.")
+endif()
 
 execute_process(COMMAND git log -1 --format=%H
                 WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -23,26 +42,25 @@ set(${PROJECT_NAME}_GIT_HASH_SHORT "${PROJECT_GIT_HASH_SHORT}")
 set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(gcc_like_ids ARMClang AppleClang Clang GNU LCC)
 set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
+
+set(IS_WINDOWS FALSE)
+set(COPY_COMMAND "cp")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+    set(IS_WINDOWS TRUE)
+    set(COPY_COMMAND "copy")
+endif()
+
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_DEBUG_POSTFIX -d)
 if(CMAKE_CXX_COMPILER_ID IN_LIST gcc_like_ids)
     set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 endif()
+
 set(${PROJECT_NAME}_sources
-    config.h
-    Interface.h
-    Interface.hpp
     Interface.cpp
-    Interfaces.h
-    Interfaces.hpp
     Interfaces.cpp
-    IpAddress.h
-    IpAddress.hpp
     IpAddress.cpp
-    MacAddress.h
-    MacAddress.cpp
-    MacAddress.hpp
-    os.h)
+    MacAddress.cpp)
 
 configure_file(version.h.in version.h)
 
@@ -53,32 +71,49 @@ target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>")
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
-add_library(${PROJECT_NAME}-shared SHARED ${${PROJECT_NAME}_sources})
-target_link_libraries(${PROJECT_NAME}-shared PUBLIC ${PROJECT_NAME}_compiler_flags)
-target_include_directories(${PROJECT_NAME}-shared PUBLIC "${PROJECT_BINARY_DIR}")
+set(HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET ${PROJECT_NAME}-shared)
 
-add_library(${PROJECT_NAME}-static STATIC ${${PROJECT_NAME}_sources})
-target_link_libraries(${PROJECT_NAME}-static PUBLIC ${PROJECT_NAME}_compiler_flags)
-target_include_directories(${PROJECT_NAME}-static PUBLIC "${PROJECT_BINARY_DIR}")
+if(NOT ${BUILD_STATIC_ONLY})
+    add_library(${PROJECT_NAME}-shared SHARED ${${PROJECT_NAME}_sources})
+    target_link_libraries(${PROJECT_NAME}-shared PUBLIC ${PROJECT_NAME}_compiler_flags)
+    target_include_directories(${PROJECT_NAME}-shared PUBLIC "${PROJECT_BINARY_DIR}")
+endif()
 
-option(RUN_TESTS "If enabled, tests will be compiled and executed." False)
+if(NOT ${BUILD_DYNAMIC_ONLY})
+    set(HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET ${PROJECT_NAME}-static)
+    add_library(${PROJECT_NAME}-static STATIC ${${PROJECT_NAME}_sources})
+    target_link_libraries(${PROJECT_NAME}-static PUBLIC ${PROJECT_NAME}_compiler_flags)
+    target_include_directories(${PROJECT_NAME}-static PUBLIC "${PROJECT_BINARY_DIR}")
+endif()
 
-add_executable(${PROJECT_NAME}_tests
-               tests/main.h
-               tests/main.hpp
-               tests/main.cpp
-               tests/TestIPv4Address.cpp
-               tests/TestIPv6Address.cpp
-               tests/TestMacAddress.cpp
-               tests/TestInterface.cpp
-               tests/TestInterfaceIPAddress.cpp
-               tests/TestVersionInfo.cpp
-               tests/TestInterfaceBrowser.cpp)
-target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}_compiler_flags)
-target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}-static)
-target_include_directories(${PROJECT_NAME}_tests PUBLIC "${PROJECT_BINARY_DIR}")
+if(${IS_WINDOWS})
+    add_custom_command(TARGET ${HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET} POST_BUILD COMMAND
+                       mkdir ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
+else()
+    add_custom_command(TARGET ${HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET} POST_BUILD COMMAND
+                       mkdir -p ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
+endif()
+add_custom_command(TARGET ${HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET} POST_BUILD COMMAND
+                   ${COPY_COMMAND} ${CMAKE_BINARY_DIR}/version.h ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
+add_custom_command(TARGET ${HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET} POST_BUILD COMMAND
+                   ${COPY_COMMAND} ${CMAKE_SOURCE_DIR}/*.h ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
+add_custom_command(TARGET ${HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET} POST_BUILD COMMAND
+                   ${COPY_COMMAND} ${CMAKE_SOURCE_DIR}/*.hpp ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
 
-if (${RUN_TESTS})
+if (${ENABLE_TESTS})
+    add_executable(${PROJECT_NAME}_tests
+                   tests/main.cpp
+                   tests/TestIPv4Address.cpp
+                   tests/TestIPv6Address.cpp
+                   tests/TestMacAddress.cpp
+                   tests/TestInterface.cpp
+                   tests/TestInterfaceIPAddress.cpp
+                   tests/TestVersionInfo.cpp
+                   tests/TestInterfaceBrowser.cpp)
+    target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}_compiler_flags)
+    target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}-static)
+    target_include_directories(${PROJECT_NAME}_tests PUBLIC "${PROJECT_BINARY_DIR}")
+
     enable_testing()
     add_test(NAME Tests COMMAND ${PROJECT_NAME}_tests)
 endif()

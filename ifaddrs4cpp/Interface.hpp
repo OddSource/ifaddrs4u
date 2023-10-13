@@ -1,12 +1,15 @@
+#include <algorithm>
 #include <sstream>
 
 namespace
 {
+    using namespace OddSource::Interfaces;
+
     template<class IPAddressT>
     inline ::std::optional<uint8_t>
     sanitize_prefix_length(IPAddressT const & address, uint8_t prefix_length)
     {
-        static_assert(::std::is_base_of_v<OddSource::Interfaces::IPAddress, IPAddressT>,
+        static_assert(::std::is_base_of_v<IPAddress, IPAddressT>,
                       "the template parameter IPAddressT must derive from IPAddress.");
         if (prefix_length > address.maximum_prefix_length())
         {
@@ -18,6 +21,27 @@ namespace
         }
         return prefix_length == 0 ? ::std::nullopt : ::std::optional<uint8_t>(prefix_length);
     }
+
+    struct Populator
+    {
+        Populator()
+        {
+            ::std::transform(::std::cbegin(InterfaceIPAddressFlag_Values),
+                             ::std::cend(InterfaceIPAddressFlag_Values),
+                             ::std::inserter(InterfaceIPAddressFlag_Names,
+                                             ::std::begin(InterfaceIPAddressFlag_Names)),
+                                             [](const auto& e) { return ::std::make_pair(e.second, e.first); });
+
+            ::std::transform(::std::cbegin(InterfaceFlag_Values),
+                             ::std::cend(InterfaceFlag_Values),
+                             ::std::inserter(InterfaceFlag_Names,
+                                             ::std::begin(InterfaceFlag_Names)),
+                                             [](const auto& e) { return ::std::make_pair(e.second, e.first); });
+        }
+    };
+
+    [[maybe_unused]]
+    Populator const populator;
 }
 
 template<class IPAddressT>

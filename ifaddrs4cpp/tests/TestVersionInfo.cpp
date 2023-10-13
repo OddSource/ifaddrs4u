@@ -14,7 +14,6 @@ public:
 
     void test_version_info()
     {
-        assert_equals(VersionInfo::version(), IFADDRS4CPP_VERSION);
         assert_equals(VersionInfo::major_version(), IFADDRS4CPP_VERSION_MAJOR);
         assert_equals(VersionInfo::minor_version(), IFADDRS4CPP_VERSION_MINOR);
         assert_equals(VersionInfo::patch_version(), IFADDRS4CPP_VERSION_PATCH);
@@ -23,10 +22,12 @@ public:
         {
             ::std::string suffix("-");
             suffix += IFADDRS4CPP_VERSION_SUFFIX;
+            assert_equals(VersionInfo::version(), ::std::string(IFADDRS4CPP_VERSION) + suffix);
             assert_equals(*VersionInfo::suffix(), suffix);
         }
         else
         {
+            assert_equals(VersionInfo::version(), IFADDRS4CPP_VERSION);
             assert_not_that((bool)VersionInfo::suffix());
         }
 

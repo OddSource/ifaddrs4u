@@ -20,6 +20,7 @@
 
 #include <optional>
 #include <vector>
+#include <unordered_map>
 
 #include "IpAddress.h"
 #include "MacAddress.h"
@@ -78,6 +79,23 @@ namespace OddSource::Interfaces
         Tentative = IN6_IFF_TENTATIVE
     };
 
+    static ::std::unordered_map<::std::string, InterfaceIPAddressFlag const> const InterfaceIPAddressFlag_Values
+    {
+        {"Anycast", Anycast},
+        {"AutoConfigured", AutoConfigured},
+        {"Deprecated", Deprecated},
+        {"Detached", Detached},
+        {"Duplicated", Duplicated},
+        {"Dynamic", Dynamic},
+        {"Optimistic", Optimistic},
+        {"NoDad", NoDad},
+        {"Secured", Secured},
+        {"Temporary", Temporary},
+        {"Tentative", Tentative},
+    };
+
+    static ::std::unordered_map<InterfaceIPAddressFlag, ::std::string const> InterfaceIPAddressFlag_Names;
+
     enum InterfaceFlag : uint16_t
     {
         BroadcastAddressSet = IFF_BROADCAST, // no Windows
@@ -106,6 +124,35 @@ namespace OddSource::Interfaces
         Slave = IFF_SLAVE, // Linux only
 #endif /* IFF_SLAVE */
     };
+
+    static ::std::unordered_map<::std::string, InterfaceFlag const> const InterfaceFlag_Values
+    {
+        {"BroadcastAddressSet", BroadcastAddressSet},
+        {"DebugEnabled", DebugEnabled},
+        {"IsLoopback", IsLoopback},
+        {"IsPointToPoint", IsPointToPoint},
+        {"IsRunning", IsRunning},
+        {"IsUp", IsUp},
+        {"NoARP", NoARP},
+        {"NoTrailers", NoTrailers},
+        {"PromiscuousModeEnabled", PromiscuousModeEnabled},
+        {"ReceiveAllMulticastPackets", ReceiveAllMulticastPackets},
+        {"SupportsMulticast", SupportsMulticast},
+#ifdef IFF_OACTIVE
+        {"TransmissionInProgress", TransmissionInProgress},
+#endif /* IFF_OACTIVE */
+#ifdef IFF_SIMPLEX
+        {"Simplex", Simplex},
+#endif /* IFF_SIMPLEX */
+#ifdef IFF_MASTER
+        {"Master", Master},
+#endif /* IFF_MASTER */
+#ifdef IFF_SLAVE
+        {"IFF_SLAVE", IFF_SLAVE},
+#endif /* IFF_SLAVE */
+    };
+
+    static ::std::unordered_map<InterfaceFlag, ::std::string const> InterfaceFlag_Names;
 
     template<class IPAddressT>
     class InterfaceIPAddress;
