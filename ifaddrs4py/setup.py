@@ -6,6 +6,7 @@ from setuptools import (
     Extension,
     setup,
 )
+import shutil
 import subprocess
 import sys
 from typing import (
@@ -65,6 +66,7 @@ def which(executable: str) -> str:
 
 @dataclasses.dataclass
 class Options:
+    clean: bool = False
     dynamic: bool = False
     test_cpp: bool = False
 
@@ -72,6 +74,7 @@ class Options:
 def preprocess_options(argv: List[str]) -> Options:
     """For extracting custom command-line arguments from the setup command"""
     args = {
+        "--clean": False,
         "--dynamic": False,
         "--test-cpp": False,
     }
@@ -127,6 +130,12 @@ def pre_build(options: Options) -> None:
     print_fast(f"Using extra include dirs: {include_dirs}")
     print_fast(f"Using extra library dirs: {library_dirs}")
 
+    if options.clean:
+        for d in (cmake_path, BASE_PATH / "build", BASE_PATH / "dist"):
+            if d.exists():
+                print_fast(f"Cleaning {d}")
+                shutil.rmtree(d, ignore_errors=True)
+
     static_lib_file = cmake_path / f"libifaddrs4cpp-static.{STATIC_LIBRARY_EXTENSION}"
     extra_objects.append(f"{static_lib_file}")
 
@@ -152,6 +161,38 @@ def pre_build(options: Options) -> None:
             execute(cmake_path, f"{cmake_path / exe}")
 
 
+def pre_sdist() -> None:
+    if not EXTERN_CPP_SOURCE_SDIST.exists():
+        if not EXTERN_CPP_SOURCE_GIT.exists():
+            raise RuntimeError(
+                f"Directory {EXTERN_CPP_SOURCE_GIT} does not exist and external sources are not pre-copied, so the "
+                f"source distribution cannot be packaged. Without some juggling, the source distribution can be "
+                f"packaged only from a Git clone of the project."
+            )
+        EXTERN_CPP_SOURCE_SDIST.mkdir(parents=True, exist_ok=True)
+
+    tests_src = EXTERN_CPP_SOURCE_GIT / "tests"
+    tests_dest = EXTERN_CPP_SOURCE_SDIST / "tests"
+    if not tests_dest.exists():
+        tests_dest.mkdir()
+
+    print(f"Temporarily copying files from {EXTERN_CPP_SOURCE_GIT} to {EXTERN_CPP_SOURCE_SDIST}...")
+    for file in [EXTERN_CPP_SOURCE_GIT / "CMakeLists.txt", ] + \
+                list(EXTERN_CPP_SOURCE_GIT.glob("*.h*")) + \
+                list(EXTERN_CPP_SOURCE_GIT.glob("*.cpp")):
+        shutil.copy(file, EXTERN_CPP_SOURCE_SDIST)
+
+    print(f"Temporarily copying files from {tests_src} to {tests_dest}...")
+    for file in tests_src.glob("*"):
+        shutil.copy(file, tests_dest)
+
+
+def post_sdist() -> None:
+    if EXTERN_CPP_SOURCE_SDIST.parent.exists():
+        print(f"Removing temporary directory {EXTERN_CPP_SOURCE_SDIST.parent}")
+        shutil.rmtree(EXTERN_CPP_SOURCE_SDIST.parent, ignore_errors=True)
+
+
 if __name__ == "__main__":
     command = sys.argv[1]
     opts = preprocess_options(sys.argv)
@@ -162,7 +203,7 @@ if __name__ == "__main__":
         pre_build(opts)
 
     if command == "sdist":
-        pass  # TODO pre_sdist()
+        pre_sdist()
 
 
 cpp_extension = Extension(
@@ -188,3 +229,8 @@ setup(
         cpp_extension,
     ],
 )
+
+if __name__ == "__main__":
+    command = sys.argv[1]
+    if command == "sdist":
+        post_sdist()
