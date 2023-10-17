@@ -55,6 +55,7 @@ set(CMAKE_DEBUG_POSTFIX -d)
 if(CMAKE_CXX_COMPILER_ID IN_LIST gcc_like_ids)
     set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 endif()
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(${PROJECT_NAME}_sources
     Interface.cpp
@@ -69,7 +70,10 @@ target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE cxx_std_17)
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
                        "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>")
-set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
+                      DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
+                      CXX_STANDARD_REQUIRED ON
+                      CXX_EXTENSIONS OFF)
 
 set(HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET ${PROJECT_NAME}-shared)
 

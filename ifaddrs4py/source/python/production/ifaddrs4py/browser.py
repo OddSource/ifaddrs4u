@@ -24,12 +24,16 @@ try:
 except ImportError:
     from typing_extensions import override
 
-from ifaddrs4py.extern import InterfaceBrowser as Extern_InterfaceBrowser
+from ifaddrs4py.extern import (
+    IllegalStateError,
+    InterfaceBrowser as Extern_InterfaceBrowser,
+)
 from ifaddrs4py.interface import Interface
 from ifaddrs4py.version import __VERSION__
 
 
 __all__ = (
+    "IllegalStateError",
     "InterfaceBrowser",
 )
 

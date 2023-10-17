@@ -10,6 +10,8 @@
 
 #include <ifaddrs4cpp/Interfaces.h>
 
+static PyObject * IllegalStateError;
+
 typedef struct
 {
     PyObject_HEAD
@@ -118,7 +120,7 @@ _get_interfaces(OddSource::Interfaces::InterfaceBrowser & browser)
 
 #define ENSURE_INITIALIZED(ret) if (!self->browser) \
     { \
-        PyErr_SetString(PyExc_ValueError, "ifaddrs4py.extern.InterfaceBrowser() has not been initialized"); \
+        PyErr_SetString(IllegalStateError, "ifaddrs4py.extern.InterfaceBrowser() has not been initialized"); \
         return ret; \
     }
 
@@ -432,7 +434,7 @@ static struct PyModuleDef ifaddrs4py_module =
 PyMODINIT_FUNC
 PyInit_extern(void)
 {
-    if (PyType_Ready(&InterfaceBrowser_PyType) < 0)
+    if (PyType_Ready(&InterfaceBrowser_PyType) != 0)
     {
         return NULL;
     }
@@ -451,9 +453,24 @@ PyInit_extern(void)
     }
     CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_ImportError, { Py_DECREF(module); return NULL; })
 
-    Py_INCREF(&InterfaceBrowser_PyType);
-    if (PyModule_AddObject(module, "InterfaceBrowser", (PyObject *)&InterfaceBrowser_PyType) < 0)
+    IllegalStateError = PyErr_NewException("ifaddrs4py.extern.IllegalStateError", PyExc_RuntimeError, NULL);
+    if (IllegalStateError == NULL)
     {
+        Py_DECREF(module);
+        return NULL;
+    }
+    Py_INCREF(IllegalStateError);
+    if (PyModule_AddObject(module, "IllegalStateError", IllegalStateError) != 0)
+    {
+        Py_DECREF(IllegalStateError);
+        Py_DECREF(module);
+        return NULL;
+    }
+
+    Py_INCREF(&InterfaceBrowser_PyType);
+    if (PyModule_AddObject(module, "InterfaceBrowser", (PyObject *)&InterfaceBrowser_PyType) != 0)
+    {
+        Py_DECREF(IllegalStateError);
         Py_DECREF(&InterfaceBrowser_PyType);
         Py_DECREF(module);
         return NULL;

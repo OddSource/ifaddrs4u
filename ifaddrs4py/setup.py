@@ -178,7 +178,7 @@ cpp_extension = Extension(
     library_dirs=library_dirs,
     libraries=libraries,
     extra_objects=extra_objects,
-    extra_compile_args=["/std:c++17" if IS_WINDOWS else "-std=gnu++17"],
+    extra_compile_args=["/std:c++17" if IS_WINDOWS else "-std=c++17"],
     extra_link_args=[],
     optional=False,
 )
