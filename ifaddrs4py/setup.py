@@ -171,6 +171,7 @@ cpp_extension = Extension(
     sources=[
         "source/cpp/extern.cpp",
         "source/cpp/interface.cpp",
+        "source/cpp/ip_address.cpp",
         "source/cpp/version.cpp",
     ],
     include_dirs=include_dirs,

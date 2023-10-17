@@ -61,7 +61,8 @@ operator<<(::std::ostream & os, OddSource::Interfaces::Interface const & interfa
 #endif /* IFF_SLAVE */
     };
 
-    os << interface._name << ": flags=" << ::std::hex << interface._flags << ::std::dec << "<";
+    os << interface._name << " (" << interface._index << "): flags="
+       << ::std::hex << interface._flags << ::std::dec << "<";
     if (interface._flags)
     {
         uint8_t i(0);
@@ -97,3 +98,27 @@ operator<<(::std::ostream & os, OddSource::Interfaces::Interface const & interfa
     }
     return os;
 }
+
+OddSource::Interfaces::Interface
+OddSource::Interfaces::Interface::
+get_sample_interface()
+{
+    Interface interface(
+        3,
+        "en0",
+#ifdef IS_WINDOWS
+        "24af9519-2a42-4f62-99fa-1ed3147ad90a",
+#endif /* IS_WINDOWS */
+        BroadcastAddressSet | IsUp | IsRunning,
+        1725);
+    interface._mac_address.emplace("ac:de:48:00:11:22");
+    interface._ipv4_addresses.emplace_back(IPv4Address("192.168.0.42"), 0, 24, IPv4Address("192.168.0.254"));
+    interface._ipv6_addresses.emplace_back(
+            IPv6Address("2001:470:2ccb:a61b:e:acf8:6736:d81f"),
+            AutoConfigured | Secured,
+            64);
+    return interface;
+}
+
+OddSource::Interfaces::Interface const
+OddSource::Interfaces::Interface::SAMPLE_INTERFACE = OddSource::Interfaces::Interface::get_sample_interface();

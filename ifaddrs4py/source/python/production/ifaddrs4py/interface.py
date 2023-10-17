@@ -2,11 +2,17 @@ from __future__ import annotations
 
 import ipaddress
 from typing import (
+    final,
     Generic,
     Optional,
     TypeVar,
 )
 import uuid
+
+try:
+    from typing import override
+except ImportError:
+    from typing_extensions import override
 
 from ifaddrs4py.constants import (
     IS_WINDOWS,
@@ -59,18 +65,21 @@ _INTERFACE_FLAG_DISPLAYS = {
 if hasattr(InterfaceFlag, "TransmissionInProgress"):
     # noinspection PyUnresolvedReferences
     _INTERFACE_FLAG_DISPLAYS["OACTIVE"] = InterfaceFlag.TransmissionInProgress
-if hasattr(InterfaceFlag, "TransmissionInProgress"):
+if hasattr(InterfaceFlag, "Simplex"):
     # noinspection PyUnresolvedReferences
     _INTERFACE_FLAG_DISPLAYS["SIMPLEX"] = InterfaceFlag.Simplex
-if hasattr(InterfaceFlag, "TransmissionInProgress"):
+if hasattr(InterfaceFlag, "Master"):
     # noinspection PyUnresolvedReferences
     _INTERFACE_FLAG_DISPLAYS["MASTER"] = InterfaceFlag.Master
-if hasattr(InterfaceFlag, "TransmissionInProgress"):
+if hasattr(InterfaceFlag, "Slave"):
     # noinspection PyUnresolvedReferences
     _INTERFACE_FLAG_DISPLAYS["SLAVE"] = InterfaceFlag.Slave
 
 
+@final
 class InterfaceIPAddress(Generic[IPAddressT]):
+    __slots__ = ("_address", "_flags", "_prefix_length", "_broadcast_address", "_point_to_point_destination")
+
     def __init__(
         self,
         address: IPAddressT,
@@ -104,6 +113,7 @@ class InterfaceIPAddress(Generic[IPAddressT]):
     def is_flag_enabled(self, flag: InterfaceIPAddressFlag) -> bool:
         return (self._flags & flag.value) == flag.value
 
+    @override
     def __str__(self) -> str:
         string = f"{self._address}"
         if self._prefix_length > 0:
@@ -118,11 +128,16 @@ class InterfaceIPAddress(Generic[IPAddressT]):
                 if (self._flags & flag.value) == flag.value:
                     string += f" {display}"
 
+        if getattr(self._address, "scope_id", None):
+            string += f" scopeid {self._address.scope_id}"
+
         return string
 
+    @override
     def __repr__(self) -> str:
         return self.__str__()
 
+    @override
     def __eq__(self, other: InterfaceIPAddress[IPAddressT]) -> str:
         return (
             self._flags == other._flags and
@@ -133,8 +148,14 @@ class InterfaceIPAddress(Generic[IPAddressT]):
         )
 
 
+@final
 class Interface(object):
     if IS_WINDOWS:
+        __slots__ = (
+            "_index", "_name", "_windows_uuid", "_flags", "_mtu",
+            "_mac_address", "_ipv4_addresses", "_ipv6_addresses",
+        )
+
         def __init__(
             self,
             index: int,
@@ -155,6 +176,8 @@ class Interface(object):
             self._ipv4_addresses = ipv4_addresses or ()
             self._ipv6_addresses = ipv6_addresses or ()
     else:
+        __slots__ = ("_index", "_name", "_flags", "_mtu", "_mac_address", "_ipv4_addresses", "_ipv6_addresses")
+
         def __init__(
             self,
             index: int,
@@ -205,6 +228,7 @@ class Interface(object):
     def is_flag_enabled(self, flag: InterfaceFlag) -> bool:
         return (self._flags & flag.value) == flag.value
 
+    @override
     def __str__(self) -> str:
         string = f"{self._name} ({self._index}): flags={self._flags:x}<"
         if self._flags:
@@ -230,5 +254,6 @@ class Interface(object):
 
         return string
 
+    @override
     def __repr__(self) -> str:
         return self.__str__()

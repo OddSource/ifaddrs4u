@@ -197,6 +197,9 @@ namespace OddSource::Interfaces
         inline bool is_flag_enabled(InterfaceIPAddressFlag) const;
 
         [[nodiscard]]
+        inline uint16_t flags() const;
+
+        [[nodiscard]]
         inline bool operator==(InterfaceIPAddress<IPAddressT> const & other) const;
 
         [[nodiscard]]
@@ -211,6 +214,9 @@ namespace OddSource::Interfaces
         ::std::optional<IPAddressT const> const _point_to_point;
         uint16_t const _flags;
     };
+
+    typedef InterfaceIPAddress<IPv4Address> InterfaceIPv4Address;
+    typedef InterfaceIPAddress<IPv6Address> InterfaceIPv6Address;
 
     class Interface;
     ::std::ostream & operator<<(::std::ostream &, Interface const &);
@@ -250,6 +256,9 @@ namespace OddSource::Interfaces
         inline bool is_flag_enabled(InterfaceFlag) const;
 
         [[nodiscard]]
+        inline uint32_t flags() const;
+
+        [[nodiscard]]
         inline ::std::optional<uint64_t const> const & mtu() const;
 
         [[nodiscard]]
@@ -264,10 +273,14 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         inline ::std::vector<InterfaceIPAddress<IPv6Address> const> const & ipv6_addresses() const;
 
+        static Interface const SAMPLE_INTERFACE;
+
     private:
         friend ::std::ostream & operator<<(::std::ostream &, Interface const &);
         friend class InterfacesHelper;
         friend class TestInterface;
+
+        static Interface get_sample_interface();
 
         uint32_t const _index = 0; // DWORD on Windows
         ::std::string const _name;

@@ -24,14 +24,28 @@ IPAddress(::std::string_view const & repr)
 }
 
 OddSource::Interfaces::IPAddress::
-IPAddress(OddSource::Interfaces::IPAddress const & other)
-    : _representation(other._representation)
+IPAddress(OddSource::Interfaces::IPAddress const & other) // NOLINT(*-use-equals-default)
+    : _representation(other._representation),
+      _is_unspecified(other._is_unspecified),
+      _is_loopback(other._is_loopback),
+      _is_link_local(other._is_link_local),
+      _is_private(other._is_private),
+      _is_multicast(other._is_multicast),
+      _is_reserved(other._is_reserved),
+      _multicast_scope(other._multicast_scope)
 {
 }
 
 OddSource::Interfaces::IPAddress::
 IPAddress(OddSource::Interfaces::IPAddress && other) noexcept
-    : _representation(other._representation)
+    : _representation(other._representation),
+      _is_unspecified(other._is_unspecified),
+      _is_loopback(other._is_loopback),
+      _is_link_local(other._is_link_local),
+      _is_private(other._is_private),
+      _is_multicast(other._is_multicast),
+      _is_reserved(other._is_reserved),
+      _multicast_scope(other._multicast_scope)
 {
 }
 
@@ -172,7 +186,16 @@ OddSource::Interfaces::IPv4Address::
 OddSource::Interfaces::IPv6Address::
 IPv6Address(OddSource::Interfaces::IPv6Address const & other)
     : IPAddress(other),
-      _data(nullptr)
+      _data(nullptr),
+      _scope_id(other._scope_id),
+      _without_scope(other._without_scope),
+      _is_unique_local(other._is_unique_local),
+      _is_site_local(other._is_site_local),
+      _is_v4_mapped(other._is_v4_mapped),
+      _is_v4_compatible(other._is_v4_compatible),
+      _is_v4_translated(other._is_v4_translated),
+      _is_6to4(other._is_6to4),
+      _multicast_flags(other._multicast_flags)
 {
     delete this->_data;
     this->_data = copy_in_addr(other._data);
@@ -181,7 +204,16 @@ IPv6Address(OddSource::Interfaces::IPv6Address const & other)
 OddSource::Interfaces::IPv6Address::
 IPv6Address(OddSource::Interfaces::IPv6Address && other) noexcept
     : IPAddress(::std::move(other)),
-      _data(nullptr)
+      _data(nullptr),
+      _scope_id(other._scope_id), // NOLINT(*-use-after-move)
+      _without_scope(other._without_scope), // NOLINT(*-use-after-move)
+      _is_unique_local(other._is_unique_local), // NOLINT(*-use-after-move)
+      _is_site_local(other._is_site_local), // NOLINT(*-use-after-move)
+      _is_v4_mapped(other._is_v4_mapped), // NOLINT(*-use-after-move)
+      _is_v4_compatible(other._is_v4_compatible), // NOLINT(*-use-after-move)
+      _is_v4_translated(other._is_v4_translated), // NOLINT(*-use-after-move)
+      _is_6to4(other._is_6to4), // NOLINT(*-use-after-move)
+      _multicast_flags(other._multicast_flags) // NOLINT(*-use-after-move)
 {
     ::std::swap(other._data, this->_data); // NOLINT(*-use-after-move)
 }

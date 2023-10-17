@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "ifaddrs4cpp/config.h"
+#include <ifaddrs4cpp/config.h>
 
 void
 OddSource::ifaddrs4py::

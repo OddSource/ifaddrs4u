@@ -123,6 +123,14 @@ operator<<(::std::ostream & os, OddSource::Interfaces::InterfaceIPAddress<IPAddr
             }
         }
     }
+    if constexpr (::std::is_same_v<IPAddressT, IPv6Address>)
+    {
+        auto scope_id(static_cast<IPv6Address>(address._address).scope_id());
+        if (scope_id)
+        {
+            os << " scopeid " << *scope_id;
+        }
+    }
     return os;
 }
 
@@ -183,6 +191,14 @@ is_flag_enabled(OddSource::Interfaces::InterfaceIPAddressFlag flag) const
 }
 
 template<class IPAddressT>
+inline uint16_t
+OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
+flags() const
+{
+    return this->_flags;
+}
+
+template<class IPAddressT>
 inline bool
 OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
 operator==(InterfaceIPAddress <IPAddressT> const & other) const
@@ -230,6 +246,13 @@ OddSource::Interfaces::Interface::
 is_flag_enabled(InterfaceFlag flag) const
 {
     return (this->_flags & flag) == flag;
+}
+
+inline uint32_t
+OddSource::Interfaces::Interface::
+flags() const
+{
+    return this->_flags;
 }
 
 inline ::std::optional<uint64_t const> const &
