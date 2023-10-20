@@ -1,4 +1,4 @@
-#include "../Interfaces.h"
+#include "../VersionInfo.h"
 #include "main.h"
 
 using namespace OddSource::Interfaces;

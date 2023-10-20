@@ -371,17 +371,16 @@ namespace OddSource::Interfaces
             uint8_t prefix_length = 0, uint16_t flags = 0)
         {
             auto addr = reinterpret_cast<sockaddr_in6 *>(sa);
-            ::std::optional<::std::string const> scope_id;
             if (addr->sin6_scope_id)
             {
-                // On Windows, the scope ID is displayed as the interface number that
-                // it is, not as the interface name, probably because the interface name
-                // is a gazillion characters long.
-                scope_id.emplace(::std::to_string(addr->sin6_scope_id));
+                IPv6Address const address(&addr->sin6_addr, addr->sin6_scope_id);
+                interface._ipv6_addresses.emplace_back(address, flags, prefix_length);
             }
-            IPv6Address const address(&addr->sin6_addr, scope_id);
-
-            interface._ipv6_addresses.emplace_back(address, flags, prefix_length);
+            else
+            {
+                IPv6Address const address(&addr->sin6_addr);
+                interface._ipv6_addresses.emplace_back(address, flags, prefix_length);
+            }
         }
 
         PIP_ADAPTER_ADDRESSES _pAddresses;
@@ -489,25 +488,20 @@ namespace OddSource::Interfaces
             ::std::unordered_map<uint32_t, ::std::string> & indexes_to_names)
         {
             auto addr = reinterpret_cast<sockaddr_in6 *>(ifa->ifa_addr);
-            ::std::optional<::std::string const> scope_id;
+            ::std::optional<v6Scope> scope;
+            ::std::optional<uint32_t> scope_id;
             if (addr->sin6_scope_id)
             {
                 auto found_name = indexes_to_names.find(addr->sin6_scope_id);
                 if (found_name != indexes_to_names.end())
                 {
-                    scope_id.emplace(found_name->second);
+                    scope = {addr->sin6_scope_id, found_name->second};
                 }
                 else
                 {
-                    char buffer[IF_NAMESIZE];
-                    if (::if_indextoname(addr->sin6_scope_id, buffer))
-                    {
-                        scope_id.emplace(buffer);
-                        indexes_to_names.emplace(addr->sin6_scope_id, *scope_id);
-                    }
+                    scope_id = addr->sin6_scope_id;
                 }
             }
-            IPv6Address const address(&addr->sin6_addr, scope_id);
 
             uint8_t prefix_length(0);
             if (ifa->ifa_netmask)
@@ -548,7 +542,18 @@ namespace OddSource::Interfaces
             }
 #endif /* SIOCGIFAFLAG_IN6 */
 
-            interface._ipv6_addresses.emplace_back(address, flags, prefix_length);
+            if (scope)
+            {
+                interface._ipv6_addresses.emplace_back(IPv6Address(&addr->sin6_addr, *scope), flags, prefix_length);
+            }
+            else if (scope_id)
+            {
+                interface._ipv6_addresses.emplace_back(IPv6Address(&addr->sin6_addr, *scope_id), flags, prefix_length);
+            }
+            else
+            {
+                interface._ipv6_addresses.emplace_back(IPv6Address(&addr->sin6_addr), flags, prefix_length);
+            }
         }
 
         struct ifaddrs * _ifaddrs;

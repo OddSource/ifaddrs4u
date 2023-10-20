@@ -125,10 +125,18 @@ operator<<(::std::ostream & os, OddSource::Interfaces::InterfaceIPAddress<IPAddr
     }
     if constexpr (::std::is_same_v<IPAddressT, IPv6Address>)
     {
-        auto scope_id(static_cast<IPv6Address>(address._address).scope_id());
-        if (scope_id)
+        auto v6 = static_cast<IPv6Address>(address._address);
+        if (v6.has_scope_id())
         {
-            os << " scopeid " << *scope_id;
+            os << " scopeid ";
+            if (v6.scope_id())
+            {
+                os << *v6.scope_id();
+            }
+            else
+            {
+                os << *v6.scope_name();
+            }
         }
     }
     return os;

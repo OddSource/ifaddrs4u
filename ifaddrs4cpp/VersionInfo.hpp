@@ -30,7 +30,7 @@ patch_version()
     return IFADDRS4CPP_VERSION_PATCH;
 }
 
-inline ::std::optional<::std::string> const
+inline ::std::optional<::std::string>
 OddSource::Interfaces::VersionInfo::
 suffix()
 {

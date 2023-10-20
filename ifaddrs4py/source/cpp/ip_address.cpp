@@ -53,9 +53,9 @@ convert_to_python(OddSource::Interfaces::IPv6Address const & address)
         throw ::std::runtime_error("Unable to instantiate ipaddress.IPv6Address class");
     }
 
-    if (address.scope_id())
+    if (address.has_scope_id())
     {
-        ::std::string scope_id(*address.scope_id());
+        ::std::string scope_id(*address.scope_name_or_id());
         PyObject * scope_id_py(PyUnicode_FromStringAndSize(scope_id.c_str(), scope_id.length()));
         if (scope_id_py == NULL)
         {

@@ -234,6 +234,12 @@ namespace OddSource::Interfaces
         in_addr const * _data;
     };
 
+    struct OddSource_Export v6Scope
+    {
+        ::std::optional<uint32_t> scope_id = ::std::nullopt;
+        ::std::optional<::std::string> scope_name = ::std::nullopt;
+    };
+
     class OddSource_Export IPv6Address : public IPAddress
     {
     public:
@@ -249,9 +255,13 @@ namespace OddSource::Interfaces
         IPv6Address(::std::string_view const &); // NOLINT(*-explicit-constructor)
 
         // conversion constructor
-        IPv6Address(
-            in6_addr const *,
-            ::std::optional<::std::string const> const & scope_id = ::std::nullopt); // NOLINT(*-explicit-constructor)
+        IPv6Address(in6_addr const *); // NOLINT(*-explicit-constructor)
+
+        IPv6Address(in6_addr const *, uint32_t);
+
+        IPv6Address(in6_addr const *, ::std::string_view const &);
+
+        IPv6Address(in6_addr const *, v6Scope const & scope);
 
         ~IPv6Address() override;
 
@@ -329,10 +339,22 @@ namespace OddSource::Interfaces
         inline bool is_6to4() const;
 
         [[nodiscard]]
+        inline bool has_scope_id() const;
+
+        [[nodiscard]]
         inline ::std::string without_scope_id() const;
 
         [[nodiscard]]
-        inline ::std::optional<::std::string> const & scope_id() const;
+        inline ::std::optional<uint32_t> const & scope_id() const;
+
+        [[nodiscard]]
+        inline ::std::optional<::std::string> const & scope_name() const;
+
+        [[nodiscard]]
+        inline ::std::optional<::std::string> scope_name_or_id() const;
+
+        [[nodiscard]]
+        inline ::std::optional<::std::string> scope_id_or_name() const;
 
         [[nodiscard]]
         inline bool is_multicast_flag_enabled(MulticastV6Flag flag) const;
@@ -357,22 +379,20 @@ namespace OddSource::Interfaces
         IPv6Address(
             ::std::string_view const &,
             in6_addr const *,
-            ::std::optional<::std::string const> const & scope_id,
+            ::std::optional<v6Scope> const & scope,
             bool);
 
         [[nodiscard]]
         static ::std::string_view strip_scope(::std::string_view const &);
 
         [[nodiscard]]
-        static ::std::optional<::std::string_view> extract_scope(::std::string_view const &);
+        static ::std::optional<v6Scope> extract_scope(::std::string_view const &);
 
         [[nodiscard]]
-        static ::std::string add_scope(
-            ::std::string const & repr,
-            ::std::optional<::std::string const> const & scope_id);
+        static ::std::string add_scope(::std::string const &, ::std::optional<v6Scope> const &);
 
         in6_addr const * _data;
-        ::std::optional<::std::string> const _scope_id;
+        ::std::optional<v6Scope> const _scope;
         ::std::string const _without_scope;
         bool _is_unique_local = false;
         bool _is_site_local = false;

@@ -61,7 +61,8 @@ set(${PROJECT_NAME}_sources
     Interface.cpp
     Interfaces.cpp
     IpAddress.cpp
-    MacAddress.cpp)
+    MacAddress.cpp
+    VersionInfo.cpp)
 
 configure_file(version.h.in version.h)
 

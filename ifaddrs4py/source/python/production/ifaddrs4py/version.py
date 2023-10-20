@@ -28,13 +28,15 @@ if not _skip_version_check:
 
     if __VERSION__ != __VERSION_EXT__:
         warnings.warn(
-            f"ifaddrs4py version: C extension {__VERSION_EXT__} does not match Python {__VERSION__}",
+            f"ifaddrs4py version: C++ extension version {__VERSION_EXT__} "
+            f"does not match Python library version {__VERSION__}",
             category=VersionMismatchWarning,
             stacklevel=1,
         )
     elif __VERSION_INFO__ != __VERSION_INFO_EXT__:
         warnings.warn(
-            f"ifaddrs4py version: C extension {__VERSION_INFO__} does not match Python {__VERSION_INFO_EXT__}",
+            f"ifaddrs4py version: C++ extension version info {__VERSION_INFO__} "
+            f"does not match Python library version info {__VERSION_INFO_EXT__}",
             category=VersionMismatchWarning,
             stacklevel=1,
         )

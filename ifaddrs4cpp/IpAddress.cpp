@@ -1,8 +1,10 @@
 #include "config.h"
 
 #ifdef IS_WINDOWS
+#include <netioapi.h>
 #include <winsock2.h>
 #else /* IS_WINDOWS */
+#include <net/if.h>
 #include <netinet/in.h>
 #endif /* IS_WINDOWS */
 
@@ -183,11 +185,57 @@ OddSource::Interfaces::IPv4Address::
     delete this->_data;
 }
 
+namespace
+{
+    using namespace OddSource::Interfaces;
+
+    inline v6Scope & fill_out_scope(v6Scope & scope)
+    {
+        if (scope.scope_id && !scope.scope_name)
+        {
+            char buffer[IF_NAMESIZE];
+            if (::if_indextoname(*scope.scope_id, buffer) != nullptr)
+            {
+                scope.scope_name = ::std::string(buffer);
+            }
+        }
+        else if(scope.scope_name && !scope.scope_id)
+        {
+            uint32_t scope_id = ::if_nametoindex(scope.scope_name->c_str());
+            if (scope_id > 0)
+            {
+                scope.scope_id = scope_id;
+            }
+        }
+        return scope;
+    }
+
+    inline v6Scope scope_from(uint32_t scope_id)
+    {
+        if (scope_id == 0)
+        {
+            throw ::std::invalid_argument("IPv6 address scope ID must be greater than 0.");
+        }
+        v6Scope scope {scope_id};
+        return fill_out_scope(scope);
+    }
+
+    inline v6Scope scope_from(::std::string_view const & scope_name)
+    {
+        if (scope_name.empty())
+        {
+            throw ::std::invalid_argument("IPv6 address scope name must not be an empty string.");
+        }
+        v6Scope scope {::std::nullopt, ::std::string(scope_name)};
+        return fill_out_scope(scope);
+    }
+}
+
 OddSource::Interfaces::IPv6Address::
 IPv6Address(OddSource::Interfaces::IPv6Address const & other)
     : IPAddress(other),
       _data(nullptr),
-      _scope_id(other._scope_id),
+      _scope(other._scope),
       _without_scope(other._without_scope),
       _is_unique_local(other._is_unique_local),
       _is_site_local(other._is_site_local),
@@ -205,7 +253,7 @@ OddSource::Interfaces::IPv6Address::
 IPv6Address(OddSource::Interfaces::IPv6Address && other) noexcept
     : IPAddress(::std::move(other)),
       _data(nullptr),
-      _scope_id(other._scope_id), // NOLINT(*-use-after-move)
+      _scope(other._scope), // NOLINT(*-use-after-move)
       _without_scope(other._without_scope), // NOLINT(*-use-after-move)
       _is_unique_local(other._is_unique_local), // NOLINT(*-use-after-move)
       _is_site_local(other._is_site_local), // NOLINT(*-use-after-move)
@@ -225,10 +273,26 @@ IPv6Address(::std::string_view const & repr)
 }
 
 OddSource::Interfaces::IPv6Address::
-IPv6Address(
-    in6_addr const * data,
-    ::std::optional<::std::string const> const & scope_id)
-    : IPv6Address(IPv6Address::add_scope(IPAddress::to_repr(data), scope_id), data, scope_id, true)
+IPv6Address(in6_addr const * data)
+    : IPv6Address(IPAddress::to_repr(data), data, ::std::nullopt, true)
+{
+}
+
+OddSource::Interfaces::IPv6Address::
+IPv6Address(in6_addr const * data, uint32_t scope_id)
+    : IPv6Address(data, scope_from(scope_id))
+{
+}
+
+OddSource::Interfaces::IPv6Address::
+IPv6Address(in6_addr const * data, ::std::string_view const & scope_name)
+    : IPv6Address(data, scope_from(scope_name))
+{
+}
+
+OddSource::Interfaces::IPv6Address::
+IPv6Address(in6_addr const * data, v6Scope const & scope)
+    : IPv6Address(IPv6Address::add_scope(IPAddress::to_repr(data), scope), data, scope, true)
 {
 }
 
@@ -236,11 +300,11 @@ OddSource::Interfaces::IPv6Address::
 IPv6Address(
     ::std::string_view const & repr,
     in6_addr const * data,
-    ::std::optional<::std::string const> const & scope_id,
+    ::std::optional<v6Scope> const & scope,
     bool copy_data)
     : IPAddress(repr),
       _data(copy_data ? copy_in_addr(data) : data),
-      _scope_id(scope_id ? scope_id : IPv6Address::extract_scope(repr)),
+      _scope(scope ? scope : IPv6Address::extract_scope(repr)),
       _without_scope(IPv6Address::strip_scope(repr))
 {
     auto bytes = BYTES;
@@ -344,14 +408,18 @@ OddSource::Interfaces::IPv6Address
 OddSource::Interfaces::IPv6Address::
 normalize() const
 {
-    return {this->_data, this->_scope_id};
+    if (this->_scope)
+    {
+        return {this->_data, *this->_scope};
+    }
+    return {this->_data};
 }
 
 ::std::string_view
 OddSource::Interfaces::IPv6Address::
 strip_scope(::std::string_view const & repr)
 {
-    size_t i = repr.find('%');
+    size_t const i = repr.find('%');
     if (i != ::std::string_view::npos)
     {
         return repr.substr(0, i);
@@ -359,21 +427,39 @@ strip_scope(::std::string_view const & repr)
     return repr;
 }
 
-::std::optional<::std::string_view>
+::std::optional<OddSource::Interfaces::v6Scope>
 OddSource::Interfaces::IPv6Address::
 extract_scope(::std::string_view const & repr)
 {
-    size_t i = repr.find('%');
+    size_t const i = repr.find('%');
     if (i != ::std::string_view::npos)
     {
-        return repr.substr(i + 1);
+        ::std::string const scope(repr.substr(i + 1));
+        if (!scope.empty())
+        {
+            if (scope.find_first_not_of("0123456789") == std::string::npos)
+            {
+                try
+                {
+                    return scope_from(::std::stoul(scope));
+                }
+                catch (::std::invalid_argument const &)
+                {
+                }
+            }
+            return scope_from(scope);
+        }
     }
     return ::std::nullopt;
 }
 
 ::std::string
 OddSource::Interfaces::IPv6Address::
-add_scope(::std::string const & repr, ::std::optional<::std::string const> const & scope_id)
+add_scope(::std::string const & repr, ::std::optional<v6Scope> const & scope)
 {
-    return scope_id ? repr + "%" + *scope_id : repr;
+    if (!scope)
+    {
+        return repr;
+    }
+    return repr + "%" + (scope->scope_name ? *scope->scope_name : ::std::to_string(*scope->scope_id));
 }

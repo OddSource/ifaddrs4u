@@ -42,7 +42,9 @@ public:
                 strcmp((char const *)address, "2001::dead:beef"),
                 0,
                 "The C strings do not match.");
+        assert_not_that(address.has_scope_id());
         assert_that(!address.scope_id(), "There should be no scope ID.");
+        assert_that(!address.scope_name(), "There should be no scope name.");
         assert_equals(address.without_scope_id(), "2001::dead:beef");
 
         ::std::ostringstream oss;
@@ -55,15 +57,31 @@ public:
         IPv6Address address("fe80::f1:1612:447b:70c5%en0");
         assert_equals(::std::string(address), "fe80::f1:1612:447b:70c5%en0");
         assert_equals(
-                strcmp((char const *)address, "fe80::f1:1612:447b:70c5%en0"),
-                0,
-                "The C strings do not match.");
-        assert_equals(*address.scope_id(), "en0");
+            strcmp((char const *)address, "fe80::f1:1612:447b:70c5%en0"),
+            0,
+            "The C strings do not match.");
+        assert_that(address.has_scope_id());
+        assert_that((bool)address.scope_name());
+        assert_equals(*address.scope_name(), "en0");
+        assert_equals(*address.scope_name_or_id(), "en0");
         assert_equals(address.without_scope_id(), "fe80::f1:1612:447b:70c5");
 
         ::std::ostringstream oss;
         oss << IPv6Address("fe80::b0fb:b8ff:fe5b:84e8%awl1");
         assert_equals(oss.str(), "fe80::b0fb:b8ff:fe5b:84e8%awl1");
+
+        IPv6Address address2("fe80::f1:1612:447b:70c5%117");
+        assert_equals(::std::string(address2), "fe80::f1:1612:447b:70c5%117");
+        assert_equals(
+            strcmp((char const *)address2, "fe80::f1:1612:447b:70c5%117"),
+            0,
+            "The C strings do not match.");
+        assert_that(address2.has_scope_id());
+        assert_that((bool)address2.scope_id());
+        assert_equals(*address2.scope_id(), 117u);
+        assert_equals(*address2.scope_name_or_id(), "117");
+        assert_equals(*address2.scope_id_or_name(), "117");
+        assert_equals(address2.without_scope_id(), "fe80::f1:1612:447b:70c5");
     }
 
     void test_in_addr_round_trip_unscoped()
@@ -72,6 +90,7 @@ public:
         inet_pton(AF_INET6, "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5", &data);
         IPv6Address address(&data);
         assert_equals(::std::string(address), "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5");
+        assert_not_that(address.has_scope_id());
 
         assert_equals(address.version(), IPv6);
         assert_equals(address.maximum_prefix_length(), 128);
@@ -90,9 +109,11 @@ public:
     {
         in6_addr data {};
         inet_pton(AF_INET6, "fe80::f1:1612:447b:70c5", &data);
-        IPv6Address address(&data, "12");
-        assert_equals(::std::string(address), "fe80::f1:1612:447b:70c5%12");
-        assert_equals(*address.scope_id(), "12");
+        IPv6Address address(&data, 117);
+        assert_equals(::std::string(address), "fe80::f1:1612:447b:70c5%117");
+        assert_that(address.has_scope_id());
+        assert_that((bool)address.scope_id());
+        assert_equals(*address.scope_id(), 117u);
         assert_equals(address.without_scope_id(), "fe80::f1:1612:447b:70c5");
 
         assert_equals(address.version(), IPv6);

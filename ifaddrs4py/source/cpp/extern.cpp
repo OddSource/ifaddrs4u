@@ -220,7 +220,7 @@ InterfaceBrowser_for_each_interface(InterfaceBrowser_PyObj * self, PyObject * co
         return NULL;
     }
 
-    Py_RETURN_NONE;
+    return keep_calling_callable;
 }
 
 #define ENSURE_POPULATED(ret) if (self->interfaces == NULL) \

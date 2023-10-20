@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.oddsource.java</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>2.3-SNAPSHOT</version>
+    </parent>
+
+    <groupId>io.oddsource.java.net</groupId>
+    <artifactId>ifaddrs4j</artifactId>
+    <packaging>jar</packaging>
+
+    <name>OddSource Code ifaddrs4j</name>
+    <version>0.1.0-alpha0-SNAPSHOT</version>
+    <description>
+        OddSource Code ifaddrs4j - Cross platform access to network interfaces and addresses
+    </description>
+
+    <url>http://github.com/OddSource/ifaddrs4u/ifaddrs4j</url>
+    <scm>
+        <url>http://github.com/OddSource/ifaddrs4u</url>
+        <connection>scm:git:http://github.com/OddSource/ifaddrs4u.git</connection>
+        <developerConnection>scm:git:git@github.com:OddSource/ifaddrs4u.git</developerConnection>
+    </scm>
+    <inceptionYear>2023</inceptionYear>
+
+    <properties>
+        <javac.source.version>11</javac.source.version>
+        <javac.target.version>11</javac.target.version>
+        <project.tasks.maximum.memory>256m</project.tasks.maximum.memory>
+        <version.dependency.test.junit>4.13.2</version.dependency.test.junit>
+        <version.plugin.cmake>3.25.2-b1</version.plugin.cmake>
+        <cmake.download>false</cmake.download>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${version.dependency.test.junit}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <sourceDirectory>source/production/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>source/production/resources</directory>
+            </resource>
+            <resource>
+                <targetPath>META-INF</targetPath>
+                <directory>build/jar/META-INF</directory>
+            </resource>
+        </resources>
+
+        <testSourceDirectory>source/test/java/unit</testSourceDirectory>
+        <testResources>
+            <testResource>
+                <directory>source/test/resources</directory>
+            </testResource>
+        </testResources>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>${version.plugin.spotbugs}</version>
+                    <configuration>
+                        <effort>Max</effort>
+                        <excludeFilterFile>build/spotbugs-exclude.xml</excludeFilterFile>
+                        <threshold>Low</threshold>
+                        <xmlOutput>true</xmlOutput>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${version.plugin.checkstyle}</version>
+                    <configuration>
+                        <suppressionsLocation>build/checkstyle-suppressions.xml</suppressionsLocation>
+                        <consoleOutput>true</consoleOutput>
+                        <failsOnError>true</failsOnError>
+                        <linkXRef>false</linkXRef>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${version.plugin.enforcer}</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-maven</id>
+                            <goals>
+                                <goal>display-info</goal>
+                                <goal>enforce</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.googlecode.cmake-maven-project</groupId>
+                    <artifactId>cmake-maven-plugin</artifactId>
+                    <version>${version.plugin.cmake}</version>
+                    <executions>
+                        <execution>
+                            <id>cmake-generate-ifaddrs4cpp</id>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                            <phase>generate-sources</phase>
+                            <configuration>
+                                <sourcePath>${project.basedir}/../ifaddrs4cpp</sourcePath>
+                                <targetPath>${project.basedir}/../ifaddrs4cpp/cmake-external-build</targetPath>
+                                <options>
+                                    <option>-DENABLE_TESTS:BOOL=ON</option>
+                                    <option>-DBUILD_STATIC_ONLY:BOOL=ON</option>
+                                    <option>-DCMAKE_BUILD_TYPE=Debug</option>
+                                </options>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>cmake-generate-ifaddrs4j</id>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                            <phase>generate-sources</phase>
+                            <configuration>
+                                <sourcePath>${project.basedir}</sourcePath>
+                                <targetPath>${project.basedir}/target/cmake-build-release</targetPath>
+                                <options>
+                                    <option>-DCMAKE_BUILD_TYPE=Debug</option>
+                                </options>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>cmake-compile-ifaddrs4cpp</id>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <phase>compile</phase>
+                            <configuration>
+                                <target>all</target>
+                                <projectDirectory>${project.basedir}/../ifaddrs4cpp/cmake-external-build</projectDirectory>
+                                <options>
+                                    <option>-j</option>
+                                    <option>14</option>
+                                </options>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>cmake-compile-ifaddrs4j</id>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <phase>compile</phase>
+                            <configuration>
+                                <target>all</target>
+                                <projectDirectory>${project.basedir}/target/cmake-build-release</projectDirectory>
+                                <options>
+                                    <option>-j</option>
+                                    <option>14</option>
+                                </options>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>cmake-test-ifaddrs4cpp</id>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <phase>test-compile</phase>
+                            <configuration>
+                                <buildDirectory>${project.basedir}/../ifaddrs4cpp/cmake-external-build</buildDirectory>
+                                <options>
+                                    <option>--verbose</option>
+                                </options>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${version.plugin.compiler}</version>
+                    <configuration>
+                        <fork>true</fork>
+                        <maxmem>${project.tasks.maximum.memory}</maxmem>
+                        <source>${javac.source.version}</source>
+                        <target>${javac.target.version}</target>
+                        <debug>true</debug>
+                        <debuglevel>lines,source</debuglevel>
+                        <compilerArgs>
+                            <arg>-Xmaxerrs</arg><arg>10000</arg>
+                            <arg>-Xmaxwarns</arg><arg>10000</arg>
+                            <arg>-Xlint:all</arg>
+                            <arg>-Werror</arg>
+                        </compilerArgs>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>default-compile</id>
+                            <phase>none</phase>
+                        </execution>
+                        <execution>
+                            <id>default-testCompile</id>
+                            <phase>none</phase>
+                        </execution>
+                        <execution>
+                            <id>compile-production-sources</id>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <phase>compile</phase>
+                            <configuration>
+                                <compilerArgs>
+                                    <arg>-h</arg>
+                                    <arg>source/production/cpp/generated</arg>
+                                </compilerArgs>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>compile-test-sources</id>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                            <phase>test-compile</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${version.plugin.javadoc}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${version.plugin.source}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${version.plugin.jar}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <!-- We compile Java classes first, because that step also generates JNI headers... -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <!-- ... then we compile C++ code second, because it uses the previously-generated JNI headers -->
+                <groupId>com.googlecode.cmake-maven-project</groupId>
+                <artifactId>cmake-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

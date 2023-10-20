@@ -1,0 +1,230 @@
+/*
+ * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "generated/io_oddsource_java_net_ifaddrs4j_EnumConstantsHelper.h"
+
+#include <ifaddrs4cpp/Interface.h>
+
+#include "Interface.h"
+#include "IpAddress.h"
+#include "MacAddress.h"
+#include "macros.h"
+
+#define UNSUPPORTED_FLAG_NAME "UNSUPPORTED_FLAG"
+#define UNSUPPORTED_FLAG 2147483645
+
+/*
+ * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceFlag
+ * Method:    getConstant
+ * Signature: (Ljava/lang/String;)I
+ */
+jint JNICALL Java_io_oddsource_java_net_ifaddrs4j_EnumConstantsHelper_getInterfaceFlagConstant(
+    JNIEnv * env,
+    jclass,
+    jstring enum_name)
+{
+    char const * enum_name_c_str(env->GetStringUTFChars(enum_name, 0));
+    IF_NULL_RETURN_INT(enum_name_c_str)
+
+    ::std::string enum_name_str(enum_name_c_str);
+    env->ReleaseStringUTFChars(enum_name, enum_name_c_str);
+
+    if (enum_name_str == UNSUPPORTED_FLAG_NAME)
+    {
+        return UNSUPPORTED_FLAG;
+    }
+
+    auto found = OddSource::Interfaces::InterfaceFlag_Values.find(enum_name_str);
+    if (found == OddSource::Interfaces::InterfaceFlag_Values.end())
+    {
+        return UNSUPPORTED_FLAG;
+    }
+
+    return found->second;
+}
+
+/*
+ * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceIPAddressFlag
+ * Method:    getConstant
+ * Signature: (Ljava/lang/String;)I
+ */
+jint JNICALL Java_io_oddsource_java_net_ifaddrs4j_EnumConstantsHelper_getInterfaceIPAddressFlagConstant(
+    JNIEnv * env,
+    jclass,
+    jstring enum_name)
+{
+    char const * enum_name_c_str(env->GetStringUTFChars(enum_name, 0));
+    IF_NULL_RETURN_INT(enum_name_c_str)
+
+    ::std::string enum_name_str(enum_name_c_str);
+    env->ReleaseStringUTFChars(enum_name, enum_name_c_str);
+
+    auto found = OddSource::Interfaces::InterfaceIPAddressFlag_Values.find(enum_name_str);
+    if (found == OddSource::Interfaces::InterfaceIPAddressFlag_Values.end())
+    {
+        env->ThrowNew(
+            env->FindClass("java/lang/EnumConstantNotPresentException"),
+            (::std::string("Enum constant ") + enum_name_str +
+             " did not match any constants in the underlying C++ API, " +
+             "likely mismatch between Java code and C++ extension").c_str());
+        return -1;
+    }
+
+    return found->second;
+}
+
+/**
+ * @return io.oddsource.java.net.ifaddrs4j.MacAddress
+ */
+template<class IPAddressT>
+jobject
+OddSource::ifaddrs4j::
+convert_to_java(JNIEnv * env, OddSource::Interfaces::InterfaceIPAddress<IPAddressT> const & interface_address)
+{
+    auto address(convert_to_java(env, interface_address.address()));
+    IF_NULL_RETURN_NULL(address)
+
+    jint flags(interface_address.flags());
+
+    jobject prefix_length = NULL;
+    if (interface_address.prefix_length())
+    {
+        auto jShort(env->FindClass("java/lang/Short"));
+        IF_NULL_RETURN_NULL(jShort);
+        auto valueOf(env->GetStaticMethodID(jShort, "valueOf", "(S)Ljava/lang/Short;"));
+        IF_NULL_RETURN_NULL(valueOf);
+        prefix_length = env->CallStaticObjectMethod(jShort, valueOf, *interface_address.prefix_length());
+        IF_NULL_RETURN_NULL(prefix_length);
+    }
+
+    jobject broadcast = NULL;
+    if (interface_address.broadcast_address())
+    {
+        broadcast = convert_to_java(env, *interface_address.broadcast_address());
+        IF_NULL_RETURN_NULL(broadcast)
+    }
+
+    jobject point_to_point = NULL;
+    if (interface_address.point_to_point_destination())
+    {
+        point_to_point = convert_to_java(env, *interface_address.point_to_point_destination());
+        IF_NULL_RETURN_NULL(point_to_point)
+    }
+
+    auto cls(env->FindClass("io/oddsource/java/net/ifaddrs4j/InterfaceIPAddress"));
+    IF_NULL_RETURN_NULL(cls)
+
+    // InterfaceIPAddress(T, int, Short, T, T)
+    auto constructor(env->GetMethodID(
+        cls,
+        "<init>",
+        "(Ljava/net/InetAddress;ILjava/lang/Short;Ljava/net/InetAddress;Ljava/net/InetAddress;)V"));
+    IF_NULL_RETURN_NULL(constructor)
+
+    return env->NewObject(cls, constructor, address, flags, prefix_length, broadcast, point_to_point);
+}
+
+/**
+ * @return io.oddsource.java.net.ifaddrs4j.MacAddress
+ */
+jobject
+OddSource::ifaddrs4j::
+convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & interface)
+{
+    jint index(interface.index());
+
+    jstring name(env->NewStringUTF(interface.name().c_str()));
+    IF_NULL_RETURN_NULL(name)
+
+#ifdef IS_WINDOWS
+    jstring windows_uuid(env->NewStringUTF(interface.windows_uuid()));
+    IF_NULL_RETURN_NULL(windows_uuid)
+#endif /* IS_WINDOWS */
+
+    jint flags(interface.flags());
+
+    jobject mtu = NULL;
+    if (interface.mtu())
+    {
+        auto jLong(env->FindClass("java/lang/Long"));
+        IF_NULL_RETURN_NULL(jLong);
+        auto valueOf(env->GetStaticMethodID(jLong, "valueOf", "(J)Ljava/lang/Long;"));
+        IF_NULL_RETURN_NULL(valueOf);
+        mtu = env->CallStaticObjectMethod(jLong, valueOf, *interface.mtu());
+        IF_NULL_RETURN_NULL(mtu);
+    }
+
+    jobject mac_address = NULL;
+    if (interface.mac_address())
+    {
+        mac_address = convert_to_java(env, *interface.mac_address());
+        IF_NULL_RETURN_NULL(mac_address)
+    }
+
+    auto jArrayList(env->FindClass("java/util/ArrayList"));
+    IF_NULL_RETURN_NULL(jArrayList);
+    auto list_constructor(env->GetMethodID(jArrayList, "<init>", "(I)V"));
+    IF_NULL_RETURN_NULL(list_constructor);
+    auto list_add(env->GetMethodID(jArrayList, "add", "(Ljava/lang/Object;)Z"));
+    IF_NULL_RETURN_NULL(list_add);
+
+    auto ipv4_addresses(env->NewObject(jArrayList, list_constructor, (jint) interface.ipv4_addresses().size()));
+    IF_NULL_RETURN_NULL(ipv4_addresses);
+    auto ipv6_addresses(env->NewObject(jArrayList, list_constructor, (jint) interface.ipv6_addresses().size()));
+    IF_NULL_RETURN_NULL(ipv6_addresses);
+
+    auto v4(interface.ipv4_addresses());
+    for (auto const & address : v4)
+    {
+        auto converted(convert_to_java(env, address));
+        IF_NULL_RETURN_NULL(converted);
+        if (!env->CallBooleanMethod(ipv4_addresses, list_add, converted))
+        {
+            return NULL;
+        }
+    }
+
+    auto v6(interface.ipv6_addresses());
+    for (auto const & address : v6)
+    {
+        auto converted(convert_to_java(env, address));
+        IF_NULL_RETURN_NULL(converted);
+        if (!env->CallBooleanMethod(ipv6_addresses, list_add, converted))
+        {
+            return NULL;
+        }
+    }
+
+    auto cls(env->FindClass("io/oddsource/java/net/ifaddrs4j/Interface"));
+    IF_NULL_RETURN_NULL(cls)
+
+    // (ILjava/lang/String;ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V
+    ::std::string signature("(ILjava/lang/String;");
+#ifdef IS_WINDOWS
+    signature += "Ljava/lang/String;";
+#endif /* IS_WINDOWS */
+    signature += "ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V";
+
+    // Interface(int, String[, String], int, Long, MacAddress, List, List)
+    auto constructor(env->GetMethodID(cls, "<init>", signature.c_str()));
+    IF_NULL_RETURN_NULL(constructor)
+
+    return env->NewObject(cls, constructor, index, name,
+#ifdef IS_WINDOWS
+                                            windows_uuid,
+#endif /* IS_WINDOWS */
+                                            flags, mtu, mac_address, ipv4_addresses, ipv6_addresses);
+}

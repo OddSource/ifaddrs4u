@@ -6,6 +6,7 @@ from typing import (
     Generic,
     Optional,
     TypeVar,
+    Union,
 )
 import uuid
 
@@ -129,7 +130,13 @@ class InterfaceIPAddress(Generic[IPAddressT]):
                     string += f" {display}"
 
         if getattr(self._address, "scope_id", None):
-            string += f" scopeid {self._address.scope_id}"
+            scope_id: Union[str, int] = self._address.scope_id
+            if isinstance(scope_id, str) and scope_id.isnumeric():
+                scope_id = int(scope_id)
+            if isinstance(scope_id, int):
+                string += f" scopeid 0x{self._address.scope_id:x}"
+            else:
+                string += f" scopeid {self._address.scope_id}"
 
         return string
 

@@ -338,6 +338,13 @@ is_6to4() const
     return this->_is_6to4;
 }
 
+inline bool
+OddSource::Interfaces::IPv6Address::
+has_scope_id() const
+{
+    return (bool)this->_scope;
+}
+
 inline ::std::string
 OddSource::Interfaces::IPv6Address::
 without_scope_id() const
@@ -345,11 +352,42 @@ without_scope_id() const
     return this->_without_scope;
 }
 
-inline ::std::optional<::std::string> const &
+inline ::std::optional<uint32_t> const &
 OddSource::Interfaces::IPv6Address::
 scope_id() const
 {
-    return this->_scope_id;
+    static ::std::optional<uint32_t> const nil; // prevent "returning ref to temp local"
+    return this->_scope ? this->_scope->scope_id : nil;
+}
+
+inline ::std::optional<::std::string> const &
+OddSource::Interfaces::IPv6Address::
+scope_name() const
+{
+    static ::std::optional<::std::string> const nil; // prevent "returning ref to temp local"
+    return this->_scope ? this->_scope->scope_name : nil;
+}
+
+inline ::std::optional<::std::string>
+OddSource::Interfaces::IPv6Address::
+scope_name_or_id() const
+{
+    if (!this->_scope)
+    {
+        return ::std::nullopt;
+    }
+    return this->_scope->scope_name ? this->_scope->scope_name : ::std::to_string(*this->_scope->scope_id);
+}
+
+inline ::std::optional<::std::string>
+OddSource::Interfaces::IPv6Address::
+scope_id_or_name() const
+{
+    if (!this->_scope)
+    {
+        return ::std::nullopt;
+    }
+    return this->_scope->scope_id ? ::std::to_string(*this->_scope->scope_id) : this->_scope->scope_name;
 }
 
 inline bool
