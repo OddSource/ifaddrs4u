@@ -74,12 +74,26 @@ public class TestSamples
         final var address = Samples.getInterfaceIPv6Address();
         assertNotNull(address);
         assertEquals("2001:470:2ccb:a61b:e:acf8:6736:d81e", address.getAddress().getHostAddress());
-        assertEquals(Short.valueOf((short) 64), address.getPrefixLength());
+        assertEquals(Short.valueOf((short) 56), address.getPrefixLength());
         assertNull(address.getBroadcastAddress());
         assertNull(address.getPointToPointDestination());
         assertTrue(address.isFlagEnabled(InterfaceIPAddressFlag.AutoConfigured));
         assertTrue(address.isFlagEnabled(InterfaceIPAddressFlag.Secured));
-        assertEquals("2001:470:2ccb:a61b:e:acf8:6736:d81e/64 autoconf secured", address.toString());
+        assertEquals("2001:470:2ccb:a61b:e:acf8:6736:d81e/56 autoconf secured", address.toString());
+    }
+
+    @Test
+    public void testGetInterfaceScopedIPv6Address()
+    {
+        final var address = Samples.getInterfaceScopedIPv6Address();
+        assertNotNull(address);
+        assertEquals("fe80:0:0:0:aede:48ff:fe00:1122%6", address.getAddress().getHostAddress());
+        assertEquals(Short.valueOf((short) 64), address.getPrefixLength());
+        assertNull(address.getBroadcastAddress());
+        assertNull(address.getPointToPointDestination());
+        assertFalse(address.isFlagEnabled(InterfaceIPAddressFlag.AutoConfigured));
+        assertTrue(address.isFlagEnabled(InterfaceIPAddressFlag.Secured));
+        assertEquals("fe80:0:0:0:aede:48ff:fe00:1122%6/64 secured scopeid 0x6", address.toString());
     }
 
     @Test
@@ -98,11 +112,19 @@ public class TestSamples
         assertEquals("ac:de:48:00:11:22", anInterface.getMacAddress().toString());
         final var iterV4 = anInterface.getIpv4Addresses();
         assertTrue(iterV4.hasNext());
-        assertEquals("192.168.0.42", iterV4.next().getAddress().getHostAddress());
+        assertEquals("192.168.0.42/24 broadcast 192.168.0.254", iterV4.next().toString());
         assertFalse(iterV4.hasNext());
         final var iterV6 = anInterface.getIpv6Addresses();
         assertTrue(iterV6.hasNext());
-        assertEquals("2001:470:2ccb:a61b:e:acf8:6736:d81f", iterV6.next().getAddress().getHostAddress());
+        assertEquals(
+            "fe80:0:0:0:aede:48ff:fe00:1122%6/64 secured scopeid 0x6",
+            iterV6.next().toString()
+        );
+        assertTrue(iterV6.hasNext());
+        assertEquals(
+            "2001:470:2ccb:a61b:e:acf8:6736:d81f/56 autoconf secured",
+            iterV6.next().toString()
+        );
         assertFalse(iterV6.hasNext());
     }
 }

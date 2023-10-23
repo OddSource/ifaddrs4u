@@ -37,8 +37,8 @@ endif()
 set(SOURCES_DIRECTORY source/production/cpp)
 
 set(${PROJECT_NAME}_sources
-    ${SOURCES_DIRECTORY}/Extern.cpp
     ${SOURCES_DIRECTORY}/Interface.cpp
+    ${SOURCES_DIRECTORY}/InterfaceBrowser.cpp
     ${SOURCES_DIRECTORY}/IpAddress.cpp
     ${SOURCES_DIRECTORY}/MacAddress.cpp
     ${SOURCES_DIRECTORY}/Samples.cpp

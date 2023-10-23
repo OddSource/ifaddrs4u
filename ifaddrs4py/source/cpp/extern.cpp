@@ -1,6 +1,8 @@
 #include "config.h"
 #include "interface.h"
 #include "ip_address.h"
+#include "mac_address.h"
+#include "macros.h"
 #include "version.h"
 
 #include "structmember.h"  // not include in Python.h
@@ -18,15 +20,6 @@ typedef struct
     ::std::unique_ptr<OddSource::Interfaces::InterfaceBrowser> browser;
     PyTupleObject * interfaces;  // tuple
 } InterfaceBrowser_PyObj;
-
-#define CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(err, ret) catch (::std::exception const & e) \
-    { \
-        if (PyErr_Occurred() == NULL) \
-        { \
-            PyErr_SetString(err, e.what()); \
-        } \
-        ret; \
-    }
 
 static int
 InterfaceBrowser___init__(InterfaceBrowser_PyObj * self, PyObject * args, PyObject * kwargs)
@@ -124,6 +117,125 @@ _get_interfaces(OddSource::Interfaces::InterfaceBrowser & browser)
         return ret; \
     }
 
+namespace
+{
+    PyObject * for_each_populated_interface(InterfaceBrowser_PyObj * self, PyObject * callable)
+    {
+        Py_ssize_t num_interfaces(PyTuple_Size((PyObject *) self->interfaces));
+        if (PyErr_Occurred() != NULL)
+        {
+            return NULL;
+        }
+
+        for (Py_ssize_t i(0); i < num_interfaces; i++)
+        {
+            PyObject * interface(PyTuple_GetItem((PyObject *) self->interfaces, i));
+            if (interface == NULL)
+            {
+                return NULL;
+            }
+
+            Py_INCREF(interface);
+            PyObject * result = PyObject_CallFunctionObjArgs(callable, interface, NULL);
+            Py_DECREF(interface);
+            if (result == NULL)
+            {
+                return NULL;
+            }
+            if (!PyBool_Check(result))
+            {
+                ::std::ostringstream oss;
+                oss << "InterfaceBrowser.for_each_interface() expected second argument to be a callable that returns "
+                    << "a bool, but instead it returned a " << result->ob_type->tp_name << ".";
+                PyErr_SetString(PyExc_ValueError, oss.str().c_str());
+                Py_DECREF(result);
+                return NULL;
+            }
+            if (!PyObject_IsTrue(result))
+            {
+                return result;
+            }
+        }
+
+        return Py_True;
+    }
+
+    PyObject * for_each_interface_and_populate(InterfaceBrowser_PyObj * self, PyObject * callable)
+    {
+        bool keep_calling_callable(true);
+        bool return_error(false);
+
+        PyObject * temp_list(PyList_New(0));
+        if (temp_list == NULL)
+        {
+            return NULL;
+        }
+
+        ::std::function<bool(Interface const &)> do_this =
+        [callable, &keep_calling_callable, &return_error, &temp_list](auto cpp_interface)
+        {
+            PyObject * interface;
+            try
+            {
+                interface = OddSource::ifaddrs4py::convert_to_python(cpp_interface);
+            }
+            CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return_error = true)
+
+            if (!return_error && keep_calling_callable)
+            {
+                Py_INCREF(interface);
+                PyObject * result = PyObject_CallFunctionObjArgs(callable, interface, NULL);
+                Py_DECREF(interface);
+                if (result == NULL)
+                {
+                    return_error = true;
+                }
+                else if (!PyBool_Check(result))
+                {
+                    ::std::ostringstream oss;
+                    oss << "InterfaceBrowser.for_each_interface() expected second argument to be a callable that "
+                        << "returns a bool, but instead it returned a " << result->ob_type->tp_name << ".";
+                    PyErr_SetString(PyExc_ValueError, oss.str().c_str());
+                    return_error = true;
+                }
+                else
+                {
+                    keep_calling_callable = PyObject_IsTrue(result) ? true : false;
+                }
+                Py_DECREF(result);
+            }
+
+            if (!return_error && PyList_Append(temp_list, interface) != 0)
+            {
+                return_error = true;
+            }
+
+            Py_DECREF(interface);
+            return !return_error;
+        };
+
+        self->browser->for_each_interface(do_this);
+
+        if (!return_error && self->interfaces == NULL)
+        {
+            self->interfaces = (PyTupleObject *) PyList_AsTuple(temp_list);
+            if (self->interfaces == NULL)
+            {
+                return_error = true;
+            }
+        }
+
+        Py_DECREF(temp_list);
+
+        if (return_error)
+        {
+            return NULL;
+        }
+
+        return keep_calling_callable ? Py_True : Py_False;
+    }
+}
+
 static PyObject *
 InterfaceBrowser_for_each_interface(InterfaceBrowser_PyObj * self, PyObject * const * args, Py_ssize_t nargs)
 {
@@ -136,6 +248,8 @@ InterfaceBrowser_for_each_interface(InterfaceBrowser_PyObj * self, PyObject * co
         return NULL;
     }
 
+    ENSURE_INITIALIZED(NULL)
+
     PyObject * callable(args[0]);
     if (!PyCallable_Check(callable))
     {
@@ -146,81 +260,11 @@ InterfaceBrowser_for_each_interface(InterfaceBrowser_PyObj * self, PyObject * co
         return NULL;
     }
 
-    ENSURE_INITIALIZED(NULL)
-
-    bool keep_calling_callable(true);
-    bool return_error(false);
-
-    PyObject * temp_list = NULL;
     if (self->interfaces == NULL)
     {
-        temp_list = PyList_New(0);
-        if (temp_list == NULL)
-        {
-            return NULL;
-        }
+        return for_each_interface_and_populate(self, callable);
     }
-
-    ::std::function<bool(Interface const &)> do_this =
-    [callable, &keep_calling_callable, &return_error, &temp_list](auto interface)
-    {
-        PyObject * item;
-        try
-        {
-            item = OddSource::ifaddrs4py::convert_to_python(interface);
-        }
-        CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return_error = true)
-
-        if (!return_error && keep_calling_callable)
-        {
-            PyObject * result = PyObject_CallFunctionObjArgs(callable, item, NULL);
-            if (result == NULL)
-            {
-                return_error = true;
-            }
-            else if (!PyBool_Check(result))
-            {
-                ::std::ostringstream oss;
-                oss << "InterfaceBrowser.for_each_interface() expected second argument to be a callable that returns "
-                    << "a bool, but instead it returned a " << result->ob_type->tp_name << ".";
-                PyErr_SetString(PyExc_ValueError, oss.str().c_str());
-                return_error = true;
-            }
-            else
-            {
-                keep_calling_callable = PyObject_IsTrue(result) ? true : false;
-            }
-            Py_DECREF(result);
-        }
-
-        if (!return_error && temp_list != NULL && PyList_Append(temp_list, item) != 0)
-        {
-            return_error = true;
-        }
-
-        Py_DECREF(item);
-        return !return_error;
-    };
-
-    self->browser->for_each_interface(do_this);
-
-    if (!return_error && temp_list != NULL && self->interfaces == NULL)
-    {
-        self->interfaces = (PyTupleObject *)PyList_AsTuple(temp_list);
-        if (self->interfaces == NULL)
-        {
-            return_error = true;
-        }
-    }
-
-    Py_XDECREF(temp_list);
-
-    if (return_error)
-    {
-        return NULL;
-    }
-
-    return keep_calling_callable;
+    return for_each_populated_interface(self, callable);
 }
 
 #define ENSURE_POPULATED(ret) if (self->interfaces == NULL) \
@@ -233,25 +277,30 @@ InterfaceBrowser_for_each_interface(InterfaceBrowser_PyObj * self, PyObject * co
     }
 
 static PyObject *
-InterfaceBrowser_get_interfaces(InterfaceBrowser_PyObj * self)
+InterfaceBrowser_get_interfaces(InterfaceBrowser_PyObj * self, PyObject * Py_UNUSED(ignore))
 {
     ENSURE_INITIALIZED(NULL)
     ENSURE_POPULATED(NULL)
+    Py_INCREF(self->interfaces);
     return (PyObject *)self->interfaces;
 }
 
 static PyObject *
-InterfaceBrowser___iter__(InterfaceBrowser_PyObj * self, PyObject * Py_UNUSED(ignore))
+InterfaceBrowser___iter__(InterfaceBrowser_PyObj * self, PyObject * args)
 {
-    ENSURE_INITIALIZED(NULL)
-    ENSURE_POPULATED(NULL)
-    return PyObject_GetIter((PyObject *)self->interfaces);
+    return PyObject_GetIter(InterfaceBrowser_get_interfaces(self, args));
 }
 
 static Py_ssize_t
 InterfaceBrowser___len__(InterfaceBrowser_PyObj * self)
 {
     ENSURE_INITIALIZED(-1)
+
+    if (self->interfaces != NULL)
+    {
+        return PyTuple_Size((PyObject *) self->interfaces);
+    }
+
     try
     {
         return self->browser->get_interfaces().size();
@@ -373,52 +422,14 @@ static PyTypeObject InterfaceBrowser_PyType =
     .tp_as_mapping = &InterfaceBrowser_mapping,
 };
 
-static PyObject *
-extern_get_sample_interface_ipv4_address(PyObject * module_self, PyObject * Py_UNUSED(ignore))
-{
-    static OddSource::Interfaces::InterfaceIPv4Address const IPv4(
-        OddSource::Interfaces::IPv4Address("192.168.0.42"),
-        0,
-        24u,
-        OddSource::Interfaces::IPv4Address("192.168.0.254"));
-
-    try
-    {
-        return OddSource::ifaddrs4py::convert_to_python(IPv4);
-    }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
-}
-
-static PyObject *
-extern_get_sample_interface_ipv6_address(PyObject * module_self, PyObject * Py_UNUSED(ignore))
-{
-    static OddSource::Interfaces::InterfaceIPv6Address const IPv6(
-        OddSource::Interfaces::IPv6Address("2001:470:2ccb:a61b:e:acf8:6736:d81e"),
-        OddSource::Interfaces::AutoConfigured | OddSource::Interfaces::Secured,
-        64u);
-
-    try
-    {
-        return OddSource::ifaddrs4py::convert_to_python(IPv6);
-    }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
-}
-
-static PyObject *
-extern_get_sample_interface(PyObject * module_self, PyObject * Py_UNUSED(ignore))
-{
-    try
-    {
-        return OddSource::ifaddrs4py::convert_to_python(OddSource::Interfaces::Interface::SAMPLE_INTERFACE);
-    }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
-}
-
 static struct PyMethodDef ifaddrs4py_methods [] =
 {
     {"get_sample_interface_ipv4_address", extern_get_sample_interface_ipv4_address, METH_NOARGS, NULL},
     {"get_sample_interface_ipv6_address", extern_get_sample_interface_ipv6_address, METH_NOARGS, NULL},
+    {"get_sample_interface_scoped_ipv6_address", extern_get_sample_interface_scoped_ipv6_address, METH_NOARGS, NULL},
     {"get_sample_interface", extern_get_sample_interface, METH_NOARGS, NULL},
+    {"get_mac_address_data_from_repr", (PyCFunction) extern_get_mac_address_data_from_repr, METH_FASTCALL, NULL},
+    {"get_mac_address_repr_from_data", (PyCFunction) extern_get_mac_address_repr_from_data, METH_FASTCALL, NULL},
     {NULL}        /* Sentinel */
 };
 
@@ -449,7 +460,8 @@ PyInit_extern(void)
     {
         OddSource::ifaddrs4py::init_version_constants(module);
         OddSource::ifaddrs4py::init_interface_enums(module);
-        OddSource::ifaddrs4py::init_test_ip_address_constants(module);
+        OddSource::ifaddrs4py::init_ip_address_samples(module);
+        OddSource::ifaddrs4py::init_mac_address_sample(module);
     }
     CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_ImportError, { Py_DECREF(module); return NULL; })
 

@@ -24,9 +24,14 @@ Building and Installing
 
     $ git clone https://github.com/OddSource/ifaddrs4u.git
     $ cd ifaddrs4u/ifaddrs4py
-    $ pip install .
+    $ pip install --verbose .
     - or, to run CPP tests before installing -
-    $ pip install --config-setting="--build-option=--test-cpp" .
+    $ pip install --config-setting="--build-option=--test-cpp" --verbose .
+    - as another option, you can clean all C++ Compile output before installing -
+    $ pip install --config-setting="--build-option=--clean" --verbose .
+    - to run tests -
+    $ pip install --verbose .[test]
+    $ pytest --verbose -s
 
   Do not use :code:`python setup.py install`, as this is a deprecated convention that will cause deprecation
   warnings. See `Why you shouldn't invoke setup.py directly`_ for more information.

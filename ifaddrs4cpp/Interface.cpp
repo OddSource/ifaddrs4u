@@ -114,9 +114,13 @@ get_sample_interface()
     interface._mac_address.emplace("ac:de:48:00:11:22");
     interface._ipv4_addresses.emplace_back(IPv4Address("192.168.0.42"), 0, 24, IPv4Address("192.168.0.254"));
     interface._ipv6_addresses.emplace_back(
+            IPv6Address(static_cast<in6_addr const *>(IPv6Address("fe80::aede:48ff:fe00:1122")), v6Scope {6, "en5"}),
+            Secured,
+            64);
+    interface._ipv6_addresses.emplace_back(
             IPv6Address("2001:470:2ccb:a61b:e:acf8:6736:d81f"),
             AutoConfigured | Secured,
-            64);
+            56);
     return interface;
 }
 

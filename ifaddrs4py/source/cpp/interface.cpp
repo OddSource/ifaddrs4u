@@ -1,5 +1,7 @@
 #include "interface.h"
 #include "ip_address.h"
+#include "mac_address.h"
+#include "macros.h"
 
 #include <ifaddrs4cpp/Interface.h>
 
@@ -34,58 +36,6 @@ namespace
 
         return enum_class;
     }
-}
-
-PyObject *
-OddSource::ifaddrs4py::
-convert_to_python(OddSource::Interfaces::MacAddress const & address)
-{
-    PyObject * MacAddress(get_module_class("ifaddrs4py.mac_address", "MacAddress"));
-
-    ::std::string repr(address);
-    auto data = static_cast<uint8_t const *>(address);
-    auto data_length = address.length();
-
-    PyObject * tuple = PyTuple_New(data_length);
-    if(tuple == NULL)
-    {
-        Py_DECREF(MacAddress);
-        throw ::std::runtime_error("Unable to create tuple");
-    }
-    for(Py_ssize_t i = 0; i < data_length; i++)
-    {
-        PyObject * item = PyLong_FromUnsignedLong(data[i]);
-        if(item == NULL)
-        {
-           Py_DECREF(MacAddress);
-           Py_DECREF(tuple);
-           throw ::std::runtime_error("Unable to create long");
-        }
-
-        if (PyTuple_SetItem(tuple, i, item) != 0)
-        {
-            Py_XDECREF(item);
-            throw ::std::runtime_error("Unable to place long in tuple");
-        }
-    }
-
-    PyObject * args(Py_BuildValue("(s#O)", repr.c_str(), repr.length(), tuple));
-    Py_DECREF(tuple);
-    if (args == NULL)
-    {
-        Py_DECREF(MacAddress);
-        throw ::std::runtime_error("Unable to create args list");
-    }
-
-    PyObject * instance = PyObject_Call(MacAddress, args, NULL);
-    Py_DECREF(MacAddress);
-    Py_DECREF(args);
-    if (instance == NULL)
-    {
-        throw ::std::runtime_error("Unable to instantiate ifaddrs4py.mac_address.MacAddress class");
-    }
-
-    return instance;
 }
 
 template<class IPAddressT>
@@ -292,6 +242,63 @@ convert_to_python(OddSource::Interfaces::Interface const & interface)
     return instance;
 }
 
+PyObject *
+extern_get_sample_interface_ipv4_address(PyObject * module_self, PyObject * Py_UNUSED(ignore))
+{
+    static OddSource::Interfaces::InterfaceIPv4Address const IPv4(
+        OddSource::Interfaces::IPv4Address("192.168.0.42"),
+        0,
+        24u,
+        OddSource::Interfaces::IPv4Address("192.168.0.254"));
+
+    try
+    {
+        return OddSource::ifaddrs4py::convert_to_python(IPv4);
+    }
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
+}
+
+PyObject *
+extern_get_sample_interface_ipv6_address(PyObject * module_self, PyObject * Py_UNUSED(ignore))
+{
+    static OddSource::Interfaces::InterfaceIPv6Address const IPv6(
+        OddSource::Interfaces::IPv6Address("2001:470:2ccb:a61b:e:acf8:6736:d81e"),
+        OddSource::Interfaces::AutoConfigured | OddSource::Interfaces::Secured,
+        56u);
+
+    try
+    {
+        return OddSource::ifaddrs4py::convert_to_python(IPv6);
+    }
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
+}
+
+PyObject *
+extern_get_sample_interface_scoped_ipv6_address(PyObject * module_self, PyObject * Py_UNUSED(ignore))
+{
+    using namespace OddSource::Interfaces;
+    static InterfaceIPv6Address const Scoped_IPv6(
+        IPv6Address(static_cast<in6_addr const *>(IPv6Address("fe80::aede:48ff:fe00:1122")), v6Scope {6, "en5"}),
+        Secured,
+        64u);
+
+    try
+    {
+        return OddSource::ifaddrs4py::convert_to_python(Scoped_IPv6);
+    }
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
+}
+
+PyObject *
+extern_get_sample_interface(PyObject * module_self, PyObject * Py_UNUSED(ignore))
+{
+    try
+    {
+        return OddSource::ifaddrs4py::convert_to_python(OddSource::Interfaces::Interface::SAMPLE_INTERFACE);
+    }
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
+}
+
 void
 OddSource::ifaddrs4py::
 init_interface_enums(PyObject * module)
@@ -321,15 +328,5 @@ init_interface_enums(PyObject * module)
     if (result != 0)
     {
         throw ::std::runtime_error("Failed to add enum to module");
-    }
-
-    static OddSource::Interfaces::MacAddress const MAC("ac:de:48:00:11:22");
-
-    PyObject * mac = convert_to_python(MAC);
-    result = PyModule_AddObjectRef(module, "_TEST_MAC_ADDRESS", mac);
-    Py_DECREF(mac);
-    if (result != 0)
-    {
-        throw ::std::runtime_error("Unable to initialize _TEST_MAC_ADDRESS.");
     }
 }

@@ -23,18 +23,41 @@ import java.util.Arrays;
  */
 public final class MacAddress
 {
+    static
+    {
+        if (!Loader.LOADED)
+        {
+            // this will never actually happen, but we need to ensure that Loader initializes
+            throw new RuntimeException("Not possible!");
+        }
+    }
+
     private final String representation;
 
     private final byte[] data;
 
-    private final int data_length;
+    private final short data_length;
+
+    public MacAddress(final String representation)
+    {
+        this(representation, MacAddress.get_data_from_repr(representation));
+    }
+
+    public MacAddress(final byte[] data)
+    {
+        this(MacAddress.get_repr_from_data(data), Arrays.copyOf(data, data.length));
+    }
 
     MacAddress(final String representation, final byte[] data)
     {
         this.representation = representation;
         this.data = data;
-        this.data_length = data.length;
+        this.data_length = (short) data.length;
     }
+
+    private static native byte[] get_data_from_repr(String representation);
+
+    private static native String get_repr_from_data(byte[] data);
 
     /**
      * Gets the string representation of the MAC address (e.g. a6:83:e7:2e:a1:67).
@@ -63,7 +86,7 @@ public final class MacAddress
      *
      * @return the number of address bytes.
      */
-    public int getLength()
+    public short getLength()
     {
         return this.data_length;
     }

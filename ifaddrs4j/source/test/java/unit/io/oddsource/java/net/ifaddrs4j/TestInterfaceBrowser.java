@@ -32,7 +32,7 @@ public class TestInterfaceBrowser
     private static final boolean IS_MAC = OS.contains("mac") || OS.contains("darwin");
 
     @Test
-    public void test_print_all()
+    public void testPrintAll()
     {
         try(final var browser = new InterfaceBrowser())
         {

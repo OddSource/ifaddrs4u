@@ -75,6 +75,13 @@ public final class Samples
     public static native InterfaceIPAddress<Inet6Address> getInterfaceIPv6Address();
 
     /**
+     * A sample scoped IPv6 address.
+     *
+     * @return fe80::aede:48ff:fe00:1122%en5/56 secured scopeid en5
+     */
+    public static native InterfaceIPAddress<Inet6Address> getInterfaceScopedIPv6Address();
+
+    /**
      * A sample interface.
      *
      * @return TBD

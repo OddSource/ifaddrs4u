@@ -2,6 +2,7 @@ import sys
 
 from typing import (
     final,
+    Optional,
     Union,
     Tuple,
 )
@@ -45,8 +46,11 @@ class InterfaceBrowser:
     def __init__(self) -> None:
         self._extern = Extern_InterfaceBrowser()
 
-    def get_interface(self, index_or_name: Union[str, int]) -> Interface:
-        return self._extern.get_interface(index_or_name)
+    def get_interface(self, index_or_name: Union[str, int]) -> Optional[Interface]:
+        try:
+            return self._extern.get_interface(index_or_name)
+        except KeyError:
+            return None
 
     def get_interfaces(self) -> Tuple[Interface, ...]:
         return self._extern.get_interfaces()
@@ -60,6 +64,9 @@ class InterfaceBrowser:
 
     def __len__(self) -> int:
         return self._extern.__len__()
+
+    def length(self) -> int:
+        return self._extern.length()
 
     def __getitem__(self, index_or_name: Union[str, int]) -> Interface:
         return self._extern.__getitem__(index_or_name)
@@ -77,5 +84,5 @@ class InterfaceBrowser:
 
     @classmethod
     @property
-    def version(unused) -> str:
+    def version(cls) -> str:
         return __VERSION__

@@ -49,6 +49,14 @@ JNIEXPORT jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_Samples_getInterf
 
 /*
  * Class:     io_oddsource_java_net_ifaddrs4j_Samples
+ * Method:    getInterfaceScopedIPv6Address
+ * Signature: ()Lio/oddsource/java/net/ifaddrs4j/InterfaceIPAddress;
+ */
+JNIEXPORT jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_Samples_getInterfaceScopedIPv6Address
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     io_oddsource_java_net_ifaddrs4j_Samples
  * Method:    getInterface
  * Signature: ()Lio/oddsource/java/net/ifaddrs4j/Interface;
  */

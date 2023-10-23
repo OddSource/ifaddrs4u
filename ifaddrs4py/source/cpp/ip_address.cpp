@@ -102,7 +102,7 @@ convert_to_python(OddSource::Interfaces::IPv6Address const & address)
 
 void
 OddSource::ifaddrs4py::
-init_test_ip_address_constants(PyObject * module)
+init_ip_address_samples(PyObject * module)
 {
     static OddSource::Interfaces::IPv4Address const LO_V4("127.0.0.1");
     static OddSource::Interfaces::IPv6Address const LO_V6("::1");

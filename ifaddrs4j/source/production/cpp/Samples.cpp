@@ -93,8 +93,26 @@ jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_Samples_getInterfaceIPv6Add
     static OddSource::Interfaces::InterfaceIPv6Address const IPv6(
         OddSource::Interfaces::IPv6Address("2001:470:2ccb:a61b:e:acf8:6736:d81e"),
         OddSource::Interfaces::AutoConfigured | OddSource::Interfaces::Secured,
-        64u);
+        56u);
     return OddSource::ifaddrs4j::convert_to_java(env, IPv6);
+}
+
+/*
+ * Class:     io_oddsource_java_net_ifaddrs4j_Samples
+ * Method:    getInterfaceScopedIPv6Address
+ * Signature: ()Lio/oddsource/java/net/ifaddrs4j/InterfaceIPAddress;
+ */
+jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_Samples_getInterfaceScopedIPv6Address(
+    JNIEnv * env,
+    jclass
+)
+{
+    using namespace OddSource::Interfaces;
+    static InterfaceIPv6Address const Scoped_IPv6(
+        IPv6Address(static_cast<in6_addr const *>(IPv6Address("fe80::aede:48ff:fe00:1122")), v6Scope {6, "en5"}),
+        Secured,
+        64u);
+    return OddSource::ifaddrs4j::convert_to_java(env, Scoped_IPv6);
 }
 
 /*
