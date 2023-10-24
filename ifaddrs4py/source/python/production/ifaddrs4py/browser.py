@@ -7,7 +7,7 @@ from typing import (
     Tuple,
 )
 
-if sys.version_info.minor < 9:
+if sys.version_info <= (3, 9):
     from typing import (
         Callable,
         Generator,
@@ -20,9 +20,9 @@ else:
         Iterator,
     )
 
-try:
+if sys.version_info >= (3, 12):
     from typing import override
-except ImportError:
+else:
     from typing_extensions import override
 
 from ifaddrs4py.extern import (
@@ -41,6 +41,8 @@ __all__ = (
 
 @final
 class InterfaceBrowser:
+    version = __VERSION__
+
     __slots__ = ("_extern", )
 
     def __init__(self) -> None:
@@ -81,8 +83,3 @@ class InterfaceBrowser:
     @override
     def __str__(self) -> str:
         return self._extern.__str__()
-
-    @classmethod
-    @property
-    def version(cls) -> str:
-        return __VERSION__

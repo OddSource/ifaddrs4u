@@ -41,7 +41,7 @@ if IS_WINDOWS:
 else:
     try:
         subprocess.check_output(WHICH_COMMAND + ["command"], encoding=UTF_8).strip()
-    except (subprocess.CalledProcessError, FileNotFoundError) as ignore:
+    except (subprocess.CalledProcessError, FileNotFoundError):
         WHICH_COMMAND = ["which"]
 
 
@@ -178,8 +178,8 @@ def pre_sdist() -> None:
 
     print(f"Temporarily copying files from {EXTERN_CPP_SOURCE_GIT} to {EXTERN_CPP_SOURCE_SDIST}...")
     for file in [EXTERN_CPP_SOURCE_GIT / "CMakeLists.txt", ] + \
-                list(EXTERN_CPP_SOURCE_GIT.glob("*.h*")) + \
-                list(EXTERN_CPP_SOURCE_GIT.glob("*.cpp")):
+            list(EXTERN_CPP_SOURCE_GIT.glob("*.h*")) + \
+            list(EXTERN_CPP_SOURCE_GIT.glob("*.cpp")):
         shutil.copy(file, EXTERN_CPP_SOURCE_SDIST)
 
     print(f"Temporarily copying files from {tests_src} to {tests_dest}...")

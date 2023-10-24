@@ -29,9 +29,11 @@ Building and Installing
     $ pip install --config-setting="--build-option=--test-cpp" --verbose .
     - as another option, you can clean all C++ Compile output before installing -
     $ pip install --config-setting="--build-option=--clean" --verbose .
-    - to run tests -
+    - to run tests and other checks -
     $ pip install --verbose .[test]
     $ pytest --verbose -s
+    $ mypy source/python/
+    $ flake8 .
 
   Do not use :code:`python setup.py install`, as this is a deprecated convention that will cause deprecation
   warnings. See `Why you shouldn't invoke setup.py directly`_ for more information.
@@ -59,7 +61,7 @@ Build Requirements
 - In order to compile the C++ extension in this Python library, you must have the Python Development Headers
   installed. The way to do this varies wildly depending on how you installed Python (system package manager,
   Homebrew, Cygwin, downloadable installer, official Python Docker container, pyenv, etc.). See your Python
-  supplier for more information.
+  distribution documentation for more information.
 - In order to build the binary distribution (bdist wheel) or source distribution (sdist), you must have the
   `Build`_ project installed: :code:`pip install build`.
 - There are additional requirements for compiling :code:`ifaddrs4cpp`. See `ifaddrs4cpp/README.rst`_.

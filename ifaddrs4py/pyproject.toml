@@ -14,7 +14,7 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: BSD",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -25,9 +25,8 @@ classifiers = [
     "Topic :: Software Development",
 ]
 license = {file = "LICENSE"}
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = ["typing-extensions~=4.8"]
-#version = "0.1.0"
 dynamic = ["version"]
 
 [project.urls]
@@ -36,16 +35,28 @@ Homepage = "https://github.com/OddSource/ifaddrs4u"
 "Issue Tracker" = "https://github.com/OddSource/ifaddrs4u/issues"
 
 [project.optional-dependencies]
-test = ["pytest"]
-dev = ["pytest"]
+test = ["pytest", "mypy", "flake8"]
+dev = ["pytest", "mypy", "flake8"]
 
 [tool.setuptools.packages.find]
 where = ["source/python/production"]
-include = ["ifaddrs4py*"]
+include = ["ifaddrs4py"]
 namespaces = false
+
+[tool.setuptools.package-data]
+ifaddrs4py = ["my.typed"]
 
 [tool.setuptools.dynamic]
 version = {attr = "ifaddrs4py.version.__VERSION__"}
 
 [build-system]
 requires = ["setuptools >= 65.7.0"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+follow_imports = "normal"
+
+[[tool.mypy.overrides]]
+module = "ifaddrs4py.*"

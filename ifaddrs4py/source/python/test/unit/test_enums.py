@@ -7,12 +7,12 @@ from ifaddrs4py.interface import (
 
 
 class TestEnums(TestCase):
-    def test_interface_ip_address_flags(self):
+    def test_interface_ip_address_flags(self) -> None:
         for e in InterfaceIPAddressFlag:
             print(f"InterfaceIPAddressFlag.{e.name} = {e.value}")
             self.assertTrue(e.value > 0, f"InterfaceIPAddressFlag.{e.name} is not correct")
 
-    def test_interface_flags(self):
+    def test_interface_flags(self) -> None:
         for e in InterfaceFlag:
             print(f"InterfaceFlag.{e.name} = {e.value}")
             self.assertTrue(e.value > 0, f"InterfaceFlag.{e.name} is not correct")

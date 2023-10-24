@@ -1,18 +1,22 @@
 from __future__ import annotations
 
-import ipaddress
+import sys
 from typing import (
     final,
     Generic,
     Optional,
     TypeVar,
-    Union,
 )
 import uuid
 
-try:
+if sys.version_info >= (3, 9):
+    Tuple = tuple
+else:
+    from typing import Tuple
+
+if sys.version_info >= (3, 12):
     from typing import override
-except ImportError:
+else:
     from typing_extensions import override
 
 from ifaddrs4py.constants import (
@@ -21,6 +25,10 @@ from ifaddrs4py.constants import (
 from ifaddrs4py.extern import (
     InterfaceIPAddressFlag,
     InterfaceFlag,
+)
+from ifaddrs4py.ip_address import (
+    IPv4Address,
+    IPv6Address,
 )
 from ifaddrs4py.mac_address import (
     MacAddress,
@@ -34,7 +42,7 @@ __all__ = (
     "InterfaceIPAddressFlag",
 )
 
-IPAddressT = TypeVar("IPAddressT", ipaddress.IPv4Address, ipaddress.IPv6Address)
+IPAddressT = TypeVar("IPAddressT", IPv4Address, IPv6Address)
 
 _IP_ADDRESS_FLAG_DISPLAYS = {
     "autoconf": InterfaceIPAddressFlag.AutoConfigured,
@@ -89,11 +97,11 @@ class InterfaceIPAddress(Generic[IPAddressT]):
         broadcast_address: Optional[IPAddressT] = None,
         point_to_point_destination: Optional[IPAddressT] = None,
     ) -> None:
-        self._address = address
+        self._address: IPAddressT = address
         self._flags = flags
         self._prefix_length = prefix_length
-        self._broadcast_address = broadcast_address
-        self._point_to_point_destination = point_to_point_destination
+        self._broadcast_address: Optional[IPAddressT] = broadcast_address
+        self._point_to_point_destination: Optional[IPAddressT] = point_to_point_destination
 
     @property
     def address(self) -> IPAddressT:
@@ -129,13 +137,10 @@ class InterfaceIPAddress(Generic[IPAddressT]):
                 if (self._flags & flag.value) == flag.value:
                     string += f" {display}"
 
-        if getattr(self._address, "scope_id", None):
-            scope_id: Union[str, int] = self._address.scope_id
-            if isinstance(scope_id, str) and scope_id.isnumeric():
-                scope_id = int(scope_id)
-            if isinstance(scope_id, int):
-                string += f" scopeid 0x{self._address.scope_id:x}"
-            else:
+        if isinstance(self._address, IPv6Address):
+            if self._address.scope_number:
+                string += f" scopeid 0x{self._address.scope_number:x}"
+            elif self._address.scope_id:
                 string += f" scopeid {self._address.scope_id}"
 
         return string
@@ -145,8 +150,9 @@ class InterfaceIPAddress(Generic[IPAddressT]):
         return self.__str__()
 
     @override
-    def __eq__(self, other: InterfaceIPAddress[IPAddressT]) -> str:
+    def __eq__(self, other: object) -> bool:
         return (
+            isinstance(other, InterfaceIPAddress) and
             self._flags == other._flags and
             self._prefix_length == other._prefix_length and
             self._address == other._address and
@@ -155,14 +161,24 @@ class InterfaceIPAddress(Generic[IPAddressT]):
         )
 
 
+_slots: Tuple[str, ...]
+if IS_WINDOWS:
+    _slots = (
+        "_index", "_name", "_windows_uuid", "_flags", "_mtu",
+        "_mac_address", "_ipv4_addresses", "_ipv6_addresses",
+    )
+else:
+    _slots = (
+        "_index", "_name", "_flags", "_mtu",
+        "_mac_address", "_ipv4_addresses", "_ipv6_addresses",
+    )
+
+
 @final
 class Interface(object):
-    if IS_WINDOWS:
-        __slots__ = (
-            "_index", "_name", "_windows_uuid", "_flags", "_mtu",
-            "_mac_address", "_ipv4_addresses", "_ipv6_addresses",
-        )
+    __slots__ = _slots
 
+    if IS_WINDOWS:
         def __init__(
             self,
             index: int,
@@ -171,8 +187,8 @@ class Interface(object):
             flags: int,
             mtu: Optional[int] = None,
             mac_address: Optional[MacAddress] = None,
-            ipv4_addresses: tuple[InterfaceIPAddress[ipaddress.IPv4Address], ...] = None,
-            ipv6_addresses: tuple[InterfaceIPAddress[ipaddress.IPv6Address], ...] = None,
+            ipv4_addresses: Optional[Tuple[InterfaceIPAddress[IPv4Address], ...]] = None,
+            ipv6_addresses: Optional[Tuple[InterfaceIPAddress[IPv6Address], ...]] = None,
         ) -> None:
             self._index = index
             self._name = name
@@ -183,17 +199,15 @@ class Interface(object):
             self._ipv4_addresses = ipv4_addresses or ()
             self._ipv6_addresses = ipv6_addresses or ()
     else:
-        __slots__ = ("_index", "_name", "_flags", "_mtu", "_mac_address", "_ipv4_addresses", "_ipv6_addresses")
-
-        def __init__(
+        def __init__(  # type: ignore[misc]
             self,
             index: int,
             name: str,
             flags: int,
             mtu: Optional[int] = None,
             mac_address: Optional[MacAddress] = None,
-            ipv4_addresses: tuple[InterfaceIPAddress[ipaddress.IPv4Address], ...] = None,
-            ipv6_addresses: tuple[InterfaceIPAddress[ipaddress.IPv6Address], ...] = None,
+            ipv4_addresses: Optional[Tuple[InterfaceIPAddress[IPv4Address], ...]] = None,
+            ipv6_addresses: Optional[Tuple[InterfaceIPAddress[IPv6Address], ...]] = None,
         ) -> None:
             self._index = index
             self._name = name
@@ -225,11 +239,11 @@ class Interface(object):
         return self._mac_address
 
     @property
-    def ipv4_addresses(self) -> tuple[InterfaceIPAddress[ipaddress.IPv4Address], ...]:
+    def ipv4_addresses(self) -> Tuple[InterfaceIPAddress[IPv4Address], ...]:
         return self._ipv4_addresses
 
     @property
-    def ipv6_addresses(self) -> tuple[InterfaceIPAddress[ipaddress.IPv6Address], ...]:
+    def ipv6_addresses(self) -> Tuple[InterfaceIPAddress[IPv6Address], ...]:
         return self._ipv6_addresses
 
     def is_flag_enabled(self, flag: InterfaceFlag) -> bool:
@@ -254,10 +268,10 @@ class Interface(object):
 
         if self._mac_address is not None:
             string += f"        ether {self._mac_address}\n"
-        for address in self._ipv4_addresses:
-            string += f"        inet  {address}\n"
-        for address in self._ipv6_addresses:
-            string += f"        inet6 {address}\n"
+        for address4 in self._ipv4_addresses:
+            string += f"        inet  {address4}\n"
+        for address6 in self._ipv6_addresses:
+            string += f"        inet6 {address6}\n"
 
         return string
 
