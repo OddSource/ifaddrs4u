@@ -1,16 +1,36 @@
-ifaddrs4py - Exploring Network Interfaces
-========================================================
+ifaddrs4py - Exploring Network Interfaces in Python
+===================================================
 
-ifaddrs4py is a Python 3 + C++ extension for retrieving detailed information about system network interfaces.
+ifaddrs4py is a Python + C++ extension for retrieving detailed information about system network interfaces.
 Its cross-platform support allows you to examine network interfaces and their addresses without knowing the
-details of getifaddrs, GetAdaptersAddresses, or ioctl.
+details of :code:`getifaddrs`, :code:`GetAdaptersAddresses`, or :code:`ioctl`, etc.
 
 The Python extension is a wrapper around the underlying cross-platform ifaddrs4cpp C++ library. :code:`setup.py`
 will automatically locate ifaddrs4cpp sources (:code:`../ifaddrs4cpp` if building from a Git clone or source
 archive, :code:`./extern/ifaddrs4cpp` if building from a Python sdist) and build :code:`libifaddrs4cpp-static`
 if it has not already been built.
 
-Building and Installing
+.. contents:: Contents
+    :depth: 3
+
+System Requirements
+*******************
+
+At runtime, the only requirement is Python 3.8 or newer. See below for additional build requirements.
+
+Build Requirements
+******************
+
+- You must have Pip installed.
+- In order to compile the C++ extension in this Python library, you must have the Python Development Headers
+  installed. The way to do this varies depending on how you installed Python (system package manager,
+  Homebrew, Cygwin, downloadable installer, official Python Docker container, pyenv, etc.). See your Python
+  distribution documentation for more information.
+- In order to build the binary distribution (bdist wheel) or source distribution (sdist), you must have the
+  `Build`_ project installed: :code:`pip install build`.
+- There are additional requirements for compiling :code:`ifaddrs4cpp`. See `ifaddrs4cpp/README.rst`_.
+
+Installing and Building
 ***********************
 
 - From PyPi::
@@ -54,20 +74,13 @@ Building and Installing
 
 For more information, see `ifaddrs4u/README.rst`_ and/or `ifaddrs4cpp/README.rst`_.
 
-Build Requirements
-******************
+Usage
+*****
 
-- You must have Pip installed.
-- In order to compile the C++ extension in this Python library, you must have the Python Development Headers
-  installed. The way to do this varies wildly depending on how you installed Python (system package manager,
-  Homebrew, Cygwin, downloadable installer, official Python Docker container, pyenv, etc.). See your Python
-  distribution documentation for more information.
-- In order to build the binary distribution (bdist wheel) or source distribution (sdist), you must have the
-  `Build`_ project installed: :code:`pip install build`.
-- There are additional requirements for compiling :code:`ifaddrs4cpp`. See `ifaddrs4cpp/README.rst`_.
+This section is to-be-completed.
 
 
 .. _Why you shouldn't invoke setup.py directly: https://blog.ganssle.io/articles/2021/10/setup-py-deprecated.html#summary
 .. _ifaddrs4u/README.rst: https://github.com/OddSource/ifaddrs4u
-.. _ifaddrs4cpp/README.rst: https://github.com/OddSource/ifaddrs4u/blob/master/ifaddrs4cpp
+.. _ifaddrs4cpp/README.rst: https://github.com/OddSource/ifaddrs4u/blob/main/ifaddrs4cpp/README.rst
 .. _Build: https://pypa-build.readthedocs.io/en/stable/
