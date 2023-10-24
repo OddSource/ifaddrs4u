@@ -5,11 +5,11 @@ ifaddrs4u is a universal, platform-independent tool for obtaining information ab
 and their hardware, IPv4, and IPv6 addresses and properties and configuration flags without knowing the details
 of :code:`getifaddrs`, :code:`GetAdaptersAddresses`, or :code:`ioctl`, etc.
 
-The name uses a `common Java library idiom`_ of the library purpose followed by "4" (a homonym of "for")
+The name uses a `common Java library idiom`_ of the library purpose followed by "4" (an English homonym of "for")
 followed by the language (normally "j", but "net" is also popular for C#), e.g. log4j, neo4j, log4net, etc. In
 this case, the "u" means "universal," but you can also think of it as "you." "ifaddrs" refers to the fact that
 this library primarily wraps the Unix/Linux function :code:`getifaddrs` and its struct :code:`ifaddrs` (on
-Windows, it wraps :code:`GetAdaptersAddresses` / :code: `PIP_ADAPTER_ADDRESSES`). `See here`_ (`or here`_) for
+Windows, it wraps :code:`GetAdaptersAddresses` / :code:`PIP_ADAPTER_ADDRESSES`). `See here`_ (`or here`_) for
 more information on these platform-specific libraries.
 
 .. contents:: Contents
@@ -33,9 +33,9 @@ C++17 or newer standard library. For specific information about building and usi
 -----------------
 
 This is a Java library that makes use of a combination of standard JDK classes and JNI wrappers around
-:code:`ifaddrs4cpp`. It is designed to be API-similar to `ifaddrs4cpp`, but there are some necessary differences
-to meet Java rules, requirements, and best practices. For specific information about building and using this
-library, see `ifaddrs4j/README.rst`_.
+:code:`ifaddrs4cpp`. It is designed to be API-similar to :code:`ifaddrs4cpp`, but there are some necessary
+differences to meet Java rules, requirements, and best practices. For specific information about building and
+using this library, see `ifaddrs4j/README.rst`_.
 
 :code:`ifaddrs4pl`
 ------------------
@@ -46,7 +46,7 @@ This is an incomplete work in progress. More information soon.
 ------------------
 
 This is a Pyton library that majes use of a combination of standard Python classes and Python native wrappers
-around :code:`ifaddrs4cpp`. It is designed to be API-similar to `ifaddrs4j`, but there are some necessary
+around :code:`ifaddrs4cpp`. It is designed to be API-similar to :code:`ifaddrs4cpp`, but there are some necessary
 differences to meet Python rules, requirements, and best practices. For specific information about building
 and using this library, see `ifaddrs4py/README.rst`_.
 
