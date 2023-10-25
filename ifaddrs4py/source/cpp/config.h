@@ -6,13 +6,11 @@
 #include <stdexcept>
 #include <string>
 
+using std::string_literals::operator""s;
+
 #if PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 8
 #error "ifaddrs4py requires Python 3.8+"
 #endif /* PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 8 */
-
-//#if PY_MINOR_VERSION < 9
-//#define PyObject_Call(obj, args, kwargs) PyEval_CallObjectWithKeywords(obj, args, kwargs)
-//#endif /* PY_MINOR_VERSION < 9 */
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
 #define IS_WINDOWS 1
@@ -26,7 +24,7 @@ namespace OddSource::ifaddrs4py
         if (module == NULL)
         {
             throw ::std::runtime_error(
-                ::std::string("Failed to import module '") + module_name + "'");
+                "Failed to import module '"s + module_name + "'"s);
         }
         return module;
     }
@@ -40,8 +38,7 @@ namespace OddSource::ifaddrs4py
         if (klass == NULL)
         {
             throw ::std::runtime_error(
-                ::std::string("Failed to retrieve class '") + class_name + "' from module '" +
-                module_name + "'");
+                "Failed to retrieve class '"s + class_name + "' from module '"s + module_name + "'"s);
         }
 
         return klass;

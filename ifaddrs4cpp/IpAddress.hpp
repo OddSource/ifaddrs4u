@@ -20,26 +20,32 @@ OddSource::Interfaces::IPAddress::from_repr(::std::string_view const & repr)
         throw InvalidIPAddress("Invalid empty IP address string.");
     }
 
-    /*size_t size;
-    if constexpr (::std::is_same_v<Addr, in6_addr>)
-    {
-        size = 16;
-    }
-    else
-    {
-        size = 4;
-    }*/
-
+    ::std::string repr_str(repr);
     auto data = new Addr[sizeof(Addr)];
     int success;
     if constexpr (::std::is_same_v<Addr, in6_addr>)
     {
         // inet_pton can also handle IPv4 addresses, but only in dotted-decimal format
-        // (1.2.3.4), not in partial, hexadecimal, or any other valid IPv4 format.
-        success = inet_pton(AF_INET6, ::std::string(repr).c_str(), data);
+        // (1.2.3.4), not in octal, hexadecimal, or any other valid IPv4 format.
+        success = inet_pton(AF_INET6, repr_str.c_str(), data);
     }
     else
     {
+        int num_dots(0);
+        for (char c : repr)
+        {
+            if (c == '.')
+            {
+                num_dots++;
+            }
+        }
+        if (num_dots != 3)
+        {
+            // some implementations of inet_aton tolerate incomplete addresses, but we do not
+            throw InvalidIPAddress(
+                    "Malformed IPv4 address string '"s + repr_str + "' with "s +
+                    ::std::to_string(num_dots + 1) + " parts instead of 4"s);
+        }
         // inet_aton/inet_addr, however, can handle IPv4 addresses in all valid formats.
 #ifdef IS_WINDOWS
         auto raw = inet_addr(repr);
@@ -52,24 +58,18 @@ OddSource::Interfaces::IPAddress::from_repr(::std::string_view const & repr)
             ::std::memcpy(data, raw, sizeof(Addr));
         }
 #else /* IS_WINDOWS */
-        success = inet_aton(::std::string(repr).c_str(), data);
+        success = inet_aton(repr_str.c_str(), data);
 #endif
     }
     if (success != 1)
     {
         delete[] data;
-        throw InvalidIPAddress("Malformed IP address string or unknown inet_*ton error.");
+        throw InvalidIPAddress("Malformed IP address string '"s + repr_str + "' or unknown inet_*ton error."s);
     }
 
     return data;
 }
 
-/*template<typename Addr,
-         typename SockAddr,
-         typename ::std::enable_if<(::std::is_same<in_addr, Addr>::value &&
-                                    ::std::is_same<sockaddr_in, SockAddr>::value) ||
-                                   (::std::is_same<in6_addr, Addr>::value &&
-                                    ::std::is_same<sockaddr_in6, SockAddr>::value)>>*/
 template<typename Addr, typename>
 ::std::string
 OddSource::Interfaces::IPAddress::to_repr(const Addr * data)
@@ -98,7 +98,7 @@ OddSource::Interfaces::IPAddress::to_repr(const Addr * data)
             (LPWSTR)&s, 0, nullptr);
         ::std::string err(
             s == nullptr ?
-            ::std::string("") :
+            ""s :
             ::std::wstring_convert<::std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(::std::wstring(s)));
         LocalFree(s);
 #else /* IS_WINDOWS */
@@ -114,52 +114,6 @@ OddSource::Interfaces::IPAddress::to_repr(const Addr * data)
         );
     }
     return host_chars;
-
-    /*SockAddr sa;
-    if constexpr (::std::is_same_v<SockAddr, sockaddr_in6>)
-    {
-        sa.sin6_family = AF_INET6;
-        sa.sin6_addr = *data;
-    }
-    else
-    {
-        sa.sin_family = AF_INET;
-        sa.sin_addr = *data;
-    }
-
-#ifdef IS_WINDOWS
-    static const DWORD host_length(100);
-    DWORD length(host_length);
-    wchar_t host_wchars[host_length];
-    int error = ::WSAAddressToString(sa, sizeof(SockAddr), nullptr, host_wchars, &length);
-    if (error != 0)
-    {
-        throw OddSource::Interfaces::InvalidIPAddress(
-            (::std::ostringstream() << "Malformed IP address or WSAAddressToString system error: "
-                                    << ::WSAGetLastError()).str()
-        );
-    }
-    if (length == 0)
-    {
-        throw OddSource::Interfaces::InvalidIPAddress("Malformed IP address yielded zero-length string");
-    }
-    ::std::wstring whost(host_wchars);
-    ::std::string host = ::std::wstring_convert<::std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(whost);
-#else // IS_WINDOWS
-    static const size_t host_length(100);
-    char host_chars[host_length];
-    int error = ::getnameinfo(sa, sizeof(SockAddr), host_chars, host_length, 0, 0, NI_NUMERICHOST);
-    if (error != 0)
-    {
-        throw OddSource::Interfaces::InvalidIPAddress(
-            (::std::ostringstream() << "Malformed IP address or getnameinfo system error: "
-                                    << ::gai_strerror(error)).str()
-        );
-    }
-    ::std::string host(host_chars);
-#endif // IS_WINDOWS
-
-    return host; */
 }
 
 inline

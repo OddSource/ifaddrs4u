@@ -18,6 +18,7 @@ public:
         add_test(test_multicast_addresses);
         add_test(test_private_addresses);
         add_test(test_other_reserved_addresses);
+        add_test(test_construct_malformed);
     }
 
     void test_equals()
@@ -56,7 +57,7 @@ public:
 
         for(size_t i = 0; i < sizeof(in_addr); i++)
         {
-            assert_equals(bytes1[i], bytes2[i], ::std::string("Bytes ") + ::std::to_string(i) + " do not match.");
+            assert_equals(bytes1[i], bytes2[i], "Bytes "s + ::std::to_string(i) + " do not match."s);
         }
     }
 
@@ -204,6 +205,16 @@ public:
             assert_that(!address.is_loopback(), test + " should not be a loopback.");
             assert_that(!address.is_link_local(), test + " should not be link-local.");
         }
+    }
+
+    void test_construct_malformed()
+    {
+        assert_throws(IPv4Address(""), InvalidIPAddress);
+        assert_throws(IPv4Address("192"), InvalidIPAddress);
+        assert_throws(IPv4Address("192.168"), InvalidIPAddress);
+        assert_throws(IPv4Address("192.168.0"), InvalidIPAddress);
+        assert_throws(IPv4Address("192.168.0.1.2"), InvalidIPAddress);
+        assert_throws(IPv4Address("192.168.0.256"), InvalidIPAddress);
     }
 
     static std::unique_ptr<Test> create()

@@ -88,8 +88,8 @@ public:
             }
         }
         assert_that(interfaces_found > 1,
-                    ::std::string("At least two interfaces should have been found, but ") +
-                        ::std::to_string(interfaces_found) + " found instead.");
+                    "At least two interfaces should have been found, but "s +
+                        ::std::to_string(interfaces_found) + " found instead."s);
         assert_that(loopback_found, "At least one loopback interface should have been found.");
         assert_that(non_loopback_found, "At least one non-loopback interface should have been found.");
     }

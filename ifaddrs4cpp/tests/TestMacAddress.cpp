@@ -12,6 +12,7 @@ public:
         add_test(test_equals);
         add_test(test_string_round_trip);
         add_test(test_data_round_trip);
+        add_test(test_construct_malformed);
     }
 
     void test_equals()
@@ -51,7 +52,7 @@ public:
 
             for(size_t i = 0; i < 6; i++)
             {
-                assert_equals(data[i], data1[i], ::std::string("Bytes ") + ::std::to_string(i) + " do not match.");
+                assert_equals(data[i], data1[i], "Bytes "s + ::std::to_string(i) + " do not match."s);
             }
         }
 
@@ -64,9 +65,22 @@ public:
 
             for(size_t i = 0; i < 7; i++)
             {
-                assert_equals(data[i], data2[i], ::std::string("Bytes ") + ::std::to_string(i) + " do not match.");
+                assert_equals(data[i], data2[i], "Bytes "s + ::std::to_string(i) + " do not match."s);
             }
         }
+    }
+
+    void test_construct_malformed()
+    {
+        assert_throws(MacAddress("67:a1:2e:ff:e5"), ::std::invalid_argument);
+        assert_throws(MacAddress("67:a1:2e:ff:e5:e6:e7:e8:e9"), ::std::invalid_argument);
+        assert_throws(MacAddress("67a12ef1a4e7"), ::std::invalid_argument);
+
+        static uint8_t const data1[5] {0xa4, 0xe7, 0x83, 0xa1, 0x2e};
+        static uint8_t const data2[9] {0xb2, 0xb8, 0xfb, 0x84, 0x5b, 0xff, 0xe8, 0xe7, 0xbb};
+
+        assert_throws(MacAddress((uint8_t const *)data1, 5), ::std::invalid_argument);
+        assert_throws(MacAddress((uint8_t const *)data2, 9), ::std::invalid_argument);
     }
 
     static std::unique_ptr<Test> create()

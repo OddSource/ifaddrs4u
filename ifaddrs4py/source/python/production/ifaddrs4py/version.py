@@ -5,7 +5,6 @@ try:
     )
     _skip_version_check = False
 except ImportError:
-
     __VERSION_EXT__ = "unknown"
     __VERSION_INFO_EXT__ = ()
     _skip_version_check = True

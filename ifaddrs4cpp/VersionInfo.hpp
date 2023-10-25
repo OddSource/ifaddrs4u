@@ -36,7 +36,7 @@ suffix()
 {
     if constexpr (std::char_traits<char>::length(IFADDRS4CPP_VERSION_SUFFIX) > 0)
     {
-        return ::std::string("-") + IFADDRS4CPP_VERSION_SUFFIX;
+        return "-"s + IFADDRS4CPP_VERSION_SUFFIX;
     }
     else
     {

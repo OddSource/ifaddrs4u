@@ -25,6 +25,7 @@ public:
         add_test(test_v4_translated_addresses);
         add_test(test_v4_compatible_addresses);
         add_test(test_6to4_addresses);
+        add_test(test_construct_malformed);
     }
 
     void test_equals()
@@ -101,7 +102,7 @@ public:
 
         for(size_t i = 0; i < sizeof(in6_addr); i++)
         {
-            assert_equals(bytes1[i], bytes2[i], ::std::string("Bytes ") + ::std::to_string(i) + " do not match.");
+            assert_equals(bytes1[i], bytes2[i], "Bytes "s + ::std::to_string(i) + " do not match."s);
         }
     }
 
@@ -125,7 +126,7 @@ public:
 
         for(size_t i = 0; i < sizeof(in6_addr); i++)
         {
-            assert_equals(bytes1[i], bytes2[i], ::std::string("Bytes ") + ::std::to_string(i) + " do not match.");
+            assert_equals(bytes1[i], bytes2[i], "Bytes "s + ::std::to_string(i) + " do not match."s);
         }
     }
 
@@ -561,6 +562,16 @@ public:
                     "2002:ffff:ffff:ffff:ffff:ffff:ffff:ffff should be 6to4.");
         assert_that(!IPv6Address("2003::1").is_6to4(),
                     "2003::1 should not be 6to4.");
+    }
+
+    void test_construct_malformed()
+    {
+        assert_throws(IPv6Address(""), InvalidIPAddress);
+        assert_throws(IPv6Address("ffff:ffff:ffff:ffff:ffff:ffff:ffff"), InvalidIPAddress);
+        assert_throws(IPv6Address("ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffg"), InvalidIPAddress);
+        assert_throws(IPv6Address("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"), InvalidIPAddress);
+        assert_throws(IPv6Address("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), InvalidIPAddress);
+        assert_throws(IPv6Address("ffff::1::2"), InvalidIPAddress);
     }
 
     static std::unique_ptr<Test> create()

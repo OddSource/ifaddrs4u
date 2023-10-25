@@ -69,6 +69,23 @@ public class TestMacAddress
     }
 
     @Test
+    public void testConstructMalformed()
+    {
+        assertThrows(IllegalArgumentException.class, () -> new MacAddress("67:a1:2e:ff:e5"));
+        assertThrows(IllegalArgumentException.class, () -> new MacAddress("67:a1:2e:ff:e5:e6:e7:e8:e9"));
+        assertThrows(IllegalArgumentException.class, () -> new MacAddress("67a12ef1a4e7"));
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> new MacAddress(bytes(0x67, 0xa1, 0x2e, 0xff, 0xa4))
+        );
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> new MacAddress(bytes(0x67, 0xa1, 0x2e, 0xff, 0xa4, 0xff, 0xa4, 0xe7, 0xbb))
+        );
+    }
+
+    @Test
     public void testEquals()
     {
         assertEquals(new MacAddress("a4:83:e7:2e:a1:67"), new MacAddress("a4:83:e7:2e:a1:67"));

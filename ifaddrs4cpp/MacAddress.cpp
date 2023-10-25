@@ -164,6 +164,13 @@ to_repr(uint8_t const data[MAX_ADAPTER_ADDRESS_LENGTH], uint8_t data_length)
                                    << MAX_ADAPTER_ADDRESS_LENGTH
         ).str());
     }
+    if (data_length < MIN_ADAPTER_ADDRESS_LENGTH)
+    {
+        throw InvalidMacAddress((
+            ::std::ostringstream() << "MAC address length (" << data_length
+                                   << " bytes) too short (min " << MIN_ADAPTER_ADDRESS_LENGTH
+                                   << " bytes).").str());
+    }
 
     static const uint8_t formatted_byte_size(3);
 

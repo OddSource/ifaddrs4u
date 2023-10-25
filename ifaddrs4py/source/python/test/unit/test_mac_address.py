@@ -34,6 +34,14 @@ class TestMacAddress(TestCase):
         self.assertEqual(address.data_length, 8)
         self.assertEqual(address.data, (0x67, 0xaa, 0xa1, 0x2e, 0xff, 0xa4, 0xe7, 0xbb))
 
+    def test_construct_malformed(self) -> None:
+        self.assertRaises(ValueError, lambda: MacAddress("67:a1:2e:ff:e5"))
+        self.assertRaises(ValueError, lambda: MacAddress("67:a1:2e:ff:e5:e6:e7:e8:e9"))
+        self.assertRaises(ValueError, lambda: MacAddress("67a12ef1a4e7"))
+
+        self.assertRaises(ValueError, lambda: MacAddress(data=(0x67, 0xa1, 0x2e, 0xff, 0xa4)))
+        self.assertRaises(ValueError, lambda: MacAddress(data=(0x67, 0xa1, 0x2e, 0xff, 0xa4, 0xff, 0xa4, 0xe7, 0xbb)))
+
     def test_equals(self) -> None:
         self.assertEqual(MacAddress("a4:83:e7:2e:a1:67"), MacAddress("a4:83:e7:2e:a1:67"))
         self.assertEqual(MacAddress("a4:83:e7:2e:a1:67"), MacAddress("A4:83:E7:2E:A1:67"))

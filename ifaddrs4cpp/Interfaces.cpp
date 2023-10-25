@@ -100,8 +100,7 @@ namespace OddSource::Interfaces
             {
                 FREE(this->_pAddresses);
                 throw InterfaceBrowserSystemError(
-                        ::std::string("Call to GetAdaptersAddresses failed with error code: ") +
-                        ::std::to_string(dwRetVal));
+                        "Call to GetAdaptersAddresses failed with error code: "s + ::std::to_string(dwRetVal));
             }
 #else /* IS_WINDOWS */
             if (::getifaddrs(&this->_ifaddrs) == -1)
@@ -612,7 +611,7 @@ get_interface(uint32_t index)
     auto found = this->_index_map.find(index);
     if (found == this->_index_map.end())
     {
-        throw ::std::invalid_argument(::std::string("No interface found with index: ") + ::std::to_string(index));
+        throw ::std::invalid_argument("No interface found with index: "s + ::std::to_string(index));
     }
     return *found->second;
 }
@@ -626,7 +625,7 @@ get_interface(::std::string_view const & name)
     auto found = this->_name_map.find(::std::string(name));
     if (found == this->_name_map.end())
     {
-        throw ::std::invalid_argument(::std::string("No interface found with name: ") + ::std::string(name));
+        throw ::std::invalid_argument("No interface found with name: "s + ::std::string(name));
     }
     return *found->second;
 }
@@ -666,7 +665,7 @@ populate_and_maybe_more_unsafe(::std::function<bool(Interface const &)> * do_thi
         temp_name_map.insert(std::make_pair(interface.name(), ptr));
 #if IS_WINDOWS
         temp_name_map.insert(std::make_pair(interface.windows_uuid(), ptr));
-        temp_name_map.insert(std::make_pair(::std::string("{") + interface.windows_uuid() + ::std::string("}"), ptr));
+        temp_name_map.insert(std::make_pair("{"s + interface.windows_uuid() + "}"s, ptr));
 #endif /* IS_WINDOWS */
         temp_vector.push_back(::std::move(interface));
 
@@ -690,9 +689,9 @@ WinSockStartupCleanupHelper()
     if (error != 0)
     {
         throw ::std::system_error(
-            ::std::string("Could not initialize WinSock subsystem due to error code: ") +
-            ::std::to_string(error) + ". For the meaning of this, see the documentation: " +
-            "https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsastartup#return-value");
+            "Could not initialize WinSock subsystem due to error code: "s +
+            ::std::to_string(error) + ". For the meaning of this, see the documentation: "s +
+            "https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsastartup#return-value"s);
     }
 #endif /* IS_WINDOWS */
 }
