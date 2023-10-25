@@ -50,6 +50,7 @@ public final class VersionInfo
 
     private VersionInfo()
     {
+        throw new UnsupportedOperationException();
     }
 
     private static synchronized void load()

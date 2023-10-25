@@ -18,6 +18,7 @@
 
 #include <ifaddrs4cpp/Interfaces.h>
 
+#include "cache.h"
 #include "Interface.h"
 #include "IpAddress.h"
 #include "MacAddress.h"
@@ -26,6 +27,7 @@
 namespace
 {
     using namespace OddSource::Interfaces;
+    using namespace OddSource::ifaddrs4j;
 
     jfieldID get_field(JNIEnv * env, jobject self, char const * name, char const * signature)
     {
@@ -56,7 +58,7 @@ namespace
             if (env->ExceptionOccurred() == NULL)
             {
                 env->ThrowNew(
-                    env->FindClass("java/lang/IllegalStateException"),
+                    JNICache::IllegalStateException,
                     "Internal browser pointer is not set, browser has not been initialized.");
             }
             return NULL;
@@ -82,21 +84,17 @@ namespace
         {
             auto interfaces(browser->get_interfaces());
 
-            auto jArrayList(env->FindClass("java/util/ArrayList"));
-            IF_NULL_RETURN_NULL(jArrayList)
-            auto list_constructor(env->GetMethodID(jArrayList, "<init>", "(I)V"));
-            IF_NULL_RETURN_NULL(list_constructor)
-            auto list_add(env->GetMethodID(jArrayList, "add", "(Ljava/lang/Object;)Z"));
-            IF_NULL_RETURN_NULL(list_add)
-
-            auto jInterfaces(env->NewObject(jArrayList, list_constructor, (jint) interfaces.size()));
+            auto jInterfaces(env->NewObject(
+                JNICache::ArrayList,
+                JNICache::ArrayList__init__int,
+                (jint) interfaces.size()));
             IF_NULL_RETURN_NULL(jInterfaces)
 
             for (auto const & interface : interfaces)
             {
-                auto jInterface(OddSource::ifaddrs4j::convert_to_java(env, interface));
+                auto jInterface(convert_to_java(env, interface));
                 IF_NULL_RETURN_NULL(jInterface)
-                if (!env->CallBooleanMethod(jInterfaces, list_add, jInterface))
+                if (!env->CallBooleanMethod(jInterfaces, JNICache::ArrayList_add, jInterface))
                 {
                     return NULL;
                 }
@@ -104,7 +102,7 @@ namespace
 
             return jInterfaces;
         }
-        CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN("java/lang/RuntimeError", return NULL)
+        CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN(JNICache::RuntimeException, return NULL)
     }
 }
 
@@ -117,6 +115,8 @@ void JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_i
     JNIEnv * env,
     jobject self)
 {
+    using namespace OddSource::ifaddrs4j;
+
     auto field(get_pBrowser_field(env, self));
     IF_NULL_RETURN_VOID(field)
 
@@ -124,7 +124,7 @@ void JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_i
     if (pointer != 0)
     {
         env->ThrowNew(
-            env->FindClass("java/lang/IllegalStateException"),
+            JNICache::IllegalStateException,
             "Duplicate call to init(): Internal browser pointer is already set, browser was already initialized.");
         return;
     }
@@ -136,7 +136,7 @@ void JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_i
         auto u_pointer(reinterpret_cast<uint64_t>(browser));
         pointer = static_cast<int64_t>(u_pointer);
     }
-    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN("java/lang/RuntimeException", return)
+    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN(JNICache::RuntimeException, return)
 
     env->SetLongField(self, field, pointer);
 }
@@ -183,6 +183,8 @@ jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Exter
     jobject self,
     jstring name)
 {
+    using namespace OddSource::ifaddrs4j;
+
     auto browser(get_pBrowser(env, self));
     IF_NULL_RETURN_NULL(browser)
     ENSURE_POPULATED(NULL)
@@ -195,13 +197,13 @@ jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Exter
 
     try
     {
-        return OddSource::ifaddrs4j::convert_to_java(env, browser->get_interface(name_str));
+        return convert_to_java(env, browser->get_interface(name_str));
     }
     catch (::std::invalid_argument const &)
     {
         return NULL;
     }
-    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN("java/lang/RuntimeError", return NULL)
+    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN(JNICache::RuntimeException, return NULL)
 }
 
 /*
@@ -214,19 +216,21 @@ jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Exter
     jobject self,
     jint index)
 {
+    using namespace OddSource::ifaddrs4j;
+
     auto browser(get_pBrowser(env, self));
     IF_NULL_RETURN_NULL(browser)
     ENSURE_POPULATED(NULL)
 
     try
     {
-        return OddSource::ifaddrs4j::convert_to_java(env, browser->get_interface(index));
+        return convert_to_java(env, browser->get_interface(index));
     }
     catch (::std::invalid_argument const &)
     {
         return NULL;
     }
-    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN("java/lang/RuntimeError", return NULL)
+    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN(JNICache::RuntimeException, return NULL)
 }
 
 /*
@@ -253,51 +257,32 @@ jboolean JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Exte
     jobject self,
     jobject function)
 {
+    using namespace OddSource::Interfaces;
+    using namespace OddSource::ifaddrs4j;
+
     auto browser(get_pBrowser(env, self));
     IF_NULL_RETURN_FALSE(browser)
 
-    auto function_cls(env->GetObjectClass(function));
-    IF_NULL_RETURN_FALSE(function_cls)
-    auto function_call(env->GetMethodID(function_cls, "apply", "(Ljava/lang/Object;)Ljava/lang/Object;"));
-    IF_NULL_RETURN_FALSE(function_call)
-
-    auto bool_cls(env->FindClass("java/lang/Boolean"));
-    IF_NULL_RETURN_FALSE(bool_cls)
-    auto boolean_value(env->GetMethodID(bool_cls, "booleanValue", "()Z"));
-    IF_NULL_RETURN_FALSE(boolean_value)
-
-    auto jArrayList(env->FindClass("java/util/ArrayList"));
-    IF_NULL_RETURN_FALSE(jArrayList)
-    auto list_constructor(env->GetMethodID(jArrayList, "<init>", "()V"));
-    IF_NULL_RETURN_FALSE(list_constructor)
-    auto list_add(env->GetMethodID(jArrayList, "add", "(Ljava/lang/Object;)Z"));
-    IF_NULL_RETURN_FALSE(list_add)
-
-    auto jInterfaces(env->NewObject(jArrayList, list_constructor));
+    auto jInterfaces(env->NewObject(JNICache::ArrayList, JNICache::ArrayList__init_));
     IF_NULL_RETURN_FALSE(jInterfaces)
 
     bool keep_calling_callable(true);
     bool return_error(false);
 
-    using namespace OddSource::Interfaces;
-
     ::std::function<bool(Interface const &)> do_this = [
         env,
         function,
-        function_call,
-        boolean_value,
         jInterfaces,
-        list_add,
         &keep_calling_callable,
         &return_error](auto interface)
     {
-        auto jInterface(OddSource::ifaddrs4j::convert_to_java(env, interface));
+        auto jInterface(convert_to_java(env, interface));
         if (jInterface == NULL)
         {
             return_error = true;
             return false;
         }
-        if (!env->CallBooleanMethod(jInterfaces, list_add, jInterface))
+        if (!env->CallBooleanMethod(jInterfaces, JNICache::ArrayList_add, jInterface))
         {
             return_error = true;
             return false;
@@ -305,19 +290,19 @@ jboolean JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Exte
 
         if (keep_calling_callable)
         {
-            auto result(env->CallObjectMethod(function, function_call, jInterface));
+            auto result(env->CallObjectMethod(function, JNICache::Function_apply, jInterface));
             if (result == NULL)
             {
                 if (env->ExceptionOccurred() == NULL)
                 {
                     env->ThrowNew(
-                        env->FindClass("java/lang/IllegalArgumentException"),
+                        JNICache::IllegalArgumentException,
                         "Function<Interface, Boolean> must return a boolean, not null.");
                 }
                 return_error = true;
                 return false;
             }
-            keep_calling_callable = env->CallBooleanMethod(result, boolean_value);
+            keep_calling_callable = env->CallBooleanMethod(result, JNICache::Boolean_booleanValue);
             if (!keep_calling_callable && env->ExceptionOccurred() != NULL)
             {
                 return_error = true;
@@ -332,7 +317,7 @@ jboolean JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Exte
     {
         browser->for_each_interface(do_this);
     }
-    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN("java/lang/RuntimeError", return false)
+    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN(JNICache::RuntimeException, return false)
 
     if (!return_error && get_interfaces(env, self) == NULL && env->ExceptionOccurred() == NULL)
     {

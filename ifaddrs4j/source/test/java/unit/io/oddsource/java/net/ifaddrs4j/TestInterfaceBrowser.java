@@ -32,24 +32,100 @@ public class TestInterfaceBrowser
     private static final boolean IS_MAC = OS.contains("mac") || OS.contains("darwin");
 
     @Test
-    public void testPrintAll()
+    public void testForEachThenIterate()
     {
         try(final var browser = new InterfaceBrowser())
         {
-            browser.forEachInterface(
-                anInterface -> {
-                    System.out.println(anInterface.toString());
-                    return true;
-                }
-            );
-
-            final AtomicInteger numInterfaces = new AtomicInteger();
-            browser.forEachInterface(ignored -> {
-                numInterfaces.getAndIncrement();
+            final var numInterfaces1 = new AtomicInteger();
+            final var result = browser.forEachInterface(anInterface -> {
+                numInterfaces1.getAndIncrement();
+                System.out.println(anInterface.toString());
                 return true;
             });
 
-            assertTrue(numInterfaces.get() > 0);
+            int numInterfaces2 = 0;
+            for(var anInterface : browser)
+            {
+                numInterfaces2++;
+                assertTrue(anInterface.getIndex() > 0);
+                assertNotNull(anInterface.getName());
+            }
+
+            assertTrue(result);
+            assertTrue(numInterfaces1.get() > 0);
+            assertEquals(numInterfaces1.get(), numInterfaces2);
+        }
+    }
+
+    @Test
+    public void testIterateThenForEach()
+    {
+        try(final var browser = new InterfaceBrowser())
+        {
+            int numInterfaces1 = 0;
+            for(var anInterface : browser)
+            {
+                numInterfaces1++;
+                assertTrue(anInterface.getIndex() > 0);
+                assertNotNull(anInterface.getName());
+            }
+
+            final var numInterfaces2 = new AtomicInteger();
+            final var result = browser.forEachInterface(ignored -> {
+                numInterfaces2.getAndIncrement();
+                return true;
+            });
+
+            assertTrue(result);
+            assertTrue(numInterfaces1 > 0);
+            assertEquals(numInterfaces1, numInterfaces2.get());
+        }
+    }
+
+    @Test
+    public void testIterateThenIterate()
+    {
+        try(final var browser = new InterfaceBrowser())
+        {
+            int numInterfaces1 = 0;
+            for(var anInterface : browser)
+            {
+                numInterfaces1++;
+                assertTrue(anInterface.getIndex() > 0);
+                assertNotNull(anInterface.getName());
+            }
+
+            int numInterfaces2 = 0;
+            for(var anInterface : browser)
+            {
+                numInterfaces2++;
+                assertTrue(anInterface.getIndex() > 0);
+                assertNotNull(anInterface.getName());
+            }
+
+            assertTrue(numInterfaces1 > 0);
+            assertEquals(numInterfaces1, numInterfaces2);
+        }
+    }
+
+    @Test
+    public void testForEachWithReturningFalse()
+    {
+        try(final var browser = new InterfaceBrowser())
+        {
+            final var numInterfaces1 = new AtomicInteger();
+            final var result1 = browser.forEachInterface(ignored -> {
+                numInterfaces1.getAndIncrement();
+                return false;
+            });
+
+            final var numInterfaces2 = new AtomicInteger();
+            final var result2 = browser.forEachInterface(ignored -> numInterfaces2.getAndIncrement() == 0);
+
+            assertFalse(result1);
+            assertFalse(result2);
+            assertEquals(numInterfaces1.get(), 1);
+            assertEquals(numInterfaces2.get(), 2);
         }
     }
 

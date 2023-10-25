@@ -80,6 +80,7 @@ final class Loader
 
     private Loader()
     {
+        throw new UnsupportedOperationException();
     }
 
     static private void loadLibrary(final String platform, final String extension)

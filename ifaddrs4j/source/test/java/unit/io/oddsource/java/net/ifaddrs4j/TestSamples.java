@@ -18,7 +18,6 @@ package io.oddsource.java.net.ifaddrs4j;
 
 import static org.junit.Assert.*;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.UUID;
@@ -38,13 +37,10 @@ public class TestSamples
     @Test
     public void testGetIPv6Loopback() throws UnknownHostException
     {
-        assertEquals("0:0:0:0:0:0:0:1", InetAddress.getByAddress(
-            new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
-        ).getHostAddress());
-
         final var address = Samples.getIPv6Loopback();
         assertNotNull(address);
         assertEquals("0:0:0:0:0:0:0:1", address.getHostAddress());
+        assertEquals("::1", InetAddressHelper.toString(address));
     }
 
     @Test
@@ -74,6 +70,7 @@ public class TestSamples
         final var address = Samples.getInterfaceIPv6Address();
         assertNotNull(address);
         assertEquals("2001:470:2ccb:a61b:e:acf8:6736:d81e", address.getAddress().getHostAddress());
+        assertEquals("2001:470:2ccb:a61b:e:acf8:6736:d81e", InetAddressHelper.toString(address.getAddress()));
         assertEquals(Short.valueOf((short) 56), address.getPrefixLength());
         assertNull(address.getBroadcastAddress());
         assertNull(address.getPointToPointDestination());
@@ -88,12 +85,13 @@ public class TestSamples
         final var address = Samples.getInterfaceScopedIPv6Address();
         assertNotNull(address);
         assertEquals("fe80:0:0:0:aede:48ff:fe00:1122%6", address.getAddress().getHostAddress());
+        assertEquals("fe80::aede:48ff:fe00:1122%6", InetAddressHelper.toString(address.getAddress()));
         assertEquals(Short.valueOf((short) 64), address.getPrefixLength());
         assertNull(address.getBroadcastAddress());
         assertNull(address.getPointToPointDestination());
         assertFalse(address.isFlagEnabled(InterfaceIPAddressFlag.AutoConfigured));
         assertTrue(address.isFlagEnabled(InterfaceIPAddressFlag.Secured));
-        assertEquals("fe80:0:0:0:aede:48ff:fe00:1122%6/64 secured scopeid 0x6", address.toString());
+        assertEquals("fe80::aede:48ff:fe00:1122%6/64 secured scopeid 0x6", address.toString());
     }
 
     @Test
@@ -117,7 +115,7 @@ public class TestSamples
         final var iterV6 = anInterface.getIpv6Addresses();
         assertTrue(iterV6.hasNext());
         assertEquals(
-            "fe80:0:0:0:aede:48ff:fe00:1122%6/64 secured scopeid 0x6",
+            "fe80::aede:48ff:fe00:1122%6/64 secured scopeid 0x6",
             iterV6.next().toString()
         );
         assertTrue(iterV6.hasNext());

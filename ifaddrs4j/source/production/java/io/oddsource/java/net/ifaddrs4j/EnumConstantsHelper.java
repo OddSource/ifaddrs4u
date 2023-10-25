@@ -37,6 +37,7 @@ final class EnumConstantsHelper
 
     private EnumConstantsHelper()
     {
+        throw new UnsupportedOperationException();
     }
 
     static native int getInterfaceIPAddressFlagConstant(final String name);

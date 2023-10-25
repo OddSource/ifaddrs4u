@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "cache.h"
 #include "IpAddress.h"
 #include "macros.h"
 
@@ -28,38 +29,15 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::IPv4Address const & address)
 {
-    jclass const parent_cls = env->FindClass("java/net/InetAddress");
-    IF_NULL_RETURN_NULL(parent_cls)
-
-    // InetAddress getByAddress(byte[])
-    auto const method(env->GetStaticMethodID(parent_cls, "getByAddress", "([B)Ljava/net/InetAddress;"));
-    IF_NULL_RETURN_NULL(method)
-
     auto bytes(reinterpret_cast<jbyte const *>(static_cast<in_addr const *>(address)));
-    /*jbyte jBytes[4];
-    for(int i(0); i < 4; i++)
-    {
-        jBytes[i] = bytes[i];
-    }*/
     auto byte_array(env->NewByteArray(4));
     IF_NULL_RETURN_NULL(byte_array)
     env->SetByteArrayRegion(byte_array, 0, 4, bytes);
 
-    auto inet4Address(env->CallStaticObjectMethod(parent_cls, method, byte_array));
-    IF_NULL_RETURN_NULL(inet4Address)
-
-    jclass const cls = env->FindClass("java/net/Inet4Address");
-    IF_NULL_RETURN_NULL(cls)
-    if (!env->IsInstanceOf(inet4Address, cls))
-    {
-        env->ThrowNew(
-            env->FindClass("java/io/IOException"),
-            (::std::string("Unable to convert address ") + ::std::string(address) +
-             " into a java.net.Inet4Address. Resulting object could not be cast.").c_str());
-        return NULL;
-    }
-
-    return inet4Address;
+    return env->CallStaticObjectMethod(
+        JNICache::InetAddressHelper,
+        JNICache::InetAddressHelper_getIPv4Address,
+        byte_array);
 }
 
 /**
@@ -69,50 +47,20 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::IPv6Address const & address)
 {
-    jclass const parent_cls = env->FindClass("java/net/InetAddress");
-    IF_NULL_RETURN_NULL(parent_cls)
-
-    jclass const cls(env->FindClass("java/net/Inet6Address"));
-    IF_NULL_RETURN_NULL(cls)
-
-    jstring repr(env->NewStringUTF(::std::string(address).c_str()));
-    IF_NULL_RETURN_NULL(repr)
-
     auto bytes(reinterpret_cast<jbyte const *>(static_cast<in6_addr const *>(address)));
     auto byte_array(env->NewByteArray(16));
     IF_NULL_RETURN_NULL(byte_array)
     env->SetByteArrayRegion(byte_array, 0, 16, bytes);
 
+    jobject scope_id(NULL);
     if (address.scope_id() && *address.scope_id() > 0)
     {
-        // Inet6Address getByAddress(String, byte[], int)
-        auto const method(env->GetStaticMethodID(cls,
-                                                "getByAddress",
-                                                "(Ljava/lang/String;[BI)Ljava/net/Inet6Address;"));
-        IF_NULL_RETURN_NULL(method)
-
-        jint scope_id(*address.scope_id());
-
-        return env->CallStaticObjectMethod(cls, method, repr, byte_array, scope_id);
+        scope_id = env->CallStaticObjectMethod(JNICache::Integer, JNICache::Integer_valueOf, *address.scope_id());
+        IF_NULL_RETURN_NULL(scope_id);
     }
-    else
-    {
-        // InetAddress getByAddress(byte[])
-        auto const method(env->GetStaticMethodID(parent_cls, "getByAddress", "([B)Ljava/net/InetAddress;"));
-        IF_NULL_RETURN_NULL(method)
 
-        auto inet6Address(env->CallStaticObjectMethod(parent_cls, method, byte_array));
-        IF_NULL_RETURN_NULL(inet6Address)
-
-        if (!env->IsInstanceOf(inet6Address, cls))
-        {
-            env->ThrowNew(
-                env->FindClass("java/io/IOException"),
-                (::std::string("Unable to convert address ") + ::std::string(address) +
-                 " into a java.net.Inet6Address. Resulting object could not be cast.").c_str());
-            return NULL;
-        }
-
-        return inet6Address;
-    }
+    return env->CallStaticObjectMethod(
+        JNICache::InetAddressHelper,
+        JNICache::InetAddressHelper_getIPv6Address,
+        byte_array, scope_id);
 }

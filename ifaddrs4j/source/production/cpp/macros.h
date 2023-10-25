@@ -28,12 +28,13 @@
 #define IF_NULL_RETURN_NULL(thing) IF_NULL_RETURN(thing, NULL)
 #define IF_NULL_RETURN_FALSE(thing) IF_NULL_RETURN(thing, false)
 #define IF_NULL_RETURN_VOID(thing) IF_NULL_RETURN(thing, )
+#define IF_NULL_RETURN_ERR(thing) IF_NULL_RETURN(thing, JNI_ERR)
 
 #define CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN(err, ret) catch (::std::exception const & e) \
     { \
         if (env->ExceptionOccurred() == NULL) \
         { \
-            env->ThrowNew(env->FindClass(err), e.what()); \
+            env->ThrowNew(err, e.what()); \
         } \
         ret; \
     }

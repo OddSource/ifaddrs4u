@@ -130,18 +130,18 @@ public final class InterfaceIPAddress<IPAddressT extends InetAddress>
 
     public String toString()
     {
-        final var builder = new StringBuilder(this.address.getHostAddress());
+        final var builder = new StringBuilder(InetAddressHelper.toString(this.address));
         if(this.prefixLength != null)
         {
             builder.append('/').append(this.prefixLength);
         }
         if(this.broadcastAddress != null)
         {
-            builder.append(" broadcast ").append(this.broadcastAddress.getHostAddress());
+            builder.append(" broadcast ").append(InetAddressHelper.toString(this.broadcastAddress));
         }
         else if(this.pointToPointDestination != null)
         {
-            builder.append(" destination ").append(this.pointToPointDestination.getHostAddress());
+            builder.append(" destination ").append(InetAddressHelper.toString(this.pointToPointDestination));
         }
         if (this.flags > 0)
         {

@@ -37,6 +37,7 @@ public final class Samples
 
     private Samples()
     {
+        throw new UnsupportedOperationException();
     }
 
     /**
