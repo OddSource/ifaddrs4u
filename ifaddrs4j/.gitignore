@@ -2,3 +2,4 @@
 target/
 out/
 cmake-build-release/
+hs_err*.log

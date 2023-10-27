@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.oddsource.java.net.ifaddrs4j;
+package ifaddrs4j.test.unit;
 
 import static org.junit.Assert.*;
 
@@ -22,6 +22,9 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
+
+import io.oddsource.java.net.ifaddrs4j.InterfaceBrowser;
+import io.oddsource.java.net.ifaddrs4j.InterfaceFlag;
 
 public class TestInterfaceBrowser
 {
@@ -34,12 +37,12 @@ public class TestInterfaceBrowser
     @Test
     public void testForEachThenIterate()
     {
-        try(final var browser = new InterfaceBrowser())
+        try(var browser = new InterfaceBrowser())
         {
             final var numInterfaces1 = new AtomicInteger();
             final var result = browser.forEachInterface(anInterface -> {
                 numInterfaces1.getAndIncrement();
-                System.out.println(anInterface.toString());
+                System.err.println(anInterface.toString());
                 return true;
             });
 
@@ -60,7 +63,7 @@ public class TestInterfaceBrowser
     @Test
     public void testIterateThenForEach()
     {
-        try(final var browser = new InterfaceBrowser())
+        try(var browser = new InterfaceBrowser())
         {
             int numInterfaces1 = 0;
             for(var anInterface : browser)
@@ -85,7 +88,7 @@ public class TestInterfaceBrowser
     @Test
     public void testIterateThenIterate()
     {
-        try(final var browser = new InterfaceBrowser())
+        try(var browser = new InterfaceBrowser())
         {
             int numInterfaces1 = 0;
             for(var anInterface : browser)
@@ -111,7 +114,7 @@ public class TestInterfaceBrowser
     @Test
     public void testForEachWithReturningFalse()
     {
-        try(final var browser = new InterfaceBrowser())
+        try(var browser = new InterfaceBrowser())
         {
             final var numInterfaces1 = new AtomicInteger();
             final var result1 = browser.forEachInterface(ignored -> {
@@ -132,7 +135,7 @@ public class TestInterfaceBrowser
     @Test
     public void testGetByName()
     {
-        try(final var browser = new InterfaceBrowser())
+        try(var browser = new InterfaceBrowser())
         {
             if(IS_MAC)
             {
@@ -152,7 +155,7 @@ public class TestInterfaceBrowser
     @Test
     public void testGetByIndex()
     {
-        try(final var browser = new InterfaceBrowser())
+        try(var browser = new InterfaceBrowser())
         {
             if(IS_MAC)
             {
@@ -178,7 +181,7 @@ public class TestInterfaceBrowser
         boolean loopbackFound = false;
         boolean nonLoopbackFound = false;
 
-        try(final var browser = new InterfaceBrowser())
+        try(var browser = new InterfaceBrowser())
         {
             final var interfaces = browser.getInterfaces();
             while(interfaces.hasMoreElements())

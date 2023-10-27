@@ -33,7 +33,7 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
 {
     static
     {
-        if (!Loader.LOADED)
+        if(!Loader.LOADED)
         {
             // this will never actually happen, but we need to ensure that Loader initializes
             throw new RuntimeException("Not possible!");
@@ -269,9 +269,9 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
         @Override
         public native void close();
 
-        native Interface getInterface(final String name);
+        native Interface getInterface(String name);
 
-        native Interface getInterface(final int index);
+        native Interface getInterface(int index);
 
         List<Interface> getInterfaces()
         {
@@ -298,7 +298,7 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
             return this.forEachInterfaceAndPopulate(doThis);
         }
 
-        native boolean forEachInterfaceAndPopulate(final Function<Interface, Boolean> doThis);
+        native boolean forEachInterfaceAndPopulate(Function<Interface, Boolean> doThis);
     }
 
     private final class BrowserCleaner implements Runnable

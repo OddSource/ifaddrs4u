@@ -29,7 +29,7 @@ public final class VersionInfo
 {
     static
     {
-        if (!Loader.LOADED)
+        if(!Loader.LOADED)
         {
             // this will never actually happen, but we need to ensure that Loader initializes
             throw new RuntimeException("Not possible!");
@@ -53,12 +53,17 @@ public final class VersionInfo
         throw new UnsupportedOperationException();
     }
 
+    @SuppressWarnings({"checkstyle:methodlength", "checkstyle:innerassignment"})
     private static synchronized void load()
     {
-        if (VersionInfo.VERSION == null)
+        if(VersionInfo.VERSION == null)
         {
-            try (final var stream = VersionInfo.class.getResourceAsStream("version.properties"))
+            try(var stream = VersionInfo.class.getResourceAsStream("version.properties"))
             {
+                if(stream == null)
+                {
+                    throw new RuntimeException("Unable to find version.properties on the classpath.");
+                }
                 final var properties = new Properties();
                 properties.load(stream);
 
@@ -68,7 +73,7 @@ public final class VersionInfo
                 VersionInfo.VERSION_PATCH = Short.parseShort(properties.getProperty("ifaddrs4j.version.patch"));
                 VersionInfo.VERSION_SUFFIX = properties.getProperty("ifaddrs4j.version.suffix");
 
-                if (!VersionInfo.VERSION.equals(VersionInfo.getExtensionVersion()))
+                if(!VersionInfo.VERSION.equals(VersionInfo.getExtensionVersion()))
                 {
                     VersionInfo.LOGGER.warning(String.format(
                         "C++ extension version %s does not match Java library version %s",
@@ -76,7 +81,7 @@ public final class VersionInfo
                         VersionInfo.VERSION
                     ));
                 }
-                else if (
+                else if(
                     !VersionInfo.VERSION_SUFFIX.equals(VersionInfo.getExtensionSuffix()) ||
                     VersionInfo.VERSION_MAJOR != VersionInfo.getExtensionMajor() ||
                     VersionInfo.VERSION_MINOR != VersionInfo.getExtensionMinor() ||
@@ -93,7 +98,7 @@ public final class VersionInfo
                     ));
                 }
             }
-            catch (IOException | IllegalArgumentException e)
+            catch(IOException | IllegalArgumentException e)
             {
                 VersionInfo.VERSION = VersionInfo.VERSION_SUFFIX = "load-error";
                 VersionInfo.VERSION_MAJOR = VersionInfo.VERSION_MINOR = VersionInfo.VERSION_PATCH = -1;

@@ -28,7 +28,7 @@ final class EnumConstantsHelper
 {
     static
     {
-        if (!Loader.LOADED)
+        if(!Loader.LOADED)
         {
             // this will never actually happen, but we need to ensure that Loader initializes
             throw new RuntimeException("Not possible!");
@@ -40,7 +40,7 @@ final class EnumConstantsHelper
         throw new UnsupportedOperationException();
     }
 
-    static native int getInterfaceIPAddressFlagConstant(final String name);
+    static native int getInterfaceIPAddressFlagConstant(String name);
 
-    static native int getInterfaceFlagConstant(final String name);
+    static native int getInterfaceFlagConstant(String name);
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.oddsource.java.net.ifaddrs4j;
+package ifaddrs4j.test.unit;
 
 import static org.junit.Assert.*;
 
@@ -23,6 +23,8 @@ import java.net.Inet6Address;
 import java.net.UnknownHostException;
 
 import org.junit.Test;
+
+import io.oddsource.java.net.ifaddrs4j.InetAddressHelper;
 
 public class TestInetAddressHelper
 {
@@ -111,7 +113,6 @@ public class TestInetAddressHelper
             address.getAddress()
         );
         assertEquals("1:0:0:0:0:0:0:0", address.getHostAddress());
-        System.out.println(InetAddressHelper.toString(address));
         assertEquals("1::", InetAddressHelper.toString(address));
     }
 

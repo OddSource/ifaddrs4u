@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package io.oddsource.java.net.ifaddrs4j;
+package ifaddrs4j.test.unit;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import io.oddsource.java.net.ifaddrs4j.VersionInfo;
 
 public class TestVersionInfo
 {

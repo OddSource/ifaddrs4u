@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package io.oddsource.java.net.ifaddrs4j;
+package ifaddrs4j.test.unit;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import io.oddsource.java.net.ifaddrs4j.InterfaceFlag;
+import io.oddsource.java.net.ifaddrs4j.InterfaceIPAddressFlag;
 
 public class TestEnums
 {
@@ -27,7 +30,7 @@ public class TestEnums
     {
         for (var e : InterfaceIPAddressFlag.values())
         {
-            System.out.println("InterfaceIPAddressFlag." + e.name() + " (" + e.display + ") = " + e.flag);
+            System.err.println("InterfaceIPAddressFlag." + e.name() + " (" + e.display + ") = " + e.flag);
             assertTrue("InterfaceIPAddressFlag." + e.name() + " is not correct", e.flag > 0);
         }
     }
@@ -37,7 +40,7 @@ public class TestEnums
     {
         for (var e : InterfaceFlag.values())
         {
-            System.out.println("InterfaceFlag." + e.name() + " (" + e.display + ") = " + e.flag);
+            System.err.println("InterfaceFlag." + e.name() + " (" + e.display + ") = " + e.flag);
             assertTrue("InterfaceFlag." + e.name() + " is not correct", e.flag > 0);
         }
 

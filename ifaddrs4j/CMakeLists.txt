@@ -1,3 +1,18 @@
+#[[
+    Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+]]
 cmake_minimum_required(VERSION 3.26)
 
 project(ifaddrs4j
@@ -5,6 +20,8 @@ project(ifaddrs4j
         DESCRIPTION "A JNI C++17 extension for ifaddrs4j"
         HOMEPAGE_URL "https://github.com/OddSource/ifaddrs4u"
         LANGUAGES CXX)
+
+set(CLASSIFIER "" CACHE STRING "Classifier, including leading hyphen, to append to copied dynamic library name")
 
 set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(gcc_like_ids ARMClang AppleClang Clang GNU LCC)
@@ -64,4 +81,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC
                            "$ENV{JAVA_HOME}/include"
                            "$ENV{JAVA_HOME}/include/${JAVA_PLATFORM_INCLUDE}")
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-                   ${COPY_COMMAND} "${CMAKE_BINARY_DIR}/libifaddrs4j.${DYNAMIC_LIBRARY_EXTENSION}" "${CMAKE_SOURCE_DIR}/target/classes/")
+                   ${COPY_COMMAND} "${CMAKE_BINARY_DIR}/libifaddrs4j.${DYNAMIC_LIBRARY_EXTENSION}"
+                                   "${CMAKE_SOURCE_DIR}/target/classes/libifaddrs4j${CLASSIFIER}.${DYNAMIC_LIBRARY_EXTENSION}")

@@ -28,13 +28,21 @@
 
     <groupId>io.oddsource.java.net</groupId>
     <artifactId>ifaddrs4j</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>OddSource Code ifaddrs4j</name>
     <version>0.1.0-alpha0-SNAPSHOT</version>
     <description>
         OddSource Code ifaddrs4j - Cross platform access to network interfaces and addresses
     </description>
+
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <url>http://github.com/OddSource/ifaddrs4u/ifaddrs4j</url>
     <scm>
@@ -49,7 +57,11 @@
         <javac.target.version>11</javac.target.version>
         <project.tasks.maximum.memory>256m</project.tasks.maximum.memory>
         <version.dependency.test.junit>4.13.2</version.dependency.test.junit>
+        <version.dependency.test.log4j>2.21.0</version.dependency.test.log4j>
         <version.plugin.cmake>3.25.2-b1</version.plugin.cmake>
+        <version.plugin.resources>3.3.1</version.plugin.resources>
+        <version.plugin.surefire>3.2.1</version.plugin.surefire>
+        <version.plugin.reports>3.4.5</version.plugin.reports>
         <cmake.download>false</cmake.download>
     </properties>
 
@@ -60,6 +72,16 @@
                 <artifactId>junit</artifactId>
                 <version>${version.dependency.test.junit}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${version.dependency.test.log4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-jpl</artifactId>
+                <version>${version.dependency.test.log4j}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -69,6 +91,16 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jpl</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -76,10 +108,6 @@
         <resources>
             <resource>
                 <directory>source/production/resources</directory>
-            </resource>
-            <resource>
-                <targetPath>META-INF</targetPath>
-                <directory>build/jar/META-INF</directory>
             </resource>
         </resources>
 
@@ -92,60 +120,6 @@
 
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>com.github.spotbugs</groupId>
-                    <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>${version.plugin.spotbugs}</version>
-                    <configuration>
-                        <effort>Max</effort>
-                        <excludeFilterFile>build/spotbugs-exclude.xml</excludeFilterFile>
-                        <threshold>Low</threshold>
-                        <xmlOutput>true</xmlOutput>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>validate</id>
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>${version.plugin.checkstyle}</version>
-                    <configuration>
-                        <suppressionsLocation>build/checkstyle-suppressions.xml</suppressionsLocation>
-                        <consoleOutput>true</consoleOutput>
-                        <failsOnError>true</failsOnError>
-                        <linkXRef>false</linkXRef>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>validate</id>
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>${version.plugin.enforcer}</version>
-                    <executions>
-                        <execution>
-                            <id>enforce-maven</id>
-                            <goals>
-                                <goal>display-info</goal>
-                                <goal>enforce</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
                 <plugin>
                     <groupId>com.googlecode.cmake-maven-project</groupId>
                     <artifactId>cmake-maven-plugin</artifactId>
@@ -178,6 +152,7 @@
                                 <targetPath>${project.basedir}/target/cmake-build-release</targetPath>
                                 <options>
                                     <option>-DCMAKE_BUILD_TYPE=Debug</option>
+                                    <option>-DCLASSIFIER=-${platform.specific.classifier}</option>
                                 </options>
                             </configuration>
                         </execution>
@@ -277,18 +252,98 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>${version.plugin.javadoc}</version>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${version.plugin.resources}</version>
+                    <executions>
+                        <execution>
+                            <id>resources-generate-resources</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>resources</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>resources-generate-testResources</id>
+                            <phase>generate-test-resources</phase>
+                            <goals>
+                                <goal>testResources</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>${version.plugin.source}</version>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${version.plugin.surefire}</version>
+                    <executions>
+                        <execution>
+                            <id>surefire-test-test</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${version.plugin.jar}</version>
+                    <executions>
+                        <execution>
+                            <id>jar-package-jar</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <archive>
+                            <addMavenDescriptor>true</addMavenDescriptor>
+                            <compress>true</compress>
+                            <index>true</index>
+                            <manifest>
+                                <addDefaultEntries>true</addDefaultEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addBuildEnvironmentEntries>true</addBuildEnvironmentEntries>
+                            </manifest>
+                        </archive>
+                        <classifier>${platform.specific.classifier}</classifier>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${version.plugin.source}</version>
+                    <executions>
+                        <execution>
+                            <id>source-package-source</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${version.plugin.javadoc}</version>
+                    <configuration>
+                        <show>public</show>
+                        <detectLinks />
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>javadoc-package-javadoc</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>javadoc-no-fork</goal>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -306,7 +361,11 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -314,8 +373,193 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
+                <artifactId>maven-source-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>${version.plugin.reports}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${version.plugin.javadoc}</version>
+                <configuration>
+                    <show>public</show>
+                    <detectLinks />
+                </configuration>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>javadoc-no-fork</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <profiles>
+        <profile>
+            <id>macos-intel64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>!aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <platform.specific.classifier>macos-x64</platform.specific.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>macos-arm64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <platform.specific.classifier>macos-arm</platform.specific.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-el-amd64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>amd64</arch>
+                </os>
+                <property>
+                    <name>[FINER.ACTIVATOR.FILE.REGEX]/etc/os-release</name>
+                    <value>ID_LIKE="?(?i)((rhel|fedora)(\s+(rhel|fedora))?)+"?</value>
+                </property>
+            </activation>
+            <properties>
+                <platform.specific.classifier>linux-el-x64</platform.specific.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-el-arm64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>aarch64</arch>
+                </os>
+                <property>
+                    <name>[FINER.ACTIVATOR.FILE.REGEX]/etc/os-release</name>
+                    <value>ID_LIKE="?(?i)((rhel|fedora)(\s+(rhel|fedora))?)+"?</value>
+                </property>
+            </activation>
+            <properties>
+                <platform.specific.classifier>linux-el-arm</platform.specific.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-deb-amd64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>amd64</arch>
+                </os>
+                <property>
+                    <name>[FINER.ACTIVATOR.FILE.REGEX]/etc/os-release</name>
+                    <value>ID_LIKE="?(?i)(debian|ubuntu)"?</value>
+                </property>
+            </activation>
+            <properties>
+                <platform.specific.classifier>linux-deb-x64</platform.specific.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-deb-arm64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>aarch64</arch>
+                </os>
+                <property>
+                    <name>[FINER.ACTIVATOR.FILE.REGEX]/etc/os-release</name>
+                    <value>ID_LIKE="?(?i)(debian|ubuntu)"?</value>
+                </property>
+            </activation>
+            <properties>
+                <platform.specific.classifier>linux-deb-arm</platform.specific.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>bsd-amd64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>amd64</arch>
+                </os>
+                <property>
+                    <name>[FINER.ACTIVATOR.FILE.REGEX]/etc/os-release</name>
+                    <value>ID="?.*(?i)(bsd).*"?</value>
+                </property>
+            </activation>
+            <properties>
+                <platform.specific.classifier>bsd-x64</platform.specific.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>bsd-arm64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>aarch64</arch>
+                </os>
+                <property>
+                    <name>[FINER.ACTIVATOR.FILE.REGEX]/etc/os-release</name>
+                    <value>ID="?.*(?i)(bsd).*"?</value>
+                </property>
+            </activation>
+            <properties>
+                <platform.specific.classifier>bsd-arm</platform.specific.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows-ia32</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                    <arch>ia32</arch>
+                </os>
+            </activation>
+            <properties>
+                <platform.specific.classifier>windows-ia32</platform.specific.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows-64</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <platform.specific.classifier>windows-x64</platform.specific.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows-aarch64</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <platform.specific.classifier>windows-arm</platform.specific.classifier>
+            </properties>
+        </profile>
+    </profiles>
 </project>

@@ -25,7 +25,7 @@ public final class MacAddress
 {
     static
     {
-        if (!Loader.LOADED)
+        if(!Loader.LOADED)
         {
             // this will never actually happen, but we need to ensure that Loader initializes
             throw new RuntimeException("Not possible!");

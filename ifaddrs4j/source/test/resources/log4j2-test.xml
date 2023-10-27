@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Copyright © 2010-2023 OddSource Code (license@oddsource.io)
@@ -16,12 +16,18 @@
     limitations under the License.
 
 -->
-<!DOCTYPE suppressions PUBLIC
-        "-//Puppy Crawl//DTD Suppressions 1.0//EN"
-        "http://www.puppycrawl.com/dtds/suppressions_1_0.dtd">
-<suppressions>
-
-    <suppress files="Test[A-Za-z]+.java"
-              checks="AbbreviationAsWordInName|AvoidStarImport|AvoidStaticImport|MissingCtor|MultipleStringLiterals|MagicNumber" />
-
-</suppressions>
+<Configuration name="ConfigTest" status="ERROR" monitorInterval="5">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_ERR">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="io.oddsource.java" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Root level="WARN">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

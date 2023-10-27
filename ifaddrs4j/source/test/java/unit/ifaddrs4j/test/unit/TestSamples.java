@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.oddsource.java.net.ifaddrs4j;
+package ifaddrs4j.test.unit;
 
 import static org.junit.Assert.*;
 
@@ -23,6 +23,10 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.junit.Test;
+
+import io.oddsource.java.net.ifaddrs4j.InetAddressHelper;
+import io.oddsource.java.net.ifaddrs4j.InterfaceIPAddressFlag;
+import io.oddsource.java.net.ifaddrs4j.Samples;
 
 public class TestSamples
 {

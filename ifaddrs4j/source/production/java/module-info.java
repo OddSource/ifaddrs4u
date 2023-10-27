@@ -14,4 +14,9 @@
  * limitations under the License.
  */
 
-package io.oddsource.java.net.ifaddrs4j;
+module io.oddsource.java.net.ifaddrs4j
+{
+    exports io.oddsource.java.net.ifaddrs4j;
+    requires java.base;
+    requires java.logging;
+}
