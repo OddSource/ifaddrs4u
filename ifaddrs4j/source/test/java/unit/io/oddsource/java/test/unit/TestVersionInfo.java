@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ifaddrs4j.test.unit;
+package io.oddsource.java.test.unit;
 
 import static org.junit.Assert.*;
 

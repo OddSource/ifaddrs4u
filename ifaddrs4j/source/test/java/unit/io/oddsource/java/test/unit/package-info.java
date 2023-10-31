@@ -14,4 +14,7 @@
  * limitations under the License.
  */
 
-package ifaddrs4j.test.unit;
+/**
+ * Unit tests.
+ */
+package io.oddsource.java.test.unit;

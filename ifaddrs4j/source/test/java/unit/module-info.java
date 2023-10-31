@@ -15,11 +15,11 @@
  */
 
 @SuppressWarnings("requires-automatic")
-module io.oddsource.java.net.ifaddrs4j.test.unit
+module io.oddsource.java.test.unit
 {
-    exports ifaddrs4j.test.unit;
+    exports io.oddsource.java.test.unit;
     requires java.base;
     requires io.oddsource.java.net.ifaddrs4j;
     requires junit;
-    opens ifaddrs4j.test.unit to junit, org.apache.logging.log4j, org.apache.logging.log4j.core;
+    opens io.oddsource.java.test.unit to junit, org.apache.logging.log4j, org.apache.logging.log4j.core;
 }

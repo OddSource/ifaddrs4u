@@ -21,6 +21,6 @@
     <extension>
         <groupId>io.oddsource.java.maven</groupId>
         <artifactId>finer-profile-activation</artifactId>
-        <version>0.1.0-alpha0-SNAPSHOT</version>
+        <version>1.0.0-beta1</version>
     </extension>
 </extensions>

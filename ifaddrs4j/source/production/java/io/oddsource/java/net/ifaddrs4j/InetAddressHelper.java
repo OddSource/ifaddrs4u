@@ -43,7 +43,7 @@ public final class InetAddressHelper
     /**
      * The number of words contained in an IPv6 address.
      */
-    public static final short IPv6_WORDS = IPV6_DATA_LENGTH / 2;
+    public static final short IPV6_WORDS = IPV6_DATA_LENGTH / 2;
 
     private static final short BYTE_SIZE = 8;
 
@@ -107,11 +107,12 @@ public final class InetAddressHelper
      * @param address The IPv6 address
      * @return the compressed hexadecimal words notation of the given IPv6 address.
      */
-    @SuppressWarnings("checkstyle:methodlength")
+    // note: CyclomaticComplexity ... 19, max allowed 10 ... but there is nothing simple about stringifying IPv6
+    @SuppressWarnings({"checkstyle:MethodLength", "checkstyle:CyclomaticComplexity"})
     public static String toString(final Inet6Address address)
     {
         final byte[] data = address.getAddress();
-        final int[] words = new int[IPv6_WORDS];
+        final int[] words = new int[IPV6_WORDS];
         for(short b = 0, w = 0; b < IPV6_DATA_LENGTH; b += 2, w++)
         {
             words[w] = ((data[b] & BYTE_MASK) << BYTE_SIZE) + (data[b + 1] & BYTE_MASK);
@@ -122,7 +123,7 @@ public final class InetAddressHelper
         short zeroesStart = -1;
         short zeroesEnd = -1;
         boolean endWithColon = false;
-        for(short w = 0; w < IPv6_WORDS; w++)
+        for(short w = 0; w < IPV6_WORDS; w++)
         {
             if(words[w] == 0)
             {
@@ -154,7 +155,7 @@ public final class InetAddressHelper
         }
 
         final var builder = new StringBuilder();
-        for(short w = 0; w < IPv6_WORDS; w++)
+        for(short w = 0; w < IPV6_WORDS; w++)
         {
             if(zeroesStart >= 0 && w >= zeroesStart && w <= zeroesEnd)
             {

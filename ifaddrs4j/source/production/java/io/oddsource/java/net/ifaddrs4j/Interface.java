@@ -24,6 +24,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+/**
+ * Represents a network interface (adapter) on the system, including its index, name, UUID if on Windows,
+ * configuration flags, configured MTU, MAC (hardware) address, IPv4 address(es), and IPv6 address(es).
+ *
+ * @since 1.0.0
+ */
 public final class Interface
 {
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase(Locale.US).contains("win");

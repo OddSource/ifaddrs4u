@@ -212,7 +212,7 @@ namespace OddSource::Interfaces
             // ifaddrs, but instead must fully process ifaddrs, grouping all of the
             // data for each interface as we do, and then we can process that
             // grouping into Interface objects for invoking the callback.
-            ifaddrs *ifa = this->_ifaddrs;
+            ifaddrs * ifa = this->_ifaddrs;
             ::std::unordered_map<::std::string, Interface> interfaces;
             ::std::unordered_map<uint32_t, ::std::string> indexes_to_names;
             while (ifa)

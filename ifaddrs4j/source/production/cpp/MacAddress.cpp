@@ -51,10 +51,10 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::MacAddress const & address)
 
 /*
  * Class:     io_oddsource_java_net_ifaddrs4j_MacAddress
- * Method:    get_data_from_repr
+ * Method:    getDataFromRepr
  * Signature: (Ljava/lang/String;)[B
  */
-jbyteArray JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_get_1data_1from_1repr(
+jbyteArray JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getDataFromRepr(
     JNIEnv * env,
     jclass,
     jstring representation)
@@ -83,10 +83,10 @@ jbyteArray JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_get_1data_1fr
 
 /*
  * Class:     io_oddsource_java_net_ifaddrs4j_MacAddress
- * Method:    get_repr_from_data
+ * Method:    getReprFromData
  * Signature: ([B)Ljava/lang/String;
  */
-jstring JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_get_1repr_1from_1data(
+jstring JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getReprFromData(
     JNIEnv * env,
     jclass,
     jbyteArray data)

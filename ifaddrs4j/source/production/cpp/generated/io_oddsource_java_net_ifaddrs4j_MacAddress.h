@@ -9,18 +9,18 @@ extern "C" {
 #endif
 /*
  * Class:     io_oddsource_java_net_ifaddrs4j_MacAddress
- * Method:    get_data_from_repr
+ * Method:    getDataFromRepr
  * Signature: (Ljava/lang/String;)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_get_1data_1from_1repr
+JNIEXPORT jbyteArray JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getDataFromRepr
   (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     io_oddsource_java_net_ifaddrs4j_MacAddress
- * Method:    get_repr_from_data
+ * Method:    getReprFromData
  * Signature: ([B)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_get_1repr_1from_1data
+JNIEXPORT jstring JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getReprFromData
   (JNIEnv *, jclass, jbyteArray);
 
 #ifdef __cplusplus

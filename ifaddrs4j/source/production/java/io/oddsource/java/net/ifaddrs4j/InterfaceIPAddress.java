@@ -22,7 +22,7 @@ import java.util.Objects;
 
 /**
  * A wrapper around java.lang.InetAddress to include flags and other details about how
- * an address is assigned to an interface.
+ * an address is assigned (bound) to an interface.
  *
  * @param <IPAddressT> Either an {@link java.net.Inet4Address} or an {@link Inet6Address}, indicating what
  *                     type of address is bound to the interface in this representation.
@@ -128,6 +128,7 @@ public final class InterfaceIPAddress<IPAddressT extends InetAddress>
         return (this.flags & flag.flag) == flag.flag;
     }
 
+    @Override
     public String toString()
     {
         final var builder = new StringBuilder(InetAddressHelper.toString(this.address));
@@ -164,6 +165,7 @@ public final class InterfaceIPAddress<IPAddressT extends InetAddress>
         return builder.toString();
     }
 
+    @Override
     public int hashCode()
     {
         return Objects.hash(
@@ -175,17 +177,28 @@ public final class InterfaceIPAddress<IPAddressT extends InetAddress>
         );
     }
 
+    /**
+     * Tests whether this interface-bound address matches the other, given interface-bound address.
+     *
+     * @param other The other address
+     * @return whether the addresses are equal.
+     */
+    public boolean equals(final InterfaceIPAddress<?> other)
+    {
+        return Objects.equals(this.address, other.address) &&
+               Objects.equals(this.prefixLength, other.prefixLength) &&
+               Objects.equals(this.broadcastAddress, other.broadcastAddress) &&
+               Objects.equals(this.pointToPointDestination, other.pointToPointDestination) &&
+               this.flags == other.flags;
+    }
+
+    @Override
     public boolean equals(final Object other)
     {
         if (!(other instanceof InterfaceIPAddress))
         {
             return false;
         }
-        final var address = (InterfaceIPAddress<?>) other;
-        return Objects.equals(this.address, address.address) &&
-               Objects.equals(this.prefixLength, address.prefixLength) &&
-               Objects.equals(this.broadcastAddress, address.broadcastAddress) &&
-               Objects.equals(this.pointToPointDestination, address.pointToPointDestination) &&
-               this.flags == address.flags;
+        return this.equals((InterfaceIPAddress<?>) other);
     }
 }

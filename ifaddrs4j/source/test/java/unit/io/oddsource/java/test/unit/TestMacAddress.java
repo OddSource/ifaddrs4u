@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ifaddrs4j.test.unit;
+package io.oddsource.java.test.unit;
 
 import static org.junit.Assert.*;
 
@@ -48,6 +48,13 @@ public class TestMacAddress
 
         assertEquals(address.toString(), "b2:fb:b8:5b:84:e8:fe:ff");
         assertEquals(address.getRepresentation(), "b2:fb:b8:5b:84:e8:fe:ff");
+        assertEquals(address.getLength(), 8);
+        assertArrayEquals(address.getData(), bytes(0xb2, 0xfb, 0xb8, 0x5b, 0x84, 0xe8, 0xfe, 0xff));
+
+        address = new MacAddress("b2-fb-b8-5b-84-e8-fe-ff");
+
+        assertEquals(address.toString(), "b2-fb-b8-5b-84-e8-fe-ff");
+        assertEquals(address.getRepresentation(), "b2-fb-b8-5b-84-e8-fe-ff");
         assertEquals(address.getLength(), 8);
         assertArrayEquals(address.getData(), bytes(0xb2, 0xfb, 0xb8, 0x5b, 0x84, 0xe8, 0xfe, 0xff));
     }

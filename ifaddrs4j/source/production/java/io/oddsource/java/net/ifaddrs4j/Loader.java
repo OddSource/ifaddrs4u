@@ -55,6 +55,28 @@ final class Loader
 
     private static final String SPC = " ";
 
+    private static final String BSD = "bsd";
+
+    private static final String ID_EQ = "id=";
+
+    private static final String ID_LIKE_EQ = "id_like=";
+
+    private static final String IA32 = "ia32";
+
+    private static final String IA64 = "ia64";
+
+    private static final String X86 = "x86";
+
+    private static final String X64 = "x64";
+
+    private static final String X86_64 = "x86_64";
+
+    private static final String ARCH64 = "arch64";
+
+    private static final String ARM = "arm";
+
+    private static final String AMD64 = "amd64";
+
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase(Locale.US);
 
     private static final String OS_VERSION = System.getProperty("os.version").toLowerCase(Locale.US);
@@ -131,7 +153,8 @@ final class Loader
             platform = "windows";
             extension = DLL;
         }
-        else if(Loader.OS_NAME.contains("linux") || Loader.OS_NAME.contains("posix") || Loader.OS_NAME.contains("bsd"))
+        else if(Loader.OS_NAME.contains("linux") || Loader.OS_NAME.contains("posix") ||
+                Loader.OS_NAME.contains(Loader.BSD))
         {
             platform = Loader.getUnixVariant();
             extension = SO;
@@ -140,6 +163,7 @@ final class Loader
         return platform != null ? new PlatformInfo(platform, architecture, extension) : null;
     }
 
+    @SuppressWarnings("checkstyle:CyclomaticComplexity") // 11, maximum allowed is 10, but hard-pressed to simplify this
     private static String getUnixVariant()
     {
         final File file = new File("/etc/os-release");
@@ -153,15 +177,15 @@ final class Loader
                     StandardCharsets.UTF_8
                 ).toLowerCase(Locale.US);
                 Arrays.stream(os_release.split("\\r?\\n")).forEach(line -> {
-                    if(line.startsWith("id=") && line.contains("bsd"))
+                    if(line.startsWith(Loader.ID_EQ) && line.contains(Loader.BSD))
                     {
-                        platform.set("bsd");
+                        platform.set(Loader.BSD);
                     }
-                    else if(line.startsWith("id_like=") && (line.contains("debian") || line.contains("ubuntu")))
+                    else if(line.startsWith(Loader.ID_LIKE_EQ) && (line.contains("debian") || line.contains("ubuntu")))
                     {
                         platform.set("linux-deb");
                     }
-                    else if(line.startsWith("id_like=") && (line.contains("fedora") || line.contains("rhel")))
+                    else if(line.startsWith(Loader.ID_LIKE_EQ) && (line.contains("fedora") || line.contains("rhel")))
                     {
                         platform.set("linux-el");
                     }
@@ -183,18 +207,18 @@ final class Loader
     private static String getArchitecture()
     {
         String architecture = null;
-        if(Loader.OS_ARCH.contains("arch64"))
+        if(Loader.OS_ARCH.contains(Loader.ARCH64))
         {
-            architecture = "arm";
+            architecture = Loader.ARM;
         }
-        else if(Loader.OS_ARCH.contains("amd64") || Loader.OS_ARCH.contains("x86_64") ||
-                Loader.OS_ARCH.contains("ia64"))
+        else if(Loader.OS_ARCH.contains(Loader.AMD64) || Loader.OS_ARCH.contains(Loader.X86_64) ||
+                Loader.OS_ARCH.contains(Loader.IA64))
         {
-            architecture = "x64";
+            architecture = Loader.X64;
         }
-        else if(Loader.OS_ARCH.contains("x86") || Loader.OS_ARCH.contains("ia32"))
+        else if(Loader.OS_ARCH.contains(Loader.X86) || Loader.OS_ARCH.contains(Loader.IA32))
         {
-            architecture = "ia32";
+            architecture = Loader.IA32;
         }
         return architecture;
     }

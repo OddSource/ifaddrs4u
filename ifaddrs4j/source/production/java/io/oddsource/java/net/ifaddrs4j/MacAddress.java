@@ -38,14 +38,26 @@ public final class MacAddress
 
     private final short data_length;
 
+    /**
+     * Constructs the MAC address / hardware address from the given String representation, which should be
+     * at least 6 and at most 8 hexadecimal-formatted bytes separated by hyphens or colons.
+     *
+     * @param representation The string representation
+     */
     public MacAddress(final String representation)
     {
-        this(representation, MacAddress.get_data_from_repr(representation));
+        this(representation, MacAddress.getDataFromRepr(representation));
     }
 
+    /**
+     * Constructs the MAC address / hardware address from the given array of bytes, which should contain
+     * at least 6 and at most 8 bytes.
+     *
+     * @param data The bytes making up the address
+     */
     public MacAddress(final byte[] data)
     {
-        this(MacAddress.get_repr_from_data(data), Arrays.copyOf(data, data.length));
+        this(MacAddress.getReprFromData(data), Arrays.copyOf(data, data.length));
     }
 
     MacAddress(final String representation, final byte[] data)
@@ -55,9 +67,9 @@ public final class MacAddress
         this.data_length = (short) data.length;
     }
 
-    private static native byte[] get_data_from_repr(String representation);
+    private static native byte[] getDataFromRepr(String representation);
 
-    private static native String get_repr_from_data(byte[] data);
+    private static native String getReprFromData(byte[] data);
 
     /**
      * Gets the string representation of the MAC address (e.g. a6:83:e7:2e:a1:67).
@@ -108,9 +120,20 @@ public final class MacAddress
         return Arrays.hashCode(this.data);
     }
 
+    /**
+     * Tests whether this MAC address equals the other, given MAC address.
+     *
+     * @param other The other address
+     * @return whether the addresses are equal.
+     */
+    public boolean equals(final MacAddress other)
+    {
+        return Arrays.equals(this.data, other.data);
+    }
+
     @Override
     public boolean equals(final Object other)
     {
-        return other instanceof MacAddress && Arrays.equals(this.data, ((MacAddress) other).data);
+        return other instanceof MacAddress && this.equals((MacAddress) other);
     }
 }
