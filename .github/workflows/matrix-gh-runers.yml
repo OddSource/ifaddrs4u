@@ -40,8 +40,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-11, macos-13, ubuntu-20.04, windows-2019, windows-2022]
-        java: ["11", "17"]
-        python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        java: ["11", "17", "21"]
+        include:
+          - java: "11"
+            python: "3.8"
+          - java: "17"
+            python: "3.10"
+          - java: "21"
+            python: "3.12"
     runs-on: ${{ matrix.os }}
     name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
@@ -52,16 +58,20 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: CMake Prepare
+        working-directory: ifaddrs4cpp
         run: |
              cmake -DCMAKE_BUILD_TYPE=Release -S . -B ./cmake-external-build
              cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-debug-test-build
 
       - name: Compile ipaddrs4cpp Debug
+        working-directory: ifaddrs4cpp
         run: cmake --build ./cmake-debug-test-build --target all -j 14
 
       - name: Run ifaddrs4cpp Tests
+        working-directory: ifaddrs4cpp
         #run: ./cmake-debug-test-build/ifaddrs4cpp_tests(.exe?)
         run: ctest --verbose --test-dir ./cmake-debug-test-build
 
       - name: Compile ifaddrs4cpp Release
+        working-directory: ifaddrs4cpp
         run: cmake --build ./cmake-external-build --target all -j 14
