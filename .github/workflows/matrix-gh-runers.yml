@@ -1,0 +1,67 @@
+#
+# Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: "Matrix CI - GH Runners"
+
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: "0 1 * * SUN"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    permissions:
+      actions: read  # for github/codeql-action/init to get workflow details
+      contents: read  # for actions/checkout to fetch code
+      security-events: write  # for github/codeql-action/analyze to upload SARIF results
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-11, macos-13, ubuntu-20.04, windows-2019, windows-2022]
+        java: ["11", "17"]
+        python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ marix.python }}"
+    steps:
+      - name: Checkout ifaddrs4u
+        uses: actions/checkout@v4
+
+      - name: Get CMake
+        uses: lukka/get-cmake@latest
+
+      - name: CMake Prepare
+        run: |
+             cmake -DCMAKE_BUILD_TYPE=Release -S . -B ./cmake-external-build
+             cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-debug-test-build
+
+      - name: Compile ipaddrs4cpp Debug
+        run: cmake --build ./cmake-debug-test-build --target all -j 14
+
+      - name: Run ifaddrs4cpp Tests
+        #run: ./cmake-debug-test-build/ifaddrs4cpp_tests(.exe?)
+        run: ctest --verbose --test-dir ./cmake-debug-test-build
+
+      - name: Compile ifaddrs4cpp Release
+        run: cmake --build ./cmake-external-build --target all -j 14
