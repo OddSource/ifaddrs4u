@@ -4,8 +4,12 @@
 #include <netioapi.h>
 #include <winsock2.h>
 #else /* IS_WINDOWS */
+#include <arpa/inet.h>
+#include <cerrno>
+#include <netdb.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
 #endif /* IS_WINDOWS */
 
 #include <cstring>
@@ -15,9 +19,186 @@
 
 #include "IpAddress.h"
 
-#define BYTES reinterpret_cast<uint8_t const *>(this->_data)
-#define WORDS reinterpret_cast<uint16_t const *>(this->_data)
-#define DOUBLEWORDS reinterpret_cast<uint32_t const *>(this->_data)
+#define BYTES reinterpret_cast<uint8_t const *>(this->_data.get())
+#define WORDS reinterpret_cast<uint16_t const *>(this->_data.get())
+#define DOUBLEWORDS reinterpret_cast<uint32_t const *>(this->_data.get())
+
+namespace
+{
+    using namespace OddSource::Interfaces;
+
+    template<typename Addr>
+    using Enable_If_Addr = ::std::enable_if_t<::std::is_same_v<Addr, in_addr> ||
+                                              ::std::is_same_v<Addr, in6_addr>>;
+
+    template<typename Addr, typename = Enable_If_Addr<Addr>>
+    ::std::unique_ptr<Addr>
+    from_repr(::std::string_view const & repr)
+    {
+        if (repr.length() == 0)
+        {
+            throw InvalidIPAddress("Invalid empty IP address string.");
+        }
+
+        ::std::string repr_str(repr);
+        auto data = ::std::make_unique<Addr>();
+        int success;
+        if constexpr (::std::is_same_v<Addr, in6_addr>)
+        {
+            // inet_pton can also handle IPv4 addresses, but only in dotted-decimal format
+            // (1.2.3.4), not in octal, hexadecimal, or any other valid IPv4 format.
+            success = inet_pton(AF_INET6, repr_str.c_str(), data.get());
+        }
+        else
+        {
+            int num_dots(0);
+            for (char c : repr)
+            {
+                if (c == '.')
+                {
+                    num_dots++;
+                }
+            }
+            if (num_dots != 3)
+            {
+                // some implementations of inet_aton tolerate incomplete addresses, but we do not
+                throw InvalidIPAddress(
+                        "Malformed IPv4 address string '"s + repr_str + "' with "s +
+                        ::std::to_string(num_dots + 1) + " parts instead of 4"s);
+            }
+            // inet_aton/inet_addr, however, can handle IPv4 addresses in all valid formats.
+#ifdef IS_WINDOWS
+            auto raw = inet_addr(repr);
+        if (raw == INADDR_NONE)
+        {
+            success = 0;
+        }
+        else
+        {
+            ::std::memcpy(data.get(), raw, sizeof(Addr));
+        }
+#else /* IS_WINDOWS */
+            success = inet_aton(repr_str.c_str(), data.get());
+#endif
+        }
+        if (success != 1)
+        {
+            throw InvalidIPAddress("Malformed IP address string '"s + repr_str + "' or unknown inet_*ton error."s);
+        }
+
+        return data;
+    }
+
+    template<typename Addr, typename = Enable_If_Addr<Addr>>
+    ::std::string
+    to_repr(const Addr * data)
+    {
+        AddressFamily family;
+        if constexpr (::std::is_same_v<Addr, in6_addr>)
+        {
+            family = AF_INET6;
+        }
+        else
+        {
+            family = AF_INET;
+        }
+
+        static const size_t host_length(100);
+        char host_chars[host_length];
+        auto ptr = ::inet_ntop(family, data, host_chars, host_length);
+        if (ptr == nullptr)
+        {
+#ifdef IS_WINDOWS
+            auto err_no(::WSAGetLastError());
+        wchar_t * s = nullptr;
+        ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            nullptr, err_no,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPWSTR)&s, 0, nullptr);
+        ::std::string err(
+            s == nullptr ?
+            ""s :
+            ::std::wstring_convert<::std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(::std::wstring(s)));
+        LocalFree(s);
+#else /* IS_WINDOWS */
+            auto err_no(errno);
+            char const * err(
+                    err_no == EAFNOSUPPORT ? "Address family not supported" :
+                    (err_no == ENOSPC ? "Converted address would exceed string size" :
+                     ::gai_strerror(errno)));
+#endif /* IS_WINDOWS */
+            throw InvalidIPAddress(
+                    (::std::ostringstream() << "Malformed in_addr data or inet_ntop system error: "
+                                            << err_no << " (" << err << ")").str()
+            );
+        }
+        return host_chars;
+    }
+
+    template<typename Addr, typename = Enable_If_Addr<Addr>>
+    ::std::string
+    to_repr(::std::unique_ptr<Addr> const & data)
+    {
+        return to_repr(data.get());
+    }
+
+    template<typename Addr, typename = Enable_If_Addr<Addr>>
+    ::std::unique_ptr<Addr>
+    copy_in_addr(Addr const * data)
+    {
+        auto new_data = ::std::make_unique<Addr>();
+        ::std::memcpy(new_data.get(), data, sizeof(Addr));
+        return new_data;
+    }
+
+    template<typename Addr, typename = Enable_If_Addr<Addr>>
+    ::std::unique_ptr<Addr>
+    copy_in_addr(::std::unique_ptr<Addr const> const & data)
+    {
+        return copy_in_addr(data.get());
+    }
+
+    inline v6Scope & fill_out_scope(v6Scope & scope)
+    {
+        if (scope.scope_id && !scope.scope_name)
+        {
+            char buffer[IF_NAMESIZE];
+            if (::if_indextoname(*scope.scope_id, buffer) != nullptr)
+            {
+                scope.scope_name = ::std::string(buffer);
+            }
+        }
+        else if(scope.scope_name && !scope.scope_id)
+        {
+            uint32_t scope_id = ::if_nametoindex(scope.scope_name->c_str());
+            if (scope_id > 0)
+            {
+                scope.scope_id = scope_id;
+            }
+        }
+        return scope;
+    }
+
+    inline v6Scope scope_from(uint32_t scope_id)
+    {
+        if (scope_id == 0)
+        {
+            throw ::std::invalid_argument("IPv6 address scope ID must be greater than 0.");
+        }
+        v6Scope scope {scope_id};
+        return fill_out_scope(scope);
+    }
+
+    inline v6Scope scope_from(::std::string_view const & scope_name)
+    {
+        if (scope_name.empty())
+        {
+            throw ::std::invalid_argument("IPv6 address scope name must not be an empty string.");
+        }
+        v6Scope scope {::std::nullopt, ::std::string(scope_name)};
+        return fill_out_scope(scope);
+    }
+}
 
 OddSource::Interfaces::IPAddress::
 IPAddress(::std::string_view const & repr)
@@ -56,61 +237,38 @@ OddSource::Interfaces::IPAddress::
 {
 }
 
-namespace
+struct OddSource::Interfaces::IPv4TempDataHolder
 {
-    template<typename Addr, typename = OddSource::Interfaces::Enable_If_Addr<Addr>>
-    Addr const *
-    copy_in_addr(Addr const * data)
-    {
-        auto new_data = new Addr;
-        ::std::memcpy(new_data, data, sizeof(Addr));
-        return new_data;
-    }
-}
+    mutable ::std::unique_ptr<in_addr> data;
+};
 
 OddSource::Interfaces::IPv4Address::
 IPv4Address(OddSource::Interfaces::IPv4Address const & other)
     : IPAddress(other),
-      _data(nullptr)
+      _data(copy_in_addr(other._data))
 {
-    delete this->_data;
-    this->_data = copy_in_addr(other._data);
-}
-
-OddSource::Interfaces::IPv4Address::
-IPv4Address(OddSource::Interfaces::IPv4Address && other) noexcept
-    : IPAddress(::std::move(other)),
-      _data(nullptr)
-{
-    ::std::swap(other._data, this->_data); // NOLINT(*-use-after-move)
 }
 
 OddSource::Interfaces::IPv4Address::
 IPv4Address(::std::string_view const & repr)
-    : IPv4Address(IPAddress::from_repr<in_addr>(repr), false)
+    : IPv4Address({from_repr<in_addr>(repr)})
 {
 }
 
 OddSource::Interfaces::IPv4Address::
 IPv4Address(in_addr const * data)
-    : IPv4Address(data, true)
+    : IPv4Address({copy_in_addr(data)})
 {
 }
 
 OddSource::Interfaces::IPv4Address::
-IPv4Address(in_addr const * data, bool copy_data)
-    : IPv4Address(IPAddress::to_repr(data), data, copy_data)
-{
-}
-
-OddSource::Interfaces::IPv4Address::
-IPv4Address(::std::string_view const & repr, in_addr const * data, bool copy_data)
-    : IPAddress(repr),
-      _data(copy_data ? copy_in_addr(data) : data)
+IPv4Address(IPv4TempDataHolder const & temp)
+    : IPAddress(to_repr(temp.data)),
+      _data(::std::move(temp.data))
 {
     auto bytes = BYTES;
 
-    if (*reinterpret_cast<uint32_t const *>(this->_data) == 0)
+    if (*reinterpret_cast<uint32_t const *>(this->_data.get()) == 0)
     {
         this->_is_unspecified = true;
         this->_is_reserved = true;
@@ -179,62 +337,16 @@ IPv4Address(::std::string_view const & repr, in_addr const * data, bool copy_dat
     }
 }
 
-OddSource::Interfaces::IPv4Address::
-~IPv4Address()
+struct OddSource::Interfaces::IPv6TempDataHolder
 {
-    delete this->_data;
-}
-
-namespace
-{
-    using namespace OddSource::Interfaces;
-
-    inline v6Scope & fill_out_scope(v6Scope & scope)
-    {
-        if (scope.scope_id && !scope.scope_name)
-        {
-            char buffer[IF_NAMESIZE];
-            if (::if_indextoname(*scope.scope_id, buffer) != nullptr)
-            {
-                scope.scope_name = ::std::string(buffer);
-            }
-        }
-        else if(scope.scope_name && !scope.scope_id)
-        {
-            uint32_t scope_id = ::if_nametoindex(scope.scope_name->c_str());
-            if (scope_id > 0)
-            {
-                scope.scope_id = scope_id;
-            }
-        }
-        return scope;
-    }
-
-    inline v6Scope scope_from(uint32_t scope_id)
-    {
-        if (scope_id == 0)
-        {
-            throw ::std::invalid_argument("IPv6 address scope ID must be greater than 0.");
-        }
-        v6Scope scope {scope_id};
-        return fill_out_scope(scope);
-    }
-
-    inline v6Scope scope_from(::std::string_view const & scope_name)
-    {
-        if (scope_name.empty())
-        {
-            throw ::std::invalid_argument("IPv6 address scope name must not be an empty string.");
-        }
-        v6Scope scope {::std::nullopt, ::std::string(scope_name)};
-        return fill_out_scope(scope);
-    }
-}
+    mutable ::std::unique_ptr<in6_addr> data;
+    mutable ::std::optional<v6Scope> scope = ::std::nullopt;
+};
 
 OddSource::Interfaces::IPv6Address::
 IPv6Address(OddSource::Interfaces::IPv6Address const & other)
     : IPAddress(other),
-      _data(nullptr),
+      _data(copy_in_addr(other._data)),
       _scope(other._scope),
       _without_scope(other._without_scope),
       _is_unique_local(other._is_unique_local),
@@ -245,67 +357,46 @@ IPv6Address(OddSource::Interfaces::IPv6Address const & other)
       _is_6to4(other._is_6to4),
       _multicast_flags(other._multicast_flags)
 {
-    delete this->_data;
-    this->_data = copy_in_addr(other._data);
-}
-
-OddSource::Interfaces::IPv6Address::
-IPv6Address(OddSource::Interfaces::IPv6Address && other) noexcept
-    : IPAddress(::std::move(other)),
-      _data(nullptr),
-      _scope(other._scope), // NOLINT(*-use-after-move)
-      _without_scope(other._without_scope), // NOLINT(*-use-after-move)
-      _is_unique_local(other._is_unique_local), // NOLINT(*-use-after-move)
-      _is_site_local(other._is_site_local), // NOLINT(*-use-after-move)
-      _is_v4_mapped(other._is_v4_mapped), // NOLINT(*-use-after-move)
-      _is_v4_compatible(other._is_v4_compatible), // NOLINT(*-use-after-move)
-      _is_v4_translated(other._is_v4_translated), // NOLINT(*-use-after-move)
-      _is_6to4(other._is_6to4), // NOLINT(*-use-after-move)
-      _multicast_flags(other._multicast_flags) // NOLINT(*-use-after-move)
-{
-    ::std::swap(other._data, this->_data); // NOLINT(*-use-after-move)
 }
 
 OddSource::Interfaces::IPv6Address::
 IPv6Address(::std::string_view const & repr)
-    : IPv6Address(repr, IPAddress::from_repr<in6_addr>(IPv6Address::strip_scope(repr)), ::std::nullopt, false)
+    : IPv6Address(
+        ::std::string(IPv6Address::strip_scope(repr)),
+        {from_repr<in6_addr>(IPv6Address::strip_scope(repr)), IPv6Address::extract_scope(repr)})
 {
 }
 
 OddSource::Interfaces::IPv6Address::
 IPv6Address(in6_addr const * data)
-    : IPv6Address(IPAddress::to_repr(data), data, ::std::nullopt, true)
+    : IPv6Address(to_repr(data), {copy_in_addr(data)})
 {
 }
 
 OddSource::Interfaces::IPv6Address::
 IPv6Address(in6_addr const * data, uint32_t scope_id)
-    : IPv6Address(data, scope_from(scope_id))
+    : IPv6Address(to_repr(data), {copy_in_addr(data), scope_from(scope_id)})
 {
 }
 
 OddSource::Interfaces::IPv6Address::
 IPv6Address(in6_addr const * data, ::std::string_view const & scope_name)
-    : IPv6Address(data, scope_from(scope_name))
+    : IPv6Address(to_repr(data), {copy_in_addr(data), scope_from(scope_name)})
 {
 }
 
 OddSource::Interfaces::IPv6Address::
 IPv6Address(in6_addr const * data, v6Scope const & scope)
-    : IPv6Address(IPv6Address::add_scope(IPAddress::to_repr(data), scope), data, scope, true)
+    : IPv6Address(to_repr(data), {copy_in_addr(data), scope})
 {
 }
 
 OddSource::Interfaces::IPv6Address::
-IPv6Address(
-    ::std::string_view const & repr,
-    in6_addr const * data,
-    ::std::optional<v6Scope> const & scope,
-    bool copy_data)
-    : IPAddress(repr),
-      _data(copy_data ? copy_in_addr(data) : data),
-      _scope(scope ? scope : IPv6Address::extract_scope(repr)),
-      _without_scope(IPv6Address::strip_scope(repr))
+IPv6Address(::std::string const & repr, IPv6TempDataHolder const & holder)
+    : IPAddress(IPv6Address::add_scope(repr, holder.scope)),
+      _data(::std::move(holder.data)),
+      _scope(holder.scope ? holder.scope : IPv6Address::extract_scope(repr)),
+      _without_scope(repr)
 {
     auto bytes = BYTES;
     auto words = WORDS;
@@ -398,21 +489,15 @@ IPv6Address(
     }
 }
 
-OddSource::Interfaces::IPv6Address::
-~IPv6Address()
-{
-    delete this->_data;
-}
-
 OddSource::Interfaces::IPv6Address
 OddSource::Interfaces::IPv6Address::
 normalize() const
 {
     if (this->_scope)
     {
-        return {this->_data, *this->_scope};
+        return {this->_data.get(), *this->_scope};
     }
-    return {this->_data};
+    return {this->_data.get()};
 }
 
 ::std::string_view

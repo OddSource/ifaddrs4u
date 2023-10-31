@@ -1,120 +1,10 @@
 #ifdef IS_WINDOWS
-#include <winsock2.h>
 #include <ws2tcpip.h>
 #else /* IS_WINDOWS */
-#include <arpa/inet.h>
-#include <cerrno>
-#include <netdb.h>
 #include <netinet/in.h>
-#include <sys/socket.h>
 #endif /* IS_WINDOWS */
 
 #include <sstream>
-
-template<typename Addr, typename>
-const Addr *
-OddSource::Interfaces::IPAddress::from_repr(::std::string_view const & repr)
-{
-    if (repr.length() == 0)
-    {
-        throw InvalidIPAddress("Invalid empty IP address string.");
-    }
-
-    ::std::string repr_str(repr);
-    auto data = new Addr[sizeof(Addr)];
-    int success;
-    if constexpr (::std::is_same_v<Addr, in6_addr>)
-    {
-        // inet_pton can also handle IPv4 addresses, but only in dotted-decimal format
-        // (1.2.3.4), not in octal, hexadecimal, or any other valid IPv4 format.
-        success = inet_pton(AF_INET6, repr_str.c_str(), data);
-    }
-    else
-    {
-        int num_dots(0);
-        for (char c : repr)
-        {
-            if (c == '.')
-            {
-                num_dots++;
-            }
-        }
-        if (num_dots != 3)
-        {
-            // some implementations of inet_aton tolerate incomplete addresses, but we do not
-            throw InvalidIPAddress(
-                    "Malformed IPv4 address string '"s + repr_str + "' with "s +
-                    ::std::to_string(num_dots + 1) + " parts instead of 4"s);
-        }
-        // inet_aton/inet_addr, however, can handle IPv4 addresses in all valid formats.
-#ifdef IS_WINDOWS
-        auto raw = inet_addr(repr);
-        if (raw == INADDR_NONE)
-        {
-            success = 0;
-        }
-        else
-        {
-            ::std::memcpy(data, raw, sizeof(Addr));
-        }
-#else /* IS_WINDOWS */
-        success = inet_aton(repr_str.c_str(), data);
-#endif
-    }
-    if (success != 1)
-    {
-        delete[] data;
-        throw InvalidIPAddress("Malformed IP address string '"s + repr_str + "' or unknown inet_*ton error."s);
-    }
-
-    return data;
-}
-
-template<typename Addr, typename>
-::std::string
-OddSource::Interfaces::IPAddress::to_repr(const Addr * data)
-{
-    AddressFamily family;
-    if constexpr (::std::is_same_v<Addr, in6_addr>)
-    {
-        family = AF_INET6;
-    }
-    else
-    {
-        family = AF_INET;
-    }
-
-    static const size_t host_length(100);
-    char host_chars[host_length];
-    auto ptr = ::inet_ntop(family, data, host_chars, host_length);
-    if (ptr == nullptr)
-    {
-#ifdef IS_WINDOWS
-        auto err_no(::WSAGetLastError());
-        wchar_t * s = nullptr;
-        ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-            nullptr, err_no,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            (LPWSTR)&s, 0, nullptr);
-        ::std::string err(
-            s == nullptr ?
-            ""s :
-            ::std::wstring_convert<::std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(::std::wstring(s)));
-        LocalFree(s);
-#else /* IS_WINDOWS */
-        auto err_no(errno);
-        char const * err(
-            err_no == EAFNOSUPPORT ? "Address family not supported" :
-                (err_no == ENOSPC ? "Converted address would exceed string size" :
-                    ::gai_strerror(errno)));
-#endif /* IS_WINDOWS */
-        throw InvalidIPAddress(
-            (::std::ostringstream() << "Malformed in_addr data or inet_ntop system error: "
-                                    << err_no << " (" << err << ")").str()
-        );
-    }
-    return host_chars;
-}
 
 inline
 OddSource::Interfaces::IPAddress::
@@ -141,7 +31,7 @@ inline
 OddSource::Interfaces::IPv4Address::
 operator in_addr const *() const
 {
-    return this->_data;
+    return this->_data.get();
 }
 
 inline size_t
@@ -155,7 +45,7 @@ inline
 OddSource::Interfaces::IPv6Address::
 operator in6_addr const *() const
 {
-    return this->_data;
+    return this->_data.get();
 }
 
 inline bool
@@ -225,8 +115,8 @@ inline bool
 OddSource::Interfaces::IPv4Address::
 operator==(OddSource::Interfaces::IPv4Address const & other) const
 {
-    return (*reinterpret_cast<uint32_t const *>(this->_data) ==
-            *reinterpret_cast<uint32_t const *>(other._data));
+    return (*reinterpret_cast<uint32_t const *>(this->_data.get()) ==
+            *reinterpret_cast<uint32_t const *>(other._data.get()));
 }
 
 inline bool
@@ -355,8 +245,8 @@ inline bool
 OddSource::Interfaces::IPv6Address::
 operator==(OddSource::Interfaces::IPv6Address const & other) const
 {
-    auto data1 = reinterpret_cast<uint8_t const *>(this->_data);
-    auto data2 = reinterpret_cast<uint8_t const *>(other._data);
+    auto data1 = reinterpret_cast<uint8_t const *>(this->_data.get());
+    auto data2 = reinterpret_cast<uint8_t const *>(other._data.get());
     auto length = this->data_length();
     for(size_t i(0); i < length; i++)
     {

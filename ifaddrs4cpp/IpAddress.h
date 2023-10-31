@@ -9,6 +9,7 @@
 #endif /* IS_WINDOWS */
 
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -56,14 +57,6 @@ namespace OddSource::Interfaces
         RendezvousEmbedded = 0b0100,
         ReservedFlag = 0b1000 // unused, here for clarity and unit testing
     };
-
-    class IPAddress;
-    class IPv4Address;
-    class IPv6Address;
-
-    template<typename Addr>
-    using Enable_If_Addr = ::std::enable_if_t<::std::is_same_v<Addr, in_addr> ||
-                                              ::std::is_same_v<Addr, in6_addr>>;
 
     class OddSource_Export IPAddress
     {
@@ -172,12 +165,6 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         inline virtual size_t data_length() const = 0;
 
-        template<typename Addr, typename = Enable_If_Addr<Addr>>
-        static const Addr * from_repr(::std::string_view const &);
-
-        template<typename Addr, typename = Enable_If_Addr<Addr>>
-        static ::std::string to_repr(const Addr *);
-
         ::std::string const _representation;
         bool _is_unspecified = false;
         bool _is_loopback = false;
@@ -188,6 +175,8 @@ namespace OddSource::Interfaces
         ::std::optional<MulticastScope> _multicast_scope;
     };
 
+    struct IPv4TempDataHolder;
+
     class OddSource_Export IPv4Address : public IPAddress
     {
     public:
@@ -197,7 +186,7 @@ namespace OddSource::Interfaces
         IPv4Address(IPv4Address const &);
 
         // move constructor
-        IPv4Address(IPv4Address &&) noexcept;
+        IPv4Address(IPv4Address &&) noexcept = default;
 
         // conversion constructor
         IPv4Address(::std::string_view const &); // NOLINT(*-explicit-constructor)
@@ -205,7 +194,7 @@ namespace OddSource::Interfaces
         // conversion constructor
         IPv4Address(in_addr const *); // NOLINT(*-explicit-constructor)
 
-        ~IPv4Address() override;
+        ~IPv4Address() override = default;
 
         [[nodiscard]]
         inline operator in_addr const *() const; // NOLINT(*-explicit-constructor)
@@ -227,11 +216,9 @@ namespace OddSource::Interfaces
         inline size_t data_length() const final;
 
     private:
-        IPv4Address(in_addr const *, bool);
+        explicit IPv4Address(IPv4TempDataHolder const &);
 
-        IPv4Address(::std::string_view const &, in_addr const *, bool);
-
-        in_addr const * _data;
+        ::std::unique_ptr<in_addr const> _data;
     };
 
     struct OddSource_Export v6Scope
@@ -239,6 +226,8 @@ namespace OddSource::Interfaces
         ::std::optional<uint32_t> scope_id = ::std::nullopt;
         ::std::optional<::std::string> scope_name = ::std::nullopt;
     };
+
+    struct IPv6TempDataHolder;
 
     class OddSource_Export IPv6Address : public IPAddress
     {
@@ -249,7 +238,7 @@ namespace OddSource::Interfaces
         IPv6Address(IPv6Address const &);
 
         // move constructor
-        IPv6Address(IPv6Address &&) noexcept;
+        IPv6Address(IPv6Address &&) noexcept = default;
 
         // conversion constructor
         IPv6Address(::std::string_view const &); // NOLINT(*-explicit-constructor)
@@ -263,7 +252,7 @@ namespace OddSource::Interfaces
 
         IPv6Address(in6_addr const *, v6Scope const & scope);
 
-        ~IPv6Address() override;
+        ~IPv6Address() override = default;
 
         [[nodiscard]]
         inline operator in6_addr const *() const; // NOLINT(*-explicit-constructor)
@@ -376,11 +365,7 @@ namespace OddSource::Interfaces
         inline size_t data_length() const final;
 
     private:
-        IPv6Address(
-            ::std::string_view const &,
-            in6_addr const *,
-            ::std::optional<v6Scope> const & scope,
-            bool);
+        IPv6Address(::std::string const &, IPv6TempDataHolder const &);
 
         [[nodiscard]]
         static ::std::string_view strip_scope(::std::string_view const &);
@@ -391,7 +376,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         static ::std::string add_scope(::std::string const &, ::std::optional<v6Scope> const &);
 
-        in6_addr const * _data;
+        ::std::unique_ptr<in6_addr const> _data;
         ::std::optional<v6Scope> const _scope;
         ::std::string const _without_scope;
         bool _is_unique_local = false;
@@ -405,6 +390,5 @@ namespace OddSource::Interfaces
 
     inline ::std::ostream & operator<<(::std::ostream &, IPAddress const &);
 }
-
 
 #include "IpAddress.hpp"

@@ -24,6 +24,8 @@ namespace OddSource::Interfaces
         InvalidMacAddress(InvalidMacAddress const & other) noexcept = default;
     };
 
+    struct MacTempDataHolder;
+
     class OddSource_Export MacAddress
     {
     public:
@@ -33,13 +35,13 @@ namespace OddSource::Interfaces
         MacAddress(MacAddress const &);
 
         // move constructor
-        MacAddress(MacAddress &&) noexcept;
+        MacAddress(MacAddress &&) noexcept = default;
 
         MacAddress(::std::string_view const &); // NOLINT(*-explicit-constructor)
 
-        MacAddress(uint8_t const [MAX_ADAPTER_ADDRESS_LENGTH], uint8_t length);
+        MacAddress(uint8_t const [MAX_ADAPTER_ADDRESS_LENGTH], uint8_t);
 
-        ~MacAddress();
+        ~MacAddress() = default;
 
         [[nodiscard]]
         inline operator ::std::string() const; // NOLINT(*-explicit-constructor)
@@ -60,16 +62,10 @@ namespace OddSource::Interfaces
         inline bool operator!=(MacAddress const &) const;
 
     private:
-        MacAddress(::std::string_view const &, uint8_t const *, uint8_t);
-
-        [[nodiscard]]
-        static uint8_t const * from_repr(::std::string_view const &);
-
-        [[nodiscard]]
-        static ::std::string to_repr(uint8_t const [MAX_ADAPTER_ADDRESS_LENGTH], uint8_t);
+        MacAddress(::std::string_view const &, MacTempDataHolder const &);
 
         ::std::string const _representation;
-        uint8_t const * _data;
+        ::std::unique_ptr<uint8_t const[]> _data;
         uint8_t const _data_length;
     };
 

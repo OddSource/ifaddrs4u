@@ -1,6 +1,14 @@
 #include "../IpAddress.h"
 #include "main.h"
 
+#ifdef IS_WINDOWS
+#include <netioapi.h>
+#else /* IS_WINDOWS */
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#endif /* IS_WINDOWS */
+
 using namespace OddSource::Interfaces;
 
 class TestIPv4Address : public Tests::Test

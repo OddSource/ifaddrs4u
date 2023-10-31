@@ -16,7 +16,7 @@ inline
 OddSource::Interfaces::MacAddress::
 operator uint8_t const *() const
 {
-    return this->_data;
+    return this->_data.get();
 }
 
 inline uint8_t
