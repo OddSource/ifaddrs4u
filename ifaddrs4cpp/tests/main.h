@@ -28,6 +28,7 @@
 #ifndef UNUSED
 #define UNUSED "unused"
 #endif /* UNUSED */
+#define EXPAND(x) x
 #define GET_1_OR_2_MACRO(_1,_2,NAME,...) NAME
 #define GET_2_OR_3_MACRO(_1,_2,_3,NAME,...) NAME
 #define QUOTED_STRINGIFY_ARGUMENT(x) #x
@@ -62,14 +63,14 @@ namespace OddSource::Interfaces::Tests
 
 #define assert_equal_with_message(v1, v2, message) this->assert_equal(v1, v2, message, __FILE__, __LINE__)
 #define assert_equal_without_message(v1, v2) this->assert_equal(v1, v2, ::std::nullopt, __FILE__, __LINE__)
-#define assert_equals(...) GET_2_OR_3_MACRO(__VA_ARGS__, assert_equal_with_message, assert_equal_without_message, UNUSED)(__VA_ARGS__)
+#define assert_equals(...) EXPAND(GET_2_OR_3_MACRO(__VA_ARGS__, assert_equal_with_message, assert_equal_without_message, UNUSED)(__VA_ARGS__))
 
         template<typename V1, typename V2>
         inline void assert_not_equal(V1 const &, V2 const &, ::std::optional<::std::string const>, char const *, int);
 
 #define assert_not_equal_with_message(v1, v2, message) this->assert_not_equal(v1, v2, message, __FILE__, __LINE__)
 #define assert_not_equal_without_message(v1, v2) this->assert_not_equal(v1, v2, ::std::nullopt, __FILE__, __LINE__)
-#define assert_not_equals(...) GET_2_OR_3_MACRO(__VA_ARGS__, assert_not_equal_with_message, assert_not_equal_without_message, UNUSED)(__VA_ARGS__)
+#define assert_not_equals(...) EXPAND(GET_2_OR_3_MACRO(__VA_ARGS__, assert_not_equal_with_message, assert_not_equal_without_message, UNUSED)(__VA_ARGS__))
 
         inline void assert_true(bool, ::std::optional<::std::string const>, char const *, int);
 
@@ -77,7 +78,7 @@ namespace OddSource::Interfaces::Tests
 
 #define assert_that_with_message(v, message) this->assert_true(v, message, __FILE__, __LINE__)
 #define assert_that_without_message(v) this->assert_true(v, ::std::nullopt, __FILE__, __LINE__)
-#define assert_that(...) GET_1_OR_2_MACRO(__VA_ARGS__, assert_that_with_message, assert_that_without_message, UNUSED)(__VA_ARGS__)
+#define assert_that(...) EXPAND(GET_1_OR_2_MACRO(__VA_ARGS__, assert_that_with_message, assert_that_without_message, UNUSED)(__VA_ARGS__))
 
         inline void assert_false(bool, ::std::optional<::std::string const>, char const *, int);
 
@@ -85,14 +86,14 @@ namespace OddSource::Interfaces::Tests
 
 #define assert_not_that_with_message(v, message) this->assert_false(v, message, __FILE__, __LINE__)
 #define assert_not_that_without_message(v) this->assert_false(v, ::std::nullopt, __FILE__, __LINE__)
-#define assert_not_that(...) GET_1_OR_2_MACRO(__VA_ARGS__, assert_not_that_with_message, assert_not_that_without_message, UNUSED)(__VA_ARGS__)
+#define assert_not_that(...) EXPAND(GET_1_OR_2_MACRO(__VA_ARGS__, assert_not_that_with_message, assert_not_that_without_message, UNUSED)(__VA_ARGS__))
 
         template<class E>
         inline void assert_except(::std::function<void()> const &, ::std::optional<::std::string const>, char const *, int);
 
 #define assert_throws_with_message(p, E, message) this->assert_except<E>([&]() -> void {p;}, message, __FILE__, __LINE__)
 #define assert_throws_without_message(p, E) this->assert_except<E>([&]() -> void {p;}, ::std::nullopt, __FILE__, __LINE__)
-#define assert_throws(...) GET_2_OR_3_MACRO(__VA_ARGS__, assert_throws_with_message, assert_throws_without_message, UNUSED)(__VA_ARGS__)
+#define assert_throws(...) EXPAND(GET_2_OR_3_MACRO(__VA_ARGS__, assert_throws_with_message, assert_throws_without_message, UNUSED)(__VA_ARGS__))
 
 #define fail_test(message) this->assert_true(false, message, __FILE__, __LINE__)
 
