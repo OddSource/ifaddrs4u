@@ -85,6 +85,7 @@ target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE cxx_std_17)
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
                        "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3;-wd4275;-wd4251;-wd4455>>")
+target_compile_definitions(${PROJECT_NAME}_compiler_flags INTERFACE ODDSOURCE_BUILDING_LIBRARY=1)
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
                       CXX_STANDARD_REQUIRED ON
@@ -101,9 +102,6 @@ if(NOT ${BUILD_STATIC_ONLY})
     add_library(${PROJECT_NAME}-shared SHARED ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-shared PUBLIC ${PROJECT_NAME}_compiler_flags)
     target_include_directories(${PROJECT_NAME}-shared PUBLIC "${PROJECT_BINARY_DIR}")
-    if(${IS_WINDOWS})
-        target_compile_definitions(${PROJECT_NAME}-shared PUBLIC ODDSOURCE_BUILDING_LIBRARY=1)
-    endif()
 endif()
 
 if(NOT ${BUILD_DYNAMIC_ONLY})
@@ -111,9 +109,6 @@ if(NOT ${BUILD_DYNAMIC_ONLY})
     add_library(${PROJECT_NAME}-static STATIC ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-static PUBLIC ${PROJECT_NAME}_compiler_flags)
     target_include_directories(${PROJECT_NAME}-static PUBLIC "${PROJECT_BINARY_DIR}")
-    if(${IS_WINDOWS})
-        target_compile_definitions(${PROJECT_NAME}-static PUBLIC ODDSOURCE_BUILDING_LIBRARY=1)
-    endif()
     set_target_properties(${PROJECT_NAME}-static PROPERTIES
                           POSITION_INDEPENDENT_CODE ON)
 endif()

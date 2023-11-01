@@ -50,12 +50,17 @@
 #endif /* !<net/if_dl.h> && !<linux/if_packet.h> */
 #endif /* !IS_WINDOWS */
 #include <cassert>
-#include <codecvt>
 #include <functional>
-#include <locale>
 #include <mutex>
 #include <shared_mutex>
 #include <string>
+
+#ifdef IS_WINDOWS
+#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+#include <codecvt>
+#include <locale>
+#undef _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+#endif /* IS_WINDOWS */
 
 #include "Interface.h"
 #include "Interfaces.h"
@@ -167,10 +172,11 @@ namespace OddSource::Interfaces
                 {
                     flags |= SupportsMulticast;
                 }
+                ::std::string uuid(ifa->AdapterName);
                 Interface iface(
                     ifa->IfIndex,
                     ::std::wstring_convert<::std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(ifa->FriendlyName),
-                    ifa->AdapterName.substr(1, uuid.length() - 2), // strip {}
+                    uuid.substr(1, uuid.length() - 2), // strip {}
                     flags,
                     ifa->Mtu);
 
@@ -311,7 +317,7 @@ namespace OddSource::Interfaces
                 if (candidate->sa_family == AF_INET)
                 {
                     auto cand = reinterpret_cast<sockaddr_in *>(candidate);
-                    auto cand_bytes = reinterpret_cast<uint8_t * bytes>(cand.sin_addr.s_addr);
+                    auto cand_bytes = reinterpret_cast<uint8_t *>(cand.sin_addr.s_addr);
                     uint8_t i, first_byte_with_bcast(0);
                     for (i = 3; i >= 0; i--)
                     {
@@ -343,7 +349,7 @@ namespace OddSource::Interfaces
                 if (candidate->sa_family == AF_INET)
                 {
                     auto cand = reinterpret_cast<sockaddr_in *>(candidate);
-                    auto cand_bytes = reinterpret_cast<uint8_t * bytes>(cand.sin_addr.s_addr);
+                    auto cand_bytes = reinterpret_cast<uint8_t *>(cand.sin_addr.s_addr);
                     uint8_t i, first_byte_with_bcast(0);
                     for (i = 3; i >= 0; i--)
                     {
@@ -356,7 +362,7 @@ namespace OddSource::Interfaces
                     {
                         continue;
                     }
-                    auto addr_bytes = reinterpret_cast<uint8_t * bytes>(addr.sin_addr.s_addr);
+                    auto addr_bytes = reinterpret_cast<uint8_t *>(addr.sin_addr.s_addr);
                     bool do_continue(false);
                     for (i = 0; i < first_byte_with_bcast; i++)
                     {

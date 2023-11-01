@@ -21,14 +21,13 @@
 
 #ifdef IS_WINDOWS
 #ifdef ODDSOURCE_BUILDING_LIBRARY
-#pragma message "Defining OddSource_Export as __declspec(dllexport)"
+#pragma message("COMPILATION DEBUG: Defining OddSource_Export as __declspec(dllexport)")
 #define OddSource_Export __declspec(dllexport)
 #else /* ODDSOURCE_BUILDING_LIBRARY */
-#pragma message "Defining OddSource_Export as __declspec(dllimport)"
+#pragma message("COMPILATION DEBUG: Defining OddSource_Export as __declspec(dllimport)")
 #define OddSource_Export __declspec(dllimport)
 #endif /* !ODDSOURCE_BUILDING_LIBRARY */
 #else /* IS_WINDOWS */
-#pragma message "Defining OddSource_Export as __attribute((visibility('default')))"
 #define OddSource_Export __attribute((visibility("default")))
 #endif /* IS_WINDOWS */
 
