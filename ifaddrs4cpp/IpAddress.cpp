@@ -85,7 +85,7 @@ namespace
             // inet_aton/RtlIpv4StringToAddress, however, can handle IPv4 addresses in all valid formats.
 #ifdef IS_WINDOWS
             char const * end = nullptr;
-            success = RtlIpv4StringToAddress(repr_str.c_str(), false, end, data.get());
+            success = RtlIpv4StringToAddress(repr_str.c_str(), false, &end, data.get());
             if (success == STATUS_INVALID_PARAMETER)
             {
                 throw InvalidIPAddress(
