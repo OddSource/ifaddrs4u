@@ -30,10 +30,8 @@ namespace
         if (prefix_length > address.maximum_prefix_length())
         {
             throw ::std::invalid_argument(
-                (::std::ostringstream() << "Invalid prefix length "
-                                        << ::std::to_string(prefix_length)
-                                        << " for IPv"
-                                        << ::std::to_string(address.version())).str());
+                "Invalid prefix length "s + ::std::to_string(prefix_length) +
+                " for IPv" + ::std::to_string(address.version()));
         }
         return prefix_length == 0 ? ::std::nullopt : ::std::optional<uint8_t>(prefix_length);
     }
@@ -163,7 +161,9 @@ inline
 OddSource::Interfaces::InterfaceIPAddress<IPAddressT>::
 operator ::std::string() const
 {
-    return (::std::ostringstream() << *this).str();
+    ::std::ostringstream oss;
+    oss << *this;
+    return oss.str();
 }
 
 template<class IPAddressT>

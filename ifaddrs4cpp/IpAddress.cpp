@@ -144,9 +144,7 @@ namespace
                      ::gai_strerror(errno)));
 #endif /* IS_WINDOWS */
             throw InvalidIPAddress(
-                    (::std::ostringstream() << "Malformed in_addr data or inet_ntop system error: "
-                                            << err_no << " (" << err << ")").str()
-            );
+                "Malformed in_addr data or inet_ntop system error: "s + ::std::to_string(err_no) + " ("s + err + ")"s);
         }
         return host_chars;
     }

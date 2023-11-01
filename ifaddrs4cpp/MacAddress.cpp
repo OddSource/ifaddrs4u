@@ -52,9 +52,7 @@ namespace
 #define WRONG_CHAR_THROW { \
             if ((ch < '0' || ch > '9') && (ch < 'a' || ch > 'f')) \
             { \
-                throw InvalidMacAddress(( \
-                    ::std::ostringstream() << "MAC address character out of range: " << ch \
-                ).str()); \
+                throw InvalidMacAddress("MAC address character out of range: "s + ch); \
             } \
         }
 
@@ -64,20 +62,20 @@ namespace
         // GNUC has ether_aton_r, which is thread-safe, but BSD systems have
         // ether_aton, which is not thread safe and basically cannot safely be used.
         // Windows has no built-in method until C#. So ... let's try something simple-ish.
-        size_t predicted_length((size_t) predict_repr_length(repr));
+        auto predicted_length((size_t) predict_repr_length(repr));
         if (predicted_length > MAX_ADAPTER_ADDRESS_LENGTH)
         {
-            throw InvalidMacAddress((
-                                            ::std::ostringstream() << "MAC address length (" << predicted_length
-                                                                   << " bytes) too long (max " << MAX_ADAPTER_ADDRESS_LENGTH
-                                                                   << " bytes).").str());
+            ::std::ostringstream oss;
+            oss << "MAC address length (" << predicted_length
+                << " bytes) too long (max " << MAX_ADAPTER_ADDRESS_LENGTH << " bytes).";
+            throw InvalidMacAddress(oss.str());
         }
         if (predicted_length < MIN_ADAPTER_ADDRESS_LENGTH)
         {
-            throw InvalidMacAddress((
-                                            ::std::ostringstream() << "MAC address length (" << predicted_length
-                                                                   << " bytes) too short (min " << MIN_ADAPTER_ADDRESS_LENGTH
-                                                                   << " bytes).").str());
+            ::std::ostringstream oss;
+            oss << "MAC address length (" << predicted_length
+                 << " bytes) too short (min " << MIN_ADAPTER_ADDRESS_LENGTH << " bytes).";
+            throw InvalidMacAddress(oss.str());
         }
 
         auto data = ::std::make_unique<uint8_t[]>(MAX_ADAPTER_ADDRESS_LENGTH);
@@ -123,24 +121,22 @@ namespace
     ::std::string
     to_repr(uint8_t const data[MAX_ADAPTER_ADDRESS_LENGTH], uint8_t data_length)
     {
+        ::std::ostringstream oss;
         if (data_length > MAX_ADAPTER_ADDRESS_LENGTH)
         {
-            throw InvalidMacAddress((
-                                            ::std::ostringstream() << "MAC address length " << data_length << " greater than allowed length "
-                                                                   << MAX_ADAPTER_ADDRESS_LENGTH
-                                    ).str());
+            oss << "MAC address length " << data_length << " greater than allowed length "
+                << MAX_ADAPTER_ADDRESS_LENGTH;
+            throw InvalidMacAddress(oss.str());
         }
         if (data_length < MIN_ADAPTER_ADDRESS_LENGTH)
         {
-            throw InvalidMacAddress((
-                                            ::std::ostringstream() << "MAC address length (" << data_length
-                                                                   << " bytes) too short (min " << MIN_ADAPTER_ADDRESS_LENGTH
-                                                                   << " bytes).").str());
+            oss << "MAC address length (" << data_length
+                << " bytes) too short (min " << MIN_ADAPTER_ADDRESS_LENGTH << " bytes).";
+            throw InvalidMacAddress(oss.str());
         }
 
         static const uint8_t formatted_byte_size(3);
 
-        ::std::ostringstream oss;
         auto buffer = new char[formatted_byte_size];
         for(uint8_t i(0); i < data_length; i++)
         {

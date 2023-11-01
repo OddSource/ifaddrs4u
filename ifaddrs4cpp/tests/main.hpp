@@ -47,14 +47,12 @@ assert_equal(
         ::std::ostringstream oss;
         oss << "v1 [" << type_id_string(v1) << "(" << v1 << ")] != v2 ["
                       << type_id_string(v2) << "(" << v2 << ")], but they should be equal.";
-
-        ::std::string msg(oss.str());
         if (message)
         {
-            msg += " " + *message;
+            oss << " " << *message;
         }
 
-        this->failure(msg, file, line);
+        this->failure(oss.str(), file, line);
         throw TestAssertFailureAbort();
     }
 }
@@ -73,14 +71,12 @@ assert_not_equal(
         ::std::ostringstream oss;
         oss << "v1 [" << type_id_string(v1) << "(" << v1 << ")] == v2 ["
                       << type_id_string(v2) << "(" << v2 << ")], but they should not be equal";
-
-        ::std::string msg(oss.str());
         if (message)
         {
-            msg += " " + *message;
+            oss << " " << *message;
         }
 
-        this->failure(msg, file, line);
+        this->failure(oss.str(), file, line);
         throw TestAssertFailureAbort();
     }
 }
@@ -169,9 +165,8 @@ assert_except(
         predicate();
         if (!message)
         {
-            message.emplace((::std::ostringstream() << "Expected exception of type "
-                                                    << demangle(typeid(E).name())
-                                                    << ", but no exception thrown.").str());
+            message.emplace(
+                "Expected exception of type "s + demangle(typeid(E).name()) + ", but no exception thrown."s);
         }
         this->failure(*message, file, line);
     }
@@ -185,8 +180,7 @@ inline void
 OddSource::Interfaces::Tests::Test::
 failure(::std::string const & message, char const * file, int line)
 {
-    this->_failures.emplace_back((
-        ::std::ostringstream() << file << ":" << line << " - " << message).str());
+    this->_failures.emplace_back(file + ":"s + ::std::to_string(line) + " - "s + message);
 }
 
 inline void

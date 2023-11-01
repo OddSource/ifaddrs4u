@@ -20,7 +20,10 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <string>
 #include <vector>
+
+using std::string_literals::operator""s;
 
 #define GET_1_OR_2_MACRO(_1,_2,NAME,...) NAME
 #define GET_2_OR_3_MACRO(_1,_2,_3,NAME,...) NAME

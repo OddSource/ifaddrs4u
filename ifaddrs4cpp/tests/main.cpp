@@ -123,9 +123,7 @@ run()
         }
         catch (::std::exception const & e)
         {
-            this->error((
-                ::std::ostringstream() << "Exception '" << type_id_string(e)
-                                       << "' occurred: " << e.what()).str());
+            this->error("Exception '"s + type_id_string(e) + "' occurred: "s + e.what());
         }
 
         if (error_count != this->_errors.size())
