@@ -64,7 +64,7 @@ public:
     void test_string_round_trip_unscoped()
     {
         IPv6Address address("2001::dead:beef");
-        assert_equals(::std::string(address), "2001::dead:beef");
+        assert_equals((::std::string)address, "2001::dead:beef");
         assert_equals(
                 strcmp((char const *)address, "2001::dead:beef"),
                 0,
@@ -82,7 +82,7 @@ public:
     void test_string_round_trip_scoped()
     {
         IPv6Address address("fe80::f1:1612:447b:70c5%en0");
-        assert_equals(::std::string(address), "fe80::f1:1612:447b:70c5%en0");
+        assert_equals((::std::string)address, "fe80::f1:1612:447b:70c5%en0");
         assert_equals(
             strcmp((char const *)address, "fe80::f1:1612:447b:70c5%en0"),
             0,
@@ -98,7 +98,7 @@ public:
         assert_equals(oss.str(), "fe80::b0fb:b8ff:fe5b:84e8%awl1");
 
         IPv6Address address2("fe80::f1:1612:447b:70c5%117");
-        assert_equals(::std::string(address2), "fe80::f1:1612:447b:70c5%117");
+        assert_equals((::std::string)address2, "fe80::f1:1612:447b:70c5%117");
         assert_equals(
             strcmp((char const *)address2, "fe80::f1:1612:447b:70c5%117"),
             0,
@@ -116,7 +116,7 @@ public:
         in6_addr data {};
         inet_pton(AF_INET6, "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5", &data);
         IPv6Address address(&data);
-        assert_equals(::std::string(address), "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5");
+        assert_equals((::std::string)address, "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5");
         assert_not_that(address.has_scope_id());
 
         assert_equals(address.version(), IPv6);
@@ -137,7 +137,7 @@ public:
         in6_addr data {};
         inet_pton(AF_INET6, "fe80::f1:1612:447b:70c5", &data);
         IPv6Address address(&data, 117);
-        assert_equals(::std::string(address), "fe80::f1:1612:447b:70c5%117");
+        assert_equals((::std::string)address, "fe80::f1:1612:447b:70c5%117");
         assert_that(address.has_scope_id());
         assert_that((bool)address.scope_id());
         assert_equals(*address.scope_id(), 117u);
@@ -159,8 +159,8 @@ public:
     void test_normalize()
     {
         IPv6Address address("2001:0:0:0:de:AD:be:EF");
-        assert_equals(::std::string(address), "2001:0:0:0:de:AD:be:EF");
-        assert_equals(::std::string(address.normalize()), "2001::de:ad:be:ef");
+        assert_equals((::std::string)address, "2001:0:0:0:de:AD:be:EF");
+        assert_equals((::std::string)address.normalize(), "2001::de:ad:be:ef");
     }
 
     void test_unspecified_address()
@@ -460,15 +460,15 @@ public:
         {
             IPv6Address a("::ffff:127.0.0.1");
             assert_that(a.is_v4_mapped(), "::ffff:127.0.0.1 should be v4-mapped");
-            assert_equals(::std::string(a), "::ffff:127.0.0.1");
-            assert_equals(::std::string(a.normalize()), "::ffff:127.0.0.1");
+            assert_equals((::std::string)a, "::ffff:127.0.0.1");
+            assert_equals((::std::string)a.normalize(), "::ffff:127.0.0.1");
         }
 
         {
             IPv6Address a("::ffff:201.53.78.3");
             assert_that(a.is_v4_mapped(), "::ffff:201.53.78.3 should be v4-mapped");
-            assert_equals(::std::string(a), "::ffff:201.53.78.3");
-            assert_equals(::std::string(a.normalize()), "::ffff:201.53.78.3");
+            assert_equals((::std::string)a, "::ffff:201.53.78.3");
+            assert_equals((::std::string)a.normalize(), "::ffff:201.53.78.3");
         }
     }
 
@@ -504,15 +504,15 @@ public:
         {
             IPv6Address a("::ffff:0:127.0.0.1");
             assert_that(a.is_v4_translated(), "::ffff:0:127.0.0.1 should be v4-translated");
-            assert_equals(::std::string(a), "::ffff:0:127.0.0.1");
-            assert_equals(::std::string(a.normalize()), "::ffff:0:7f00:1");
+            assert_equals((::std::string)a, "::ffff:0:127.0.0.1");
+            assert_equals((::std::string)a.normalize(), "::ffff:0:7f00:1");
         }
 
         {
             IPv6Address a("::ffff:0:201.53.78.3");
             assert_that(a.is_v4_translated(), "::ffff:0:201.53.78.3 should be v4-translated");
-            assert_equals(::std::string(a), "::ffff:0:201.53.78.3");
-            assert_equals(::std::string(a.normalize()), "::ffff:0:c935:4e03");
+            assert_equals((::std::string)a, "::ffff:0:201.53.78.3");
+            assert_equals((::std::string)a.normalize(), "::ffff:0:c935:4e03");
         }
     }
 
@@ -548,15 +548,15 @@ public:
         {
             IPv6Address a("::127.0.0.1");
             assert_that(a.is_v4_compatible(), "::127.0.0.1 should be v4-compatible");
-            assert_equals(::std::string(a), "::127.0.0.1");
-            assert_equals(::std::string(a.normalize()), "::127.0.0.1");
+            assert_equals((::std::string)a, "::127.0.0.1");
+            assert_equals((::std::string)a.normalize(), "::127.0.0.1");
         }
 
         {
             IPv6Address a("::201.53.78.3");
             assert_that(a.is_v4_compatible(), "::201.53.78.3 should be v4-compatible");
-            assert_equals(::std::string(a), "::201.53.78.3");
-            assert_equals(::std::string(a.normalize()), "::201.53.78.3");
+            assert_equals((::std::string)a, "::201.53.78.3");
+            assert_equals((::std::string)a.normalize(), "::201.53.78.3");
         }
     }
 

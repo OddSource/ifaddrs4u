@@ -19,7 +19,10 @@
 #include <chrono>
 #include <cstring>
 #include <cstdio>
+
+#ifndef IS_WINDOWS
 #include <unistd.h>
+#endif
 
 #if (defined(__GNUC__) && __GNUC__ >= 3) || defined(__clang__)
 #include <cstdlib>

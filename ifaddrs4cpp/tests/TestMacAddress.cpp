@@ -43,13 +43,13 @@ public:
 
     void test_string_round_trip()
     {
-        assert_equals(::std::string(MacAddress("a4:83:e7:2e:a1:67")), "a4:83:e7:2e:a1:67");
+        assert_equals((::std::string)MacAddress("a4:83:e7:2e:a1:67"), "a4:83:e7:2e:a1:67");
         assert_equals(
             ::strcmp((char const *)MacAddress("b2:fb:b8:5b:84:e8:ff"), "b2:fb:b8:5b:84:e8:ff"),
             0,
             "The C strings do not match");
 
-        assert_equals(::std::string(MacAddress("a4-83-e7-2e-a1-67")), "a4-83-e7-2e-a1-67");
+        assert_equals((::std::string)MacAddress("a4-83-e7-2e-a1-67"), "a4-83-e7-2e-a1-67");
 
         ::std::ostringstream oss;
         oss << MacAddress("82:1c:78:44:5c:05");
@@ -63,7 +63,7 @@ public:
 
         {
             MacAddress address(data1, 6);
-            assert_equals(::std::string(address), "a4:e7:83:a1:2e:67");
+            assert_equals((::std::string)address, "a4:e7:83:a1:2e:67");
             assert_equals(address.length(), 6);
 
             auto data((uint8_t const *)address);
@@ -76,7 +76,7 @@ public:
 
         {
             MacAddress address(data2, 7);
-            assert_equals(::std::string(address), "b2:b8:fb:84:5b:ff:e8");
+            assert_equals((::std::string)address, "b2:b8:fb:84:5b:ff:e8");
             assert_equals(address.length(), 7);
 
             auto data((uint8_t const *)address);

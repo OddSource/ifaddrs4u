@@ -56,11 +56,11 @@ public:
 
     void test_string_round_trip()
     {
-        assert_equals(::std::string(IPv4Address("4.3.5.6")), "4.3.5.6");
+        assert_equals((::std::string)IPv4Address("4.3.5.6"), "4.3.5.6");
         assert_equals(::strcmp((char const *)IPv4Address("4.3.5.6"), "4.3.5.6"), 0, "The C strings do not match.");
 
-        assert_equals(::std::string(IPv4Address("226.000.000.037")), "226.0.0.31"); // octal
-        assert_equals(::std::string(IPv4Address("0x11.0x1b.0xf3.0x01")), "17.27.243.1"); // hexadecimal
+        assert_equals((::std::string)IPv4Address("226.000.000.037"), "226.0.0.31"); // octal
+        assert_equals((::std::string)IPv4Address("0x11.0x1b.0xf3.0x01"), "17.27.243.1"); // hexadecimal
 
         ::std::ostringstream oss;
         oss << IPv4Address("172.19.52.141");
@@ -72,7 +72,7 @@ public:
         in_addr data {};
         inet_pton(AF_INET, "192.0.2.33", &data);
         IPv4Address address(&data);
-        assert_equals(::std::string(address), "192.0.2.33");
+        assert_equals((::std::string)address, "192.0.2.33");
 
         assert_equals(address.version(), IPv4);
         assert_equals(address.maximum_prefix_length(), 32);

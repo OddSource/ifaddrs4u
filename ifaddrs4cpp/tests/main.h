@@ -22,8 +22,12 @@
 #include <optional>
 #include <vector>
 
+#include "../os.h"
 #include "../s.h"
 
+#ifndef UNUSED
+#define UNUSED "unused"
+#endif /* UNUSED */
 #define GET_1_OR_2_MACRO(_1,_2,NAME,...) NAME
 #define GET_2_OR_3_MACRO(_1,_2,_3,NAME,...) NAME
 #define QUOTED_STRINGIFY_ARGUMENT(x) #x
