@@ -58,14 +58,6 @@ set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(gcc_like_ids ARMClang AppleClang Clang GNU LCC)
 set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
 
-set(IS_WINDOWS FALSE)
-set(COPY_COMMAND "cp")
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
-    message(STATUS "Detected MSVC, enabling Windows flags")
-    set(IS_WINDOWS TRUE)
-    set(COPY_COMMAND "copy")
-endif()
-
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_DEBUG_POSTFIX -d)
 if(CMAKE_CXX_COMPILER_ID IN_LIST gcc_like_ids)
@@ -80,6 +72,12 @@ set(${PROJECT_NAME}_sources
     MacAddress.cpp)
 
 configure_file(version.h.in version.h)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
+file(COPY ${CMAKE_BINARY_DIR}/version.h DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
+file(GLOB PUBLIC_HEADERS_TO_COPY ${CMAKE_SOURCE_DIR}/*.h)
+file(COPY ${PUBLIC_HEADERS_TO_COPY} DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
+file(GLOB PUBLIC_HEADERS_TO_COPY ${CMAKE_SOURCE_DIR}/*.hpp)
+file(COPY ${PUBLIC_HEADERS_TO_COPY} DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
 
 add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE cxx_std_17)
@@ -97,8 +95,6 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
 # - C4251: Docs say this can be ignored if your class is exposing a type in the C++ Standard
 # - C4455: "literal suffix identifiers that do not start with an underscore" when using std ""s
 
-set(HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET ${PROJECT_NAME}-shared)
-
 if(NOT ${BUILD_STATIC_ONLY})
     add_library(${PROJECT_NAME}-shared SHARED ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-shared PUBLIC ${PROJECT_NAME}_compiler_flags)
@@ -106,27 +102,12 @@ if(NOT ${BUILD_STATIC_ONLY})
 endif()
 
 if(NOT ${BUILD_DYNAMIC_ONLY})
-    set(HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET ${PROJECT_NAME}-static)
     add_library(${PROJECT_NAME}-static STATIC ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-static PUBLIC ${PROJECT_NAME}_compiler_flags)
     target_include_directories(${PROJECT_NAME}-static PUBLIC "${PROJECT_BINARY_DIR}")
     set_target_properties(${PROJECT_NAME}-static PROPERTIES
                           POSITION_INDEPENDENT_CODE ON)
 endif()
-
-if(IS_WINDOWS)
-    add_custom_command(TARGET ${HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET} POST_BUILD COMMAND
-                       mkdir ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
-else()
-    add_custom_command(TARGET ${HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET} POST_BUILD COMMAND
-                       mkdir -p ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
-endif()
-add_custom_command(TARGET ${HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET} POST_BUILD COMMAND
-                   ${COPY_COMMAND} ${CMAKE_BINARY_DIR}/version.h ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
-add_custom_command(TARGET ${HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET} POST_BUILD COMMAND
-                   ${COPY_COMMAND} ${CMAKE_SOURCE_DIR}/*.h ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
-add_custom_command(TARGET ${HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET} POST_BUILD COMMAND
-                   ${COPY_COMMAND} ${CMAKE_SOURCE_DIR}/*.hpp ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
 
 if (${ENABLE_TESTS})
     add_executable(${PROJECT_NAME}_tests

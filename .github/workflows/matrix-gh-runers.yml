@@ -69,7 +69,7 @@ jobs:
 
       - name: Compile ipaddrs4cpp Debug
         working-directory: ifaddrs4cpp
-        run: cmake --build ./cmake-debug-test-build --target ${{ matrix.target || 'all' }} -j 14
+        run: cmake --build ./cmake-debug-test-build --config Debug --target ${{ matrix.target || 'all' }} -j 14
 
       - name: Run ifaddrs4cpp Tests
         working-directory: ifaddrs4cpp
@@ -78,4 +78,4 @@ jobs:
 
       - name: Compile ifaddrs4cpp Release
         working-directory: ifaddrs4cpp
-        run: cmake --build ./cmake-external-build --target ${{ matrix.target || 'all' }} -j 14
+        run: cmake --build ./cmake-external-build --config Release --target ${{ matrix.target || 'all' }} -j 14
