@@ -50,8 +50,10 @@ jobs:
             python: "3.12"
           - os: windows-2019
             target: ALL_BUILD
+            cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe
           - os: windows-2022
             target: ALL_BUILD
+            cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe
     runs-on: ${{ matrix.os }}
     name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
@@ -73,8 +75,8 @@ jobs:
 
       - name: Run ifaddrs4cpp Tests
         working-directory: ifaddrs4cpp
-        #run: ./cmake-debug-test-build/ifaddrs4cpp_tests(.exe?)
-        run: ctest --verbose --config Debug --test-dir ./cmake-debug-test-build
+        run: ${{ matrix.cpp_test_command || './cmake-debug-test-build/ifaddrs4cpp_tests' }}
+        #run: ctest --verbose --config Debug --test-dir ./cmake-debug-test-build
 
       - name: Compile ifaddrs4cpp Release
         working-directory: ifaddrs4cpp
