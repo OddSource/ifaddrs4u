@@ -163,7 +163,7 @@ namespace OddSource::Interfaces
                 {
                     flags |= SupportsMulticast;
                 }
-                Interface interface(
+                Interface iface(
                     ifa->IfIndex,
                     ::std::wstring_convert<::std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(ifa->FriendlyName),
                     ifa->AdapterName.substr(1, uuid.length() - 2), // strip {}
@@ -172,7 +172,7 @@ namespace OddSource::Interfaces
 
                 if (ifa->PhysicalAddress)
                 {
-                    interface._mac_address.emplace(ifa->PhysicalAddress, ifa->PhysicalAddressLength);
+                    iface._mac_address.emplace(ifa->PhysicalAddress, ifa->PhysicalAddressLength);
                 }
 
                 PIP_ADAPTER_UNICAST_ADDRESS unicast = ifa->FirstUnicastAddress;
@@ -182,7 +182,7 @@ namespace OddSource::Interfaces
                     if (sa->sa_family == AF_INET)
                     {
                         InterfacesHelper::add_ipv4_address(
-                                sa, ifa->FirstPrefix, interface, unicast->OnLinkPrefixLength);
+                                sa, ifa->FirstPrefix, iface, unicast->OnLinkPrefixLength);
                     }
                     else if (sa->sa_family == AF_INET6)
                     {
@@ -192,7 +192,7 @@ namespace OddSource::Interfaces
                             addr_flags |= Temporary;
                         }
                         InterfacesHelper::add_ipv6_address(
-                                sa, interface, unicast->OnLinkPrefixLength, addr_flags);
+                                sa, iface, unicast->OnLinkPrefixLength, addr_flags);
                     }
                     unicast = unicast->Next;
                 }
@@ -205,17 +205,17 @@ namespace OddSource::Interfaces
                     {
                         // Extremely unlikely, as IPv4 doesn't natively support Anycast
                         // (works only with BGP), but it's Windows, so there's no telling.
-                        InterfacesHelper::add_ipv4_address(sa, ifa->FirstPrefix, interface);
+                        InterfacesHelper::add_ipv4_address(sa, ifa->FirstPrefix, iface);
                     }
                     else if (sa->sa_family == AF_INET6)
                     {
                         uint16_t addr_flags(Anycast);
-                        InterfacesHelper::add_ipv6_address(sa, interface, 0, addr_flags);
+                        InterfacesHelper::add_ipv6_address(sa, iface, 0, addr_flags);
                     }
                     anycast = anycast->Next;
                 }
 
-                if (!do_this(interface))
+                if (!do_this(iface))
                 {
                     return false;
                 }
@@ -250,13 +250,13 @@ namespace OddSource::Interfaces
                     found = interfaces.find(name);
                 }
 
-                Interface & interface = found->second;
-                if (ifa->ifa_flags != interface._flags)
+                Interface & iface = found->second;
+                if (ifa->ifa_flags != iface._flags)
                 {
                     // TODO what should we do in this case? Does this mean the OS is misbehaving?
                     ::std::cerr << "Flags " << ::std::to_string(ifa->ifa_flags)
                                 << " for next item in interface " << name
-                                << " does not match first flags " << ::std::to_string(interface._flags)
+                                << " does not match first flags " << ::std::to_string(iface._flags)
                                 << ::std::endl;
                 }
 
@@ -265,15 +265,15 @@ namespace OddSource::Interfaces
                     AddressFamily family(ifa->ifa_addr->sa_family);
                     if (family == AF_MAC_ADDRESS)
                     {
-                        InterfacesHelper::set_mac_address(ifa, interface);
+                        InterfacesHelper::set_mac_address(ifa, iface);
                     }
                     else if (family == AF_INET)
                     {
-                        InterfacesHelper::add_ipv4_address(ifa, interface);
+                        InterfacesHelper::add_ipv4_address(ifa, iface);
                     }
                     else if (family == AF_INET6)
                     {
-                        InterfacesHelper::add_ipv6_address(ifa, interface, indexes_to_names);
+                        InterfacesHelper::add_ipv6_address(ifa, iface, indexes_to_names);
                     }
                     else
                     {
@@ -285,9 +285,9 @@ namespace OddSource::Interfaces
                 ifa = ifa->ifa_next;
             }
 
-            for (auto & [name, interface] : interfaces) // NOLINT(*-use-anyofallof)
+            for (auto & [name, iface] : interfaces) // NOLINT(*-use-anyofallof)
             {
-                if (!do_this(interface))
+                if (!do_this(iface))
                 {
                     return false;
                 }
@@ -326,7 +326,7 @@ namespace OddSource::Interfaces
         }
 
         static void add_ipv4_address(
-            LPSOCKADDR sa, PIP_ADAPTER_PREFIX pre, Interface & interface,
+            LPSOCKADDR sa, PIP_ADAPTER_PREFIX pre, Interface & iface,
             uint8_t prefix_length = 0)
         {
             auto addr = reinterpret_cast<sockaddr_in *>(sa);
@@ -375,30 +375,30 @@ namespace OddSource::Interfaces
             static uint32_t const flags(0);
             if (broadcast)
             {
-                interface._ipv4_addresses.emplace_back(
+                iface._ipv4_addresses.emplace_back(
                     address, flags, prefix_length,
                     IPv4Address(&broadcast->sin_addr));
             }
             else
             {
-                interface._ipv4_addresses.emplace_back(address, flags, prefix_length);
+                iface._ipv4_addresses.emplace_back(address, flags, prefix_length);
             }
         }
 
         static void add_ipv6_address(
-            LPSOCKADDR sa, Interface & interface,
+            LPSOCKADDR sa, Interface & iface,
             uint8_t prefix_length = 0, uint16_t flags = 0)
         {
             auto addr = reinterpret_cast<sockaddr_in6 *>(sa);
             if (addr->sin6_scope_id)
             {
                 IPv6Address const address(&addr->sin6_addr, addr->sin6_scope_id);
-                interface._ipv6_addresses.emplace_back(address, flags, prefix_length);
+                iface._ipv6_addresses.emplace_back(address, flags, prefix_length);
             }
             else
             {
                 IPv6Address const address(&addr->sin6_addr);
-                interface._ipv6_addresses.emplace_back(address, flags, prefix_length);
+                iface._ipv6_addresses.emplace_back(address, flags, prefix_length);
             }
         }
 
@@ -423,7 +423,7 @@ namespace OddSource::Interfaces
             return mtu;
         }
 
-        static void set_mac_address(ifaddrs *ifa, Interface & interface)
+        static void set_mac_address(ifaddrs *ifa, Interface & iface)
         {
 #ifdef AF_LINK
             assert(ifa->ifa_addr->sa_family == AF_LINK);
@@ -457,13 +457,13 @@ namespace OddSource::Interfaces
                 if (data[i] > 0)
                 {
                     // make sure at least one byte is nonzero
-                    interface._mac_address.emplace(data, data_length);
+                    iface._mac_address.emplace(data, data_length);
                     return;
                 }
             }
         }
 
-        static void add_ipv4_address(ifaddrs *ifa, Interface & interface)
+        static void add_ipv4_address(ifaddrs *ifa, Interface & iface)
         {
             auto addr = reinterpret_cast<sockaddr_in *>(ifa->ifa_addr);
             IPv4Address const address(&addr->sin_addr);
@@ -481,29 +481,29 @@ namespace OddSource::Interfaces
             }
 
             static uint32_t const flags(0);
-            if (interface.is_flag_enabled(BroadcastAddressSet) && ifa->ifa_broadaddr)
+            if (iface.is_flag_enabled(BroadcastAddressSet) && ifa->ifa_broadaddr)
             {
                 auto broadcast = reinterpret_cast<sockaddr_in *>(ifa->ifa_broadaddr);
-                interface._ipv4_addresses.emplace_back(
+                iface._ipv4_addresses.emplace_back(
                     address, flags, prefix_length,
                     IPv4Address(&broadcast->sin_addr));
             }
-            else if(interface.is_flag_enabled(IsPointToPoint) && ifa->ifa_dstaddr)
+            else if(iface.is_flag_enabled(IsPointToPoint) && ifa->ifa_dstaddr)
             {
                 auto point_to_point = reinterpret_cast<sockaddr_in *>(ifa->ifa_dstaddr);
-                interface._ipv4_addresses.emplace_back(
+                iface._ipv4_addresses.emplace_back(
                     address, flags, prefix_length,
                     IPv4Address(&point_to_point->sin_addr), true);
             }
             else
             {
-                interface._ipv4_addresses.emplace_back(address, flags, prefix_length);
+                iface._ipv4_addresses.emplace_back(address, flags, prefix_length);
             }
         }
 
         static void add_ipv6_address(
             ifaddrs *ifa,
-            Interface & interface,
+            Interface & iface,
             ::std::unordered_map<uint32_t, ::std::string> & indexes_to_names)
         {
             auto addr = reinterpret_cast<sockaddr_in6 *>(ifa->ifa_addr);
@@ -563,15 +563,15 @@ namespace OddSource::Interfaces
 
             if (scope)
             {
-                interface._ipv6_addresses.emplace_back(IPv6Address(&addr->sin6_addr, *scope), flags, prefix_length);
+                iface._ipv6_addresses.emplace_back(IPv6Address(&addr->sin6_addr, *scope), flags, prefix_length);
             }
             else if (scope_id)
             {
-                interface._ipv6_addresses.emplace_back(IPv6Address(&addr->sin6_addr, *scope_id), flags, prefix_length);
+                iface._ipv6_addresses.emplace_back(IPv6Address(&addr->sin6_addr, *scope_id), flags, prefix_length);
             }
             else
             {
-                interface._ipv6_addresses.emplace_back(IPv6Address(&addr->sin6_addr), flags, prefix_length);
+                iface._ipv6_addresses.emplace_back(IPv6Address(&addr->sin6_addr), flags, prefix_length);
             }
         }
 
@@ -674,20 +674,20 @@ populate_and_maybe_more_unsafe(::std::function<bool(Interface const &)> * do_thi
     ::std::vector<Interface> temp_vector;
     ::std::unordered_map<uint32_t, ::std::shared_ptr<Interface const>> temp_index_map;
     ::std::unordered_map<::std::string, ::std::shared_ptr<Interface const>> temp_name_map;
-    ::std::function<bool(Interface &)> do_this_internal = [&](auto interface)
+    ::std::function<bool(Interface &)> do_this_internal = [&](auto iface)
     {
         if (return_internal && do_this)
         {
-            return_internal = (*do_this)(interface);
+            return_internal = (*do_this)(iface);
         }
-        auto ptr = ::std::make_shared<Interface const>(interface);
-        temp_index_map.insert(std::make_pair(interface.index(), ptr));
-        temp_name_map.insert(std::make_pair(interface.name(), ptr));
+        auto ptr = ::std::make_shared<Interface const>(iface);
+        temp_index_map.insert(std::make_pair(iface.index(), ptr));
+        temp_name_map.insert(std::make_pair(iface.name(), ptr));
 #if IS_WINDOWS
-        temp_name_map.insert(std::make_pair(interface.windows_uuid(), ptr));
-        temp_name_map.insert(std::make_pair("{"s + interface.windows_uuid() + "}"s, ptr));
+        temp_name_map.insert(std::make_pair(iface.windows_uuid(), ptr));
+        temp_name_map.insert(std::make_pair("{"s + iface.windows_uuid() + "}"s, ptr));
 #endif /* IS_WINDOWS */
-        temp_vector.push_back(::std::move(interface));
+        temp_vector.push_back(::std::move(iface));
 
         return true;
     };

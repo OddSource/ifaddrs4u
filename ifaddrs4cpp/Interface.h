@@ -114,17 +114,31 @@ namespace OddSource::Interfaces
 
     enum InterfaceFlag : uint16_t
     {
-        BroadcastAddressSet = IFF_BROADCAST, // no Windows
-        DebugEnabled = IFF_DEBUG, // no Windows
+#ifdef IS_WINDOWS
+        BroadcastAddressSet = 0x2,
+        DebugEnabled = 0x4, // placeholder, not applicable to Windows
+        IsLoopback = 0x8,
+        IsPointToPoint = 0x10, // placeholder, not applicable to Windows
+        IsRunning = 0x40,
+        IsUp = 0x1,
+        NoARP = 0x80, // placeholder, not applicable to Windows
+        NoTrailers = 0x20, // placeholder, not applicable to Windows
+        PromiscuousModeEnabled = 0x100, // placeholder, not applicable to Windows
+        ReceiveAllMulticastPackets = 0x200, // placeholder, not applicable to Windows
+        SupportsMulticast = 0x8000, // inverse on Windows, e.g. !IP_ADAPTER_NO_MULTICAST
+#else /* IS_WINDOWS */
+        BroadcastAddressSet = IFF_BROADCAST,
+        DebugEnabled = IFF_DEBUG,
         IsLoopback = IFF_LOOPBACK,
-        IsPointToPoint = IFF_POINTOPOINT, // no Windows
+        IsPointToPoint = IFF_POINTOPOINT,
         IsRunning = IFF_RUNNING,
         IsUp = IFF_UP,
-        NoARP = IFF_NOARP, // no Windows
-        NoTrailers = IFF_NOTRAILERS, // aka "SMART" ... no Windows
-        PromiscuousModeEnabled = IFF_PROMISC, // no Windows
+        NoARP = IFF_NOARP,
+        NoTrailers = IFF_NOTRAILERS, // aka "SMART"
+        PromiscuousModeEnabled = IFF_PROMISC,
         ReceiveAllMulticastPackets = IFF_ALLMULTI,
-        SupportsMulticast = IFF_MULTICAST, // inverse on Windows
+        SupportsMulticast = IFF_MULTICAST,
+#endif /* !IS_WINDOWS */
 
         // *nix-Platform-Specific Flags
 #ifdef IFF_OACTIVE

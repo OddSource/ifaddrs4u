@@ -34,13 +34,13 @@ public:
 
     void test_print_all()
     {
-        ::std::function<bool(Interface const &)> do_this = [this](auto interface)
+        ::std::function<bool(Interface const &)> do_this = [this](auto iface)
         {
-            ::std::cout << interface << ::std::endl;
-            assert_that(interface.index() > 0);
-            assert_that(interface.name().length() > 0);
+            ::std::cout << iface << ::std::endl;
+            assert_that(iface.index() > 0);
+            assert_that(iface.name().length() > 0);
 #ifdef IS_WINDOWS
-            assert_that(interface.windows_uuid().length() > 0);
+            assert_that(iface.windows_uuid().length() > 0);
 #endif /* IS_WINDOWS */
             return true;
         };
@@ -91,10 +91,10 @@ public:
         uint32_t interfaces_found(0);
         bool loopback_found(false);
         bool non_loopback_found(false);
-        for (auto const & interface : this->_browser.get_interfaces())
+        for (auto const & iface : this->_browser.get_interfaces())
         {
             interfaces_found++;
-            if (interface.is_loopback())
+            if (iface.is_loopback())
             {
                 loopback_found = true;
             }

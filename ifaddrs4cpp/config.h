@@ -24,7 +24,7 @@
 #define OddSource_Export __declspec(dllexport)
 #else /* ODDSOURCE_BUILDING_LIBRARY */
 #define OddSource_Export __declspec(dllimport)
-#endif /* ODDSOURCE_BUILDING_LIBRARY */
+#endif /* !ODDSOURCE_BUILDING_LIBRARY */
 #else /* IS_WINDOWS */
 #define OddSource_Export __attribute((visibility("default")))
 #endif /* IS_WINDOWS */

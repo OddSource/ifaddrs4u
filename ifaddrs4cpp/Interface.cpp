@@ -49,7 +49,7 @@ namespace
 
 ::std::ostream &
 OddSource::Interfaces::
-operator<<(::std::ostream & os, OddSource::Interfaces::Interface const & interface)
+operator<<(::std::ostream & os, OddSource::Interfaces::Interface const & iface)
 {
     static ::std::vector<InterfaceFlagDisplayInfo> const flag_displays {
         {"UP", IsUp},
@@ -77,14 +77,14 @@ operator<<(::std::ostream & os, OddSource::Interfaces::Interface const & interfa
 #endif /* IFF_SLAVE */
     };
 
-    os << interface._name << " (" << interface._index << "): flags="
-       << ::std::hex << interface._flags << ::std::dec << "<";
-    if (interface._flags)
+    os << iface._name << " (" << iface._index << "): flags="
+       << ::std::hex << iface._flags << ::std::dec << "<";
+    if (iface._flags)
     {
         uint8_t i(0);
         for (auto const & flag_display : flag_displays)
         {
-            if ((interface._flags & flag_display.flag) == flag_display.flag)
+            if ((iface._flags & flag_display.flag) == flag_display.flag)
             {
                 if (i++ > 0)
                 {
@@ -95,20 +95,20 @@ operator<<(::std::ostream & os, OddSource::Interfaces::Interface const & interfa
         }
     }
     os << ">";
-    if (interface._mtu)
+    if (iface._mtu)
     {
-        os << " mtu " << ::std::to_string(*interface._mtu);
+        os << " mtu " << ::std::to_string(*iface._mtu);
     }
     os << ::std::endl;
-    if (interface._mac_address)
+    if (iface._mac_address)
     {
-        os << "        ether " << (*interface._mac_address) << ::std::endl;
+        os << "        ether " << (*iface._mac_address) << ::std::endl;
     }
-    for (auto const & address : interface._ipv4_addresses)
+    for (auto const & address : iface._ipv4_addresses)
     {
         os << "        inet  " << address << ::std::endl;
     }
-    for (auto const & address : interface._ipv6_addresses)
+    for (auto const & address : iface._ipv6_addresses)
     {
         os << "        inet6 " << address << ::std::endl;
     }
@@ -119,7 +119,7 @@ OddSource::Interfaces::Interface
 OddSource::Interfaces::Interface::
 get_sample_interface()
 {
-    Interface interface(
+    Interface iface(
         3,
         "en0",
 #ifdef IS_WINDOWS
@@ -127,17 +127,17 @@ get_sample_interface()
 #endif /* IS_WINDOWS */
         BroadcastAddressSet | IsUp | IsRunning,
         1725);
-    interface._mac_address.emplace("ac:de:48:00:11:22");
-    interface._ipv4_addresses.emplace_back(IPv4Address("192.168.0.42"), 0, 24, IPv4Address("192.168.0.254"));
-    interface._ipv6_addresses.emplace_back(
-            IPv6Address(static_cast<in6_addr const *>(IPv6Address("fe80::aede:48ff:fe00:1122")), v6Scope {6, "en5"}),
-            Secured,
-            64);
-    interface._ipv6_addresses.emplace_back(
-            IPv6Address("2001:470:2ccb:a61b:e:acf8:6736:d81f"),
-            AutoConfigured | Secured,
-            56);
-    return interface;
+    iface._mac_address.emplace("ac:de:48:00:11:22");
+    iface._ipv4_addresses.emplace_back(IPv4Address("192.168.0.42"), 0, 24, IPv4Address("192.168.0.254"));
+    iface._ipv6_addresses.emplace_back(
+        IPv6Address(static_cast<in6_addr const *>(IPv6Address("fe80::aede:48ff:fe00:1122")), v6Scope {6, "en5"}),
+        Secured,
+        64);
+    iface._ipv6_addresses.emplace_back(
+        IPv6Address("2001:470:2ccb:a61b:e:acf8:6736:d81f"),
+        AutoConfigured | Secured,
+        56);
+    return iface;
 }
 
 OddSource::Interfaces::Interface const

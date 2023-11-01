@@ -71,7 +71,7 @@ namespace OddSource::Interfaces
     private:
         void populate_interface_storage();
 
-        bool populate_and_maybe_more_unsafe(::std::function<bool(Interface const &)> * do_this);
+        bool populate_and_maybe_more_unsafe(::std::function<bool(Interface const &)> *);
 
         mutable std::shared_mutex _storage_mutex;
         bool _storage_filled;
