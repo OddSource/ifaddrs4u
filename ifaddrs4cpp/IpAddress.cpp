@@ -84,15 +84,15 @@ namespace
             }
             // inet_aton/inet_addr, however, can handle IPv4 addresses in all valid formats.
 #ifdef IS_WINDOWS
-            auto raw = inet_addr(repr);
-        if (raw == INADDR_NONE)
-        {
-            success = 0;
-        }
-        else
-        {
-            ::std::memcpy(data.get(), raw, sizeof(Addr));
-        }
+            auto raw = inet_addr(repr_str.c_str());
+            if (raw == INADDR_NONE)
+            {
+                success = 0;
+            }
+            else
+            {
+                ::std::memcpy(data.get(), raw, sizeof(Addr));
+            }
 #else /* IS_WINDOWS */
             success = inet_aton(repr_str.c_str(), data.get());
 #endif
@@ -126,25 +126,23 @@ namespace
         {
 #ifdef IS_WINDOWS
             auto err_no(::WSAGetLastError());
-        wchar_t * s = nullptr;
-        ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-            nullptr, err_no,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            (LPWSTR)&s, 0, nullptr);
-        ::std::string err(
-            s == nullptr ?
-            ""s :
-            ::std::wstring_convert<::std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(::std::wstring(s)));
-        LocalFree(s);
+            char * s = nullptr;
+            ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                nullptr, err_no,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                (LPTSTR)&s, 0, nullptr);
+            ::std::string err(s == nullptr ? "" : s);
+            LocalFree(s);
 #else /* IS_WINDOWS */
             auto err_no(errno);
             char const * err(
                     err_no == EAFNOSUPPORT ? "Address family not supported" :
                     (err_no == ENOSPC ? "Converted address would exceed string size" :
                      ::gai_strerror(errno)));
-#endif /* IS_WINDOWS */
+#endif /* !IS_WINDOWS */
             throw InvalidIPAddress(
-                "Malformed in_addr data or inet_ntop system error: "s + ::std::to_string(err_no) + " ("s + err + ")"s);
+                "Malformed in_addr data or inet_ntop system error: "s +
+                ::std::to_string(err_no) + " ('"s + err + "')"s);
         }
         return host_chars;
     }

@@ -71,15 +71,15 @@
 #endif /* IS_WINDOWS */
 
 #ifdef IS_WINDOWS
-std::string utf8_encode(std::wstring const & wstr)
+::std::string utf8_encode(::std::wstring const & wstr)
 {
     if (wstr.empty())
     {
-        return std::string();
+        return ::std::string();
     }
-    int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
-    std::string str(size_needed, 0);
-    WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &str[0], size_needed, NULL, NULL);
+    int size_needed = ::WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+    ::std::string str(size_needed, 0);
+    ::WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &str[0], size_needed, NULL, NULL);
     return str;
 }
 #endif /* IS_WINDOWS */
@@ -178,7 +178,7 @@ namespace OddSource::Interfaces
                 ::std::string uuid(ifa->AdapterName);
                 Interface iface(
                     ifa->IfIndex,
-                    ::std::wstring_convert<::std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(ifa->FriendlyName),
+                    utf8_encode(::std::wstring(ifa->FriendlyName)),
                     uuid.substr(1, uuid.length() - 2), // strip {}
                     flags,
                     ifa->Mtu);
@@ -320,7 +320,10 @@ namespace OddSource::Interfaces
                 if (candidate->sa_family == AF_INET)
                 {
                     auto cand = reinterpret_cast<sockaddr_in *>(candidate);
+#pragma warning( push )
+#pragma warning( disable : 4312)
                     auto cand_bytes = reinterpret_cast<uint8_t *>(cand->sin_addr.s_addr);
+#pragma warning( pop )
                     uint8_t i, first_byte_with_bcast(0);
                     for (i = 3; i >= 0; i--)
                     {
@@ -352,7 +355,10 @@ namespace OddSource::Interfaces
                 if (candidate->sa_family == AF_INET)
                 {
                     auto cand = reinterpret_cast<sockaddr_in *>(candidate);
-                    auto cand_bytes = reinterpret_cast<uint8_t *>(cand.sin_addr.s_addr);
+#pragma warning( push )
+#pragma warning( disable : 4312)
+                    auto cand_bytes = reinterpret_cast<uint8_t *>(cand->sin_addr.s_addr);
+#pragma warning( pop )
                     uint8_t i, first_byte_with_bcast(0);
                     for (i = 3; i >= 0; i--)
                     {
@@ -365,7 +371,10 @@ namespace OddSource::Interfaces
                     {
                         continue;
                     }
-                    auto addr_bytes = reinterpret_cast<uint8_t *>(addr.sin_addr.s_addr);
+#pragma warning( push )
+#pragma warning( disable : 4312)
+                    auto addr_bytes = reinterpret_cast<uint8_t *>(addr->sin_addr.s_addr);
+#pragma warning( pop )
                     bool do_continue(false);
                     for (i = 0; i < first_byte_with_bcast; i++)
                     {
