@@ -50,10 +50,10 @@ jobs:
             python: "3.12"
           - os: windows-2019
             target: ALL_BUILD
-            cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe TestVersionInfo
+            cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe NoTest
           - os: windows-2022
             target: ALL_BUILD
-            cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe TestVersionInfo
+            cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe NoTest
     runs-on: ${{ matrix.os }}
     name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
