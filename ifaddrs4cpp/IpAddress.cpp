@@ -92,7 +92,7 @@ namespace
                     "An invalid parameter was passed to RtlIpv4StringToAddress while converting '"s +
                     repr_str + "'"s);
             }
-            else if (success != STATUS_SUCCESS)
+            else if (success != 0)
             {
                 char * s = nullptr;
                 ::FormatMessage(
