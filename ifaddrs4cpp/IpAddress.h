@@ -19,8 +19,10 @@
 #include "config.h"
 
 #ifdef IS_WINDOWS
-#include <ws2ipdef.h>
 #include <winsock2.h>
+#include <windows.h>
+#include <ws2ipdef.h>
+#include <iphlpapi.h>
 #else /* IS_WINDOWS */
 #include <netinet/in.h>
 #endif /* IS_WINDOWS */
