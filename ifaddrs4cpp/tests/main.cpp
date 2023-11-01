@@ -18,11 +18,14 @@
 
 #include <chrono>
 #include <cstring>
-#include <cstdio>
 
-#ifndef IS_WINDOWS
+#ifdef IS_WINDOWS
+#include <io.h>
+#include <stdio.h>
+#else /* IS_WINDOWS */
+#include <cstdio>
 #include <unistd.h>
-#endif
+#endif /* !IS_WINDOWS */
 
 #if (defined(__GNUC__) && __GNUC__ >= 3) || defined(__clang__)
 #include <cstdlib>
@@ -96,7 +99,11 @@ registry()
 
 namespace
 {
+#ifdef IS_WINDOWS
+    bool const is_tty(_isatty(_fileno(stdout)));
+#else /* IS_WINDOWS */
     bool const is_tty(::isatty(::fileno(::stdin)));
+#endif /* !IS_WINDOWS */
     char const * RED = is_tty ? "\033[0;31m" : "";
     char const * ORANGE = is_tty ? "\033[0;33m" : "";
     char const * GREEN = is_tty ? "\033[0;32m" : "";
