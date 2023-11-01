@@ -24,6 +24,10 @@ import io.oddsource.java.net.ifaddrs4j.VersionInfo;
 
 public class TestVersionInfo
 {
+    public TestVersionInfo()
+    {
+    }
+
     @Test
     public void testVersionInfo()
     {

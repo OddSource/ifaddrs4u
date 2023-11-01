@@ -25,6 +25,10 @@ import io.oddsource.java.net.ifaddrs4j.InterfaceIPAddressFlag;
 
 public class TestEnums
 {
+    public TestEnums()
+    {
+    }
+
     @Test
     public void testInterfaceIPAddressFlags()
     {

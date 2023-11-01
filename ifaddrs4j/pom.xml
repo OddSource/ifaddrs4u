@@ -53,8 +53,7 @@
     <inceptionYear>2023</inceptionYear>
 
     <properties>
-        <javac.source.version>11</javac.source.version>
-        <javac.target.version>11</javac.target.version>
+        <maven.compiler.release>11</maven.compiler.release>
         <project.tasks.maximum.memory>256m</project.tasks.maximum.memory>
         <version.dependency.test.junit>4.13.2</version.dependency.test.junit>
         <version.dependency.test.log4j>2.21.0</version.dependency.test.log4j>
@@ -208,8 +207,6 @@
                     <configuration>
                         <fork>true</fork>
                         <maxmem>${project.tasks.maximum.memory}</maxmem>
-                        <source>${javac.source.version}</source>
-                        <target>${javac.target.version}</target>
                         <debug>true</debug>
                         <debuglevel>lines,source</debuglevel>
                         <compilerArgs>

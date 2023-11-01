@@ -157,7 +157,7 @@ run()
 
 int
 OddSource::Interfaces::Tests::Test::
-run_all_registered_test_cases(::std::vector<::std::string const> const & matching)
+run_all_registered_test_cases(::std::vector<::std::string> const & matching)
 {
     uint32_t total_test_count(0);
     uint32_t total_pass_count(0);
@@ -232,7 +232,7 @@ run_all_registered_test_cases(::std::vector<::std::string const> const & matchin
 
 int main(int argc, char * argv [])
 {
-    ::std::vector<::std::string const> matching;
+    ::std::vector<::std::string> matching;
     matching.reserve(argc - 1);
     for (int i = 1; i < argc; i++)
     {

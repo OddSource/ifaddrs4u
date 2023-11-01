@@ -164,7 +164,7 @@ namespace OddSource::Interfaces
         {"Master", Master},
 #endif /* IFF_MASTER */
 #ifdef IFF_SLAVE
-        {"IFF_SLAVE", IFF_SLAVE},
+        {"IFF_SLAVE", Slave},
 #endif /* IFF_SLAVE */
     };
 
@@ -284,10 +284,10 @@ namespace OddSource::Interfaces
         inline ::std::optional<MacAddress const> const & mac_address() const;
 
         [[nodiscard]]
-        inline ::std::vector<InterfaceIPAddress<IPv4Address> const> const & ipv4_addresses() const;
+        inline ::std::vector<InterfaceIPAddress<IPv4Address>> const & ipv4_addresses() const;
 
         [[nodiscard]]
-        inline ::std::vector<InterfaceIPAddress<IPv6Address> const> const & ipv6_addresses() const;
+        inline ::std::vector<InterfaceIPAddress<IPv6Address>> const & ipv6_addresses() const;
 
         static Interface const SAMPLE_INTERFACE;
 
@@ -306,8 +306,8 @@ namespace OddSource::Interfaces
         uint32_t const _flags;
         ::std::optional<uint64_t const> _mtu;
         ::std::optional<MacAddress const> _mac_address;
-        ::std::vector<InterfaceIPAddress<IPv4Address> const> _ipv4_addresses;
-        ::std::vector<InterfaceIPAddress<IPv6Address> const> _ipv6_addresses;
+        ::std::vector<InterfaceIPAddress<IPv4Address>> _ipv4_addresses;
+        ::std::vector<InterfaceIPAddress<IPv6Address>> _ipv6_addresses;
     };
 }
 

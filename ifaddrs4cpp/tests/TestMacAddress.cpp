@@ -17,6 +17,8 @@
 #include "../MacAddress.h"
 #include "main.h"
 
+#include <cstring>
+
 using namespace OddSource::Interfaces;
 
 class TestMacAddress : public Tests::Test

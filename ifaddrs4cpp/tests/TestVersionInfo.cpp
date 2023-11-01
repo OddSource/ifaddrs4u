@@ -17,6 +17,8 @@
 #include "../VersionInfo.h"
 #include "main.h"
 
+#include <cstring>
+
 using namespace OddSource::Interfaces;
 
 class TestVersionInfo : public Tests::Test

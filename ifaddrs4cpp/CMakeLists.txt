@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 ]]
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.22)
 
 project(ifaddrs4cpp
         VERSION 0.1.0
@@ -103,6 +103,8 @@ if(NOT ${BUILD_DYNAMIC_ONLY})
     add_library(${PROJECT_NAME}-static STATIC ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-static PUBLIC ${PROJECT_NAME}_compiler_flags)
     target_include_directories(${PROJECT_NAME}-static PUBLIC "${PROJECT_BINARY_DIR}")
+    set_target_properties(${PROJECT_NAME}-static PROPERTIES
+                          POSITION_INDEPENDENT_CODE ON)
 endif()
 
 if(${IS_WINDOWS})

@@ -33,9 +33,11 @@
 
 #if __has_include(<linux/ipv6.h>)
 #include <linux/ipv6.h>
-#define # HAS_LINUX_IPV6
+#define HAS_LINUX_IPV6
 #endif /* <linux/ipv6.h> */
-
+#if __has_include(<net/if_arp.h>)
+#include <net/if_arp.h>
+#endif
 #if __has_include(<net/if_dl.h>)
 #include <net/if_dl.h>
 #elif __has_include(<linux/if_packet.h>)
@@ -46,6 +48,7 @@
 #endif /* !IS_WINDOWS */
 #include <cassert>
 #include <functional>
+#include <mutex>
 #include <shared_mutex>
 #include <string>
 
@@ -446,7 +449,7 @@ namespace OddSource::Interfaces
             {
                 return;
             }
-            auto data = addr->sll_addr[i];
+            auto data = addr->sll_addr;
 #endif /* !AF_LINK */
             for (uint8_t i(0); i < data_length; i++)
             {
@@ -609,7 +612,7 @@ for_each_interface(::std::function<bool(Interface const &)> & do_this)
     return ::std::all_of(this->_interface_vector.begin(), this->_interface_vector.end(), do_this);
 }
 
-::std::vector<OddSource::Interfaces::Interface const> const &
+::std::vector<OddSource::Interfaces::Interface> const &
 OddSource::Interfaces::InterfaceBrowser::
 get_interfaces()
 {
@@ -667,7 +670,7 @@ OddSource::Interfaces::InterfaceBrowser::
 populate_and_maybe_more_unsafe(::std::function<bool(Interface const &)> * do_this)
 {
     bool return_internal(true);
-    ::std::vector<Interface const> temp_vector;
+    ::std::vector<Interface> temp_vector;
     ::std::unordered_map<uint32_t, ::std::shared_ptr<Interface const>> temp_index_map;
     ::std::unordered_map<::std::string, ::std::shared_ptr<Interface const>> temp_name_map;
     ::std::function<bool(Interface &)> do_this_internal = [&](auto interface)

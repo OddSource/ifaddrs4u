@@ -322,7 +322,7 @@ IPv4Address(IPv4TempDataHolder const & temp)
              (bytes[0] == 198 && bytes[1] == 51 && bytes[2] == 100) || // 198.51.100.0/24
              (bytes[0] == 203 && bytes[1] == 0 && bytes[2] == 113) || // 203.0.113.0/24
              (bytes[0] == 233 && bytes[1] == 252 && bytes[2] == 0) || // 233.252.0.0/24
-             (bytes[0] >= 240 && bytes[0] <= 255) // 240.0.0.0/4
+             bytes[0] >= 240 // 240.0.0.0/4
             )
     {
         this->_is_reserved = true;
@@ -418,17 +418,17 @@ IPv6Address(::std::string const & repr, IPv6TempDataHolder const & holder)
     auto words = WORDS;
     auto doublewords = DOUBLEWORDS;
 
-    if (IN6_IS_ADDR_UNSPECIFIED(this->_data))
+    if (IN6_IS_ADDR_UNSPECIFIED(this->_data.get()))
     {
         this->_is_unspecified = true;
         this->_is_reserved = true;
     }
-    else if(IN6_IS_ADDR_LOOPBACK(this->_data))
+    else if(IN6_IS_ADDR_LOOPBACK(this->_data.get()))
     {
         this->_is_loopback = true;
         this->_is_reserved = true;
     }
-    else if(IN6_IS_ADDR_LINKLOCAL(this->_data) && // some impls erroneously check *only* fe80
+    else if(IN6_IS_ADDR_LINKLOCAL(this->_data.get()) && // some impls erroneously check *only* fe80
             words[1] == 0 && words[2] == 0 && words[3] == 0)
     {
         this->_is_link_local = true;
@@ -441,23 +441,23 @@ IPv6Address(::std::string const & repr, IPv6TempDataHolder const & holder)
         this->_is_private = true;
         this->_is_reserved = true;
     }
-    else if(IN6_IS_ADDR_SITELOCAL(this->_data))
+    else if(IN6_IS_ADDR_SITELOCAL(this->_data.get()))
     {
         this->_is_site_local = true;
         this->_is_private = true;
         this->_is_reserved = true;
     }
-    else if(IN6_IS_ADDR_MULTICAST(this->_data))
+    else if(IN6_IS_ADDR_MULTICAST(this->_data.get()))
     {
         this->_is_multicast = true;
         this->_is_reserved = true;
     }
-    else if(IN6_IS_ADDR_V4MAPPED(this->_data))
+    else if(IN6_IS_ADDR_V4MAPPED(this->_data.get()))
     {
         this->_is_v4_mapped = true;
         this->_is_reserved = true;
     }
-    else if(IN6_IS_ADDR_V4COMPAT(this->_data))
+    else if(IN6_IS_ADDR_V4COMPAT(this->_data.get()))
     {
         this->_is_v4_compatible = true;
         this->_is_reserved = true;

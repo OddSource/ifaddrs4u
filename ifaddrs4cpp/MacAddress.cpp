@@ -64,7 +64,7 @@ namespace
         // GNUC has ether_aton_r, which is thread-safe, but BSD systems have
         // ether_aton, which is not thread safe and basically cannot safely be used.
         // Windows has no built-in method until C#. So ... let's try something simple-ish.
-        auto predicted_length(predict_repr_length(repr));
+        size_t predicted_length((size_t) predict_repr_length(repr));
         if (predicted_length > MAX_ADAPTER_ADDRESS_LENGTH)
         {
             throw InvalidMacAddress((

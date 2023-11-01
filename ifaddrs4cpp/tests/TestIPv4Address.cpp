@@ -17,6 +17,8 @@
 #include "../IpAddress.h"
 #include "main.h"
 
+#include <cstring>
+
 #ifdef IS_WINDOWS
 #include <netioapi.h>
 #else /* IS_WINDOWS */
@@ -210,7 +212,7 @@ public:
 
     void test_other_reserved_addresses()
     {
-        ::std::vector<::std::string const> tests {
+        ::std::vector<::std::string> tests {
             "192.0.2.0", "192.0.2.255",
             "192.88.99.0", "192.88.99.255",
             "198.51.100.0", "198.51.100.255",

@@ -17,6 +17,8 @@
 #include "../IpAddress.h"
 #include "main.h"
 
+#include <cstring>
+
 #ifdef IS_WINDOWS
 #include <netioapi.h>
 #else /* IS_WINDOWS */

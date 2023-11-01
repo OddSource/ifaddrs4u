@@ -62,7 +62,7 @@ namespace OddSource::Interfaces
 
         bool for_each_interface(::std::function<bool(Interface const &)> & do_this);
 
-        ::std::vector<Interface const> const & get_interfaces();
+        ::std::vector<Interface> const & get_interfaces();
 
         Interface const & get_interface(uint32_t);
 
@@ -75,7 +75,7 @@ namespace OddSource::Interfaces
 
         mutable std::shared_mutex _storage_mutex;
         bool _storage_filled;
-        ::std::vector<Interface const> _interface_vector;
+        ::std::vector<Interface> _interface_vector;
         ::std::unordered_map<uint32_t, ::std::shared_ptr<Interface const>> _index_map;
         ::std::unordered_map<::std::string, ::std::shared_ptr<Interface const>> _name_map;
 

@@ -101,7 +101,7 @@ template<class IPAddressT>
 OddSource::Interfaces::
 operator<<(::std::ostream & os, OddSource::Interfaces::InterfaceIPAddress<IPAddressT> const & address)
 {
-    static ::std::vector<InterfaceIPFlagDisplayInfo const> const flag_displays {
+    static ::std::vector<InterfaceIPFlagDisplayInfo> const flag_displays {
         {"autoconf", AutoConfigured},
         {"deprecated", Deprecated},
         {"secured", Secured},
@@ -314,14 +314,14 @@ mac_address() const
     return this->_mac_address;
 }
 
-inline ::std::vector<OddSource::Interfaces::InterfaceIPAddress<OddSource::Interfaces::IPv4Address> const> const &
+inline ::std::vector<OddSource::Interfaces::InterfaceIPAddress<OddSource::Interfaces::IPv4Address>> const &
 OddSource::Interfaces::Interface::
 ipv4_addresses() const
 {
     return this->_ipv4_addresses;
 }
 
-inline ::std::vector<OddSource::Interfaces::InterfaceIPAddress<OddSource::Interfaces::IPv6Address> const> const &
+inline ::std::vector<OddSource::Interfaces::InterfaceIPAddress<OddSource::Interfaces::IPv6Address>> const &
 OddSource::Interfaces::Interface::
 ipv6_addresses() const
 {

@@ -1,6 +1,12 @@
+# CLion names
 cmake-build-debug
 cmake-build-opt
 cmake-build-release
 cmake-build-test
+# Manual names
+cmake-debug-test-build
+cmake-release-build
+# Py/setup.py and J/Maven names
 cmake-external-build
+
 .idea

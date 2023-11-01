@@ -30,6 +30,10 @@ import io.oddsource.java.net.ifaddrs4j.Samples;
 
 public class TestSamples
 {
+    public TestSamples()
+    {
+    }
+
     @Test
     public void testGetIPv4Loopback()
     {

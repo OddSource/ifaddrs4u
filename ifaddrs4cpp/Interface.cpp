@@ -51,7 +51,7 @@ namespace
 OddSource::Interfaces::
 operator<<(::std::ostream & os, OddSource::Interfaces::Interface const & interface)
 {
-    static ::std::vector<InterfaceFlagDisplayInfo const> const flag_displays {
+    static ::std::vector<InterfaceFlagDisplayInfo> const flag_displays {
         {"UP", IsUp},
         {"RUNNING", IsRunning},
         {"LOOPBACK", IsLoopback},

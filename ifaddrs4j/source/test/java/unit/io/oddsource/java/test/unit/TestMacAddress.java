@@ -24,6 +24,10 @@ import io.oddsource.java.net.ifaddrs4j.MacAddress;
 
 public class TestMacAddress
 {
+    public TestMacAddress()
+    {
+    }
+
     private static byte[] bytes(final int... args)
     {
         final byte[] value = new byte[args.length];

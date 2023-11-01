@@ -34,6 +34,10 @@ public class TestInterfaceBrowser
 
     private static final boolean IS_MAC = OS.contains("mac") || OS.contains("darwin");
 
+    public TestInterfaceBrowser()
+    {
+    }
+
     @Test
     public void testForEachThenIterate()
     {

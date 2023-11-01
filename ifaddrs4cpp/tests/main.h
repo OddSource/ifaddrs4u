@@ -95,7 +95,7 @@ namespace OddSource::Interfaces::Tests
         static void registrate(::std::string const &, create_function *);
 
         [[nodiscard]]
-        static int run_all_registered_test_cases(::std::vector<::std::string const> const & matching);
+        static int run_all_registered_test_cases(::std::vector<::std::string> const & matching);
 
         template<typename T>
         class Registrar
@@ -129,8 +129,8 @@ namespace OddSource::Interfaces::Tests
         uint16_t _pass_test_count;
         uint16_t _fail_test_count;
         uint16_t _error_test_count;
-        ::std::vector<::std::string const> _failures;
-        ::std::vector<::std::string const> _errors;
+        ::std::vector<::std::string> _failures;
+        ::std::vector<::std::string> _errors;
     };
 }
 

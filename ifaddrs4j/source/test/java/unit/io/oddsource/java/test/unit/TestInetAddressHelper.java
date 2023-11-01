@@ -28,6 +28,10 @@ import io.oddsource.java.net.ifaddrs4j.InetAddressHelper;
 
 public class TestInetAddressHelper
 {
+    public TestInetAddressHelper()
+    {
+    }
+
     private static byte[] bytes(final int... args)
     {
         final byte[] value = new byte[args.length];

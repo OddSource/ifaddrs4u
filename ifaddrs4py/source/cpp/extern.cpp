@@ -195,7 +195,7 @@ namespace
             {
                 interface = OddSource::ifaddrs4py::convert_to_python(cpp_interface);
             }
-            CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return_error = true)
+            CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return_error = true; return false)
 
             if (!return_error && keep_calling_callable)
             {
@@ -425,17 +425,17 @@ static PyTypeObject InterfaceBrowser_PyType =
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     .tp_name = "ifaddrs4py.extern.InterfaceBrowser",
     .tp_basicsize = sizeof(InterfaceBrowser_PyObj),
-    .tp_flags = Py_TPFLAGS_METHOD_DESCRIPTOR | Py_TPFLAGS_IMMUTABLETYPE,
-    .tp_new = PyType_GenericNew,
-    .tp_init = (initproc) InterfaceBrowser___init__,
     .tp_dealloc = (destructor) InterfaceBrowser_dealloc,
     .tp_repr = (reprfunc) InterfaceBrowser___repr__,
-    .tp_str = (reprfunc) InterfaceBrowser___repr__,
-    .tp_iter = (getiterfunc) InterfaceBrowser___iter__,
-    .tp_members = InterfaceBrowser_members,
-    .tp_methods = InterfaceBrowser_methods,
-    .tp_getset = InterfaceBrowser_getters_and_setters,
     .tp_as_mapping = &InterfaceBrowser_mapping,
+    .tp_str = (reprfunc) InterfaceBrowser___repr__,
+    .tp_flags = Py_TPFLAGS_METHOD_DESCRIPTOR | Py_TPFLAGS_IMMUTABLETYPE,
+    .tp_iter = (getiterfunc) InterfaceBrowser___iter__,
+    .tp_methods = InterfaceBrowser_methods,
+    .tp_members = InterfaceBrowser_members,
+    .tp_getset = InterfaceBrowser_getters_and_setters,
+    .tp_init = (initproc) InterfaceBrowser___init__,
+    .tp_new = PyType_GenericNew,
 };
 
 static struct PyMethodDef ifaddrs4py_methods [] =
