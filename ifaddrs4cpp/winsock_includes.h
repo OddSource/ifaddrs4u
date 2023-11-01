@@ -9,5 +9,6 @@
 #include <windows.h>
 #include <ws2ipdef.h>
 #include <iphlpapi.h>
+#include <winternl.h>
 #include <ip2string.h>
 #endif /* WINSOCK_INCLUDES_INCLUDED */

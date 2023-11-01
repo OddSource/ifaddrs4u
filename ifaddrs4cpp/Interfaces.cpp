@@ -185,7 +185,7 @@ namespace OddSource::Interfaces
 
                 if (ifa->PhysicalAddress)
                 {
-                    iface._mac_address.emplace(ifa->PhysicalAddress, ifa->PhysicalAddressLength);
+                    iface._mac_address.emplace(ifa->PhysicalAddress, (uint8_t)ifa->PhysicalAddressLength);
                 }
 
                 PIP_ADAPTER_UNICAST_ADDRESS unicast = ifa->FirstUnicastAddress;
