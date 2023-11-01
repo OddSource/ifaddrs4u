@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <string>
 
 namespace
 {
@@ -25,6 +26,7 @@ namespace
     inline ::std::optional<uint8_t>
     sanitize_prefix_length(IPAddressT const & address, uint8_t prefix_length)
     {
+        using std::string_literals::operator""s;
         static_assert(::std::is_base_of_v<IPAddress, IPAddressT>,
                       "the template parameter IPAddressT must derive from IPAddress.");
         if (prefix_length > address.maximum_prefix_length())

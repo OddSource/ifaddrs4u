@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "MacAddress.h"
+#include "s.h"
 
 namespace
 {

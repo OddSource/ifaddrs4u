@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <string>
+
 inline ::std::string
 OddSource::Interfaces::VersionInfo::
 version()
@@ -50,6 +52,7 @@ inline ::std::optional<::std::string>
 OddSource::Interfaces::VersionInfo::
 suffix()
 {
+    using std::string_literals::operator""s;
     if constexpr (std::char_traits<char>::length(IFADDRS4CPP_VERSION_SUFFIX) > 0)
     {
         return "-"s + IFADDRS4CPP_VERSION_SUFFIX;

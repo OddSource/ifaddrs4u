@@ -15,6 +15,7 @@
  */
 
 #include "config.h"
+#include "s.h"
 
 #ifdef IS_WINDOWS
 #include <netioapi.h>

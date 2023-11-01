@@ -38,7 +38,3 @@ using std::int8_t;
 using std::int16_t;
 using std::int32_t;
 using std::int64_t;
-
-#include <string>
-
-using std::string_literals::operator""s;
