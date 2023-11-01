@@ -18,8 +18,7 @@
 #include "s.h"
 
 #ifdef IS_WINDOWS
-#include <netioapi.h>
-#include <winsock2.h>
+#include "winsock_includes.h"
 #else /* IS_WINDOWS */
 #include <arpa/inet.h>
 #include <cerrno>

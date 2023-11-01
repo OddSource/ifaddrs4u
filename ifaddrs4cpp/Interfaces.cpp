@@ -18,11 +18,7 @@
 #include "s.h"
 
 #ifdef IS_WINDOWS
-#include <winsock2.h>
-#include <windows.h>
-#include <ws2ipdef.h>
-#include <iphlpapi.h>
-#include <ws2tcpip.h>
+#include "winsock_includes.h"
 #else /* IS_WINDOWS */
 
 #include <cerrno>
@@ -55,13 +51,6 @@
 #include <shared_mutex>
 #include <string>
 
-#ifdef IS_WINDOWS
-#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
-#include <codecvt>
-#include <locale>
-#undef _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
-#endif /* IS_WINDOWS */
-
 #include "Interface.h"
 #include "Interfaces.h"
 #include "IpAddress.h"
@@ -79,6 +68,20 @@
 #else /* AF_LINK */
 #define AF_MAC_ADDRESS AF_PACKET
 #endif /* AF_LINK */
+#endif /* IS_WINDOWS */
+
+#ifdef IS_WINDOWS
+std::string utf8_encode(std::wstring const & wstr)
+{
+    if (wstr.empty())
+    {
+        return std::string();
+    }
+    int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+    std::string str(size_needed, 0);
+    WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &str[0], size_needed, NULL, NULL);
+    return str;
+}
 #endif /* IS_WINDOWS */
 
 namespace OddSource::Interfaces
@@ -317,7 +320,7 @@ namespace OddSource::Interfaces
                 if (candidate->sa_family == AF_INET)
                 {
                     auto cand = reinterpret_cast<sockaddr_in *>(candidate);
-                    auto cand_bytes = reinterpret_cast<uint8_t *>(cand.sin_addr.s_addr);
+                    auto cand_bytes = reinterpret_cast<uint8_t *>(cand->sin_addr.s_addr);
                     uint8_t i, first_byte_with_bcast(0);
                     for (i = 3; i >= 0; i--)
                     {
