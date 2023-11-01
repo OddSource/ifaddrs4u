@@ -84,11 +84,16 @@ add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE cxx_std_17)
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
-                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3;-wd4275;-wd4251>>")
+                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3;-wd4275;-wd4251;-wd4455>>")
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
                       CXX_STANDARD_REQUIRED ON
                       CXX_EXTENSIONS OFF)
+
+# Windows compiler warnings disablement explanations:
+# - C4275: Docs say this can be ignored if your class is derived from a type in the C++ Standard
+# - C4251: Docs say this can be ignored if your class is exposing a type in the C++ Standard
+# - C4455: "literal suffix identifiers that do not start with an underscore" when using std ""s
 
 set(HEADER_ARCHIVE_CUSTOM_COMMAND_TARGET ${PROJECT_NAME}-shared)
 

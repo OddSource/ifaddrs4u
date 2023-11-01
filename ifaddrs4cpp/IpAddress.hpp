@@ -285,5 +285,5 @@ inline ::std::ostream &
 OddSource::Interfaces::
 operator<<(::std::ostream & os, OddSource::Interfaces::IPAddress const & address)
 {
-    return os << ::std::string(address);
+    return os << address.operator::std::string();
 }

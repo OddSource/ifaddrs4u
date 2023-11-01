@@ -50,7 +50,9 @@
 #endif /* !<net/if_dl.h> && !<linux/if_packet.h> */
 #endif /* !IS_WINDOWS */
 #include <cassert>
+#include <codecvt>
 #include <functional>
+#include <locale>
 #include <mutex>
 #include <shared_mutex>
 #include <string>
@@ -159,9 +161,9 @@ namespace OddSource::Interfaces
                 }
                 if (has_broadcast(ifa->FirstPrefix))
                 {
-                    flagn |= BroadcastAddressSet;
+                    flags |= BroadcastAddressSet;
                 }
-                if (ifa->Flags & IP_ADAPTER_NO_MULTICAST != IP_ADAPTER_NO_MULTICAST)
+                if ((ifa->Flags & IP_ADAPTER_NO_MULTICAST) != IP_ADAPTER_NO_MULTICAST)
                 {
                     flags |= SupportsMulticast;
                 }
@@ -710,7 +712,7 @@ WinSockStartupCleanupHelper()
     int error = WSAStartup(version_requested, &data);
     if (error != 0)
     {
-        throw ::std::system_error(
+        throw ::std::runtime_error(
             "Could not initialize WinSock subsystem due to error code: "s +
             ::std::to_string(error) + ". For the meaning of this, see the documentation: "s +
             "https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsastartup#return-value"s);
