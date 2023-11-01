@@ -82,20 +82,33 @@ namespace
                         "Malformed IPv4 address string '"s + repr_str + "' with "s +
                         ::std::to_string(num_dots + 1) + " parts instead of 4"s);
             }
-            // inet_aton/inet_addr, however, can handle IPv4 addresses in all valid formats.
+            // inet_aton/RtlIpv4StringToAddress, however, can handle IPv4 addresses in all valid formats.
 #ifdef IS_WINDOWS
-            auto raw = inet_addr(repr_str.c_str());
-            if (raw == INADDR_NONE)
+            char const * end = nullptr;
+            success = RtlIpv4StringToAddress(repr_str.c_str(), False, end, data.get());
+            if (success == STATUS_INVALID_PARAMETER)
             {
-                success = 0;
+                throw InvalidIPAddress(
+                    "An invalid parameter was passed to RtlIpv4StringToAddress while converting '"s +
+                    repr_str + "'"s);
             }
-            else
+            else if (success != STATUS_SUCCESS)
             {
-                ::std::memcpy(data.get(), raw, sizeof(Addr));
+                char * s = nullptr;
+                ::FormatMessage(
+                    FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                    nullptr, success,
+                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                    (LPTSTR)&s, 0, nullptr);
+                ::std::string err(s == nullptr ? "" : s);
+                LocalFree(s);
+                throw InvalidIPAddress(
+                    "Malformed IP address string '"s + repr_str + "' or unknown RtlIpv4StringToAddress error ("s +
+                    ::std::to_string(success) + "): "s + err);
             }
 #else /* IS_WINDOWS */
             success = inet_aton(repr_str.c_str(), data.get());
-#endif
+#endif /* !IS_WINDOWS */
         }
         if (success != 1)
         {
@@ -127,7 +140,8 @@ namespace
 #ifdef IS_WINDOWS
             auto err_no(::WSAGetLastError());
             char * s = nullptr;
-            ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            ::FormatMessage(
+                FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                 nullptr, err_no,
                 MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                 (LPTSTR)&s, 0, nullptr);
