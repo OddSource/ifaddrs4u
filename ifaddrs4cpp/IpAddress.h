@@ -93,7 +93,7 @@ namespace OddSource::Interfaces
          * @return a string.
          */
         [[nodiscard]]
-        virtual inline operator char const *() const; // NOLINT(*-explicit-constructor)
+        virtual inline explicit operator char const *() const;
 
         /**
          * Indicates whether this address represents the unspecified address

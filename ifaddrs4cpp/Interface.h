@@ -210,7 +210,7 @@ namespace OddSource::Interfaces
         inline operator ::std::string() const; // NOLINT(*-explicit-constructor)
 
         [[nodiscard]]
-        inline operator char const *() const; // NOLINT(*-explicit-constructor)
+        inline explicit operator char const *() const;
 
         [[nodiscard]]
         inline IPAddressT const & address() const;

@@ -64,10 +64,10 @@ namespace OddSource::Interfaces
         inline operator ::std::string() const; // NOLINT(*-explicit-constructor)
 
         [[nodiscard]]
-        inline operator char const *() const; // NOLINT(*-explicit-constructor)
+        inline explicit operator char const *() const;
 
         [[nodiscard]]
-        inline operator uint8_t const *() const; // NOLINT(*-explicit-constructor)
+        inline explicit operator uint8_t const *() const;
 
         [[nodiscard]]
         inline uint8_t length() const;
