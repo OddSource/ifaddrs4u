@@ -10,4 +10,8 @@
 #include <ws2ipdef.h>
 #include <iphlpapi.h>
 #include <ip2string.h>
+
+#pragma comment(lib, "IPHLPAPI.lib")
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "Ntdll.lib")
 #endif /* WINSOCK_INCLUDES_INCLUDED */
