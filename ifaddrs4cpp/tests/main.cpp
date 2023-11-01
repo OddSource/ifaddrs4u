@@ -203,7 +203,15 @@ run_all_registered_test_cases(::std::vector<::std::string> const & matching)
     }
 
     ::std::chrono::steady_clock::time_point end_time(std::chrono::steady_clock::now());
+#ifdef IS_WINDOWS
+// no loss of data as indicated by MSVC
+#pragma warning( push )
+#pragma warning( disable : 4244)
+#endif /* IS_WINDOWS */
     long double elapsed_microseconds(std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count());
+#ifdef IS_WINDOWS
+#pragma warning( pop )
+#endif /* IS_WINDOWS */
     ::std::ostringstream oss;
     oss.precision(5);
     if (elapsed_microseconds > 1'000'000)

@@ -320,6 +320,7 @@ namespace OddSource::Interfaces
                 if (candidate->sa_family == AF_INET)
                 {
                     auto cand = reinterpret_cast<sockaddr_in *>(candidate);
+// no loss of data as indicated by MSVC
 #pragma warning( push )
 #pragma warning( disable : 4312)
                     auto cand_bytes = reinterpret_cast<uint8_t *>(cand->sin_addr.s_addr);
@@ -355,6 +356,7 @@ namespace OddSource::Interfaces
                 if (candidate->sa_family == AF_INET)
                 {
                     auto cand = reinterpret_cast<sockaddr_in *>(candidate);
+// no loss of data as indicated by MSVC
 #pragma warning( push )
 #pragma warning( disable : 4312)
                     auto cand_bytes = reinterpret_cast<uint8_t *>(cand->sin_addr.s_addr);
@@ -371,6 +373,7 @@ namespace OddSource::Interfaces
                     {
                         continue;
                     }
+// no loss of data as indicated by MSVC
 #pragma warning( push )
 #pragma warning( disable : 4312)
                     auto addr_bytes = reinterpret_cast<uint8_t *>(addr->sin_addr.s_addr);

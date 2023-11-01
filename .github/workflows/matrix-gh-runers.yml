@@ -74,7 +74,7 @@ jobs:
       - name: Run ifaddrs4cpp Tests
         working-directory: ifaddrs4cpp
         #run: ./cmake-debug-test-build/ifaddrs4cpp_tests(.exe?)
-        run: ctest --verbose --test-dir ./cmake-debug-test-build
+        run: ctest --verbose --config Debug --test-dir ./cmake-debug-test-build
 
       - name: Compile ifaddrs4cpp Release
         working-directory: ifaddrs4cpp
