@@ -338,6 +338,8 @@ namespace OddSource::Interfaces
                         return true;
                     }
                 }
+
+                pre = pre->Next;
             }
             return false;
         }
@@ -369,31 +371,30 @@ namespace OddSource::Interfaces
                             first_byte_with_bcast = i;
                         }
                     }
-                    if (first_byte_with_bcast < 1)
+                    if (first_byte_with_bcast > 0)
                     {
-                        continue;
-                    }
 // no loss of data as indicated by MSVC
 #pragma warning( push )
 #pragma warning( disable : 4312)
-                    auto addr_bytes = reinterpret_cast<uint8_t *>(addr->sin_addr.s_addr);
+                        auto addr_bytes = reinterpret_cast<uint8_t *>(addr->sin_addr.s_addr);
 #pragma warning( pop )
-                    bool do_continue(false);
-                    for (i = 0; i < first_byte_with_bcast; i++)
-                    {
-                        if (cand_bytes[i] != addr_bytes[i])
+                        bool dismatch(false);
+                        for (i = 0; i < first_byte_with_bcast; i++)
                         {
-                            do_continue = true;
+                            if (cand_bytes[i] != addr_bytes[i])
+                            {
+                                dismatch = true;
+                                break;
+                            }
+                        }
+                        if (!dismatch)
+                        {
+                            broadcast = cand;
                             break;
                         }
                     }
-                    if (do_continue)
-                    {
-                        continue;
-                    }
-                    broadcast = cand;
-                    break;
                 }
+
                 pre = pre->Next;
             }
 
