@@ -409,7 +409,7 @@ namespace OddSource::Interfaces
             ::std::optional<uint64_t const> mtu;
 #ifdef SIOCGIFMTU
             ifreq ifr {};
-            ::strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
+            ::strncpy(ifr.ifr_name, if_name, IFNAMSIZ - 1);
             int sock(::socket(AF_INET, SOCK_DGRAM, 0));
             if (sock < 0)
             {
@@ -546,7 +546,7 @@ namespace OddSource::Interfaces
             uint32_t flags(0);
 #ifdef SIOCGIFAFLAG_IN6
             in6_ifreq ifr6 {};
-            ::strncpy(ifr6.ifr_name, ifa->ifa_name, IFNAMSIZ);
+            ::strncpy(ifr6.ifr_name, ifa->ifa_name, IFNAMSIZ - 1);
             ifr6.ifr_addr = *addr;
             int sock6(::socket(AF_INET6, SOCK_DGRAM, 0));
             if (sock6 < 0)
