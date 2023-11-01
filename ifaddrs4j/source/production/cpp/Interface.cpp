@@ -101,6 +101,8 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::InterfaceIPAddress<IPAddressT> const & interface_address)
 {
+    ENSURE_OUR_CLASSES_LOADED(env, NULL)
+
     auto address(convert_to_java(env, interface_address.address()));
     IF_NULL_RETURN_NULL(address)
 
@@ -143,6 +145,8 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & interface)
 {
+    ENSURE_OUR_CLASSES_LOADED(env, NULL)
+
     using namespace OddSource::Interfaces;
 
     jint index(interface.index());
@@ -204,7 +208,9 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & interface
         }
     }
 
-    return env->NewObject(JNICache::Interface, JNICache::Interface__init_,
+    return env->NewObject(
+        JNICache::Interface,
+        JNICache::Interface__init_,
         index, name,
 #ifdef IS_WINDOWS
         windows_uuid,

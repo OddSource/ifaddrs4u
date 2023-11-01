@@ -59,7 +59,6 @@ namespace OddSource::ifaddrs4j
     jclass JNICache::RuntimeException = NULL;
 }
 
-
 jint JNI_OnLoad(JavaVM * vm, void *)
 {
     JNIEnv * env;
@@ -72,71 +71,6 @@ jint JNI_OnLoad(JavaVM * vm, void *)
 
     jclass cls;
     jmethodID method;
-
-    // InetAddressHelper methods
-    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/InetAddressHelper");
-    JNICache::InetAddressHelper = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::InetAddressHelper)
-
-    method = env->GetStaticMethodID(cls, "getIPv4Address", "([B)Ljava/net/Inet4Address;");
-    JNICache::InetAddressHelper_getIPv4Address = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::InetAddressHelper_getIPv4Address)
-    env->DeleteLocalRef((jobject) method);
-
-    method = env->GetStaticMethodID(cls, "getIPv6Address", "([BLjava/lang/Integer;)Ljava/net/Inet6Address;");
-    JNICache::InetAddressHelper_getIPv6Address = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::InetAddressHelper_getIPv6Address)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // MacAddress constructor
-    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/MacAddress");
-    JNICache::MacAddress = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::MacAddress)
-
-    // MacAddress(String, byte[])
-    method = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;[B)V");
-    JNICache::MacAddress__init_ = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::MacAddress__init_)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // InterfaceIPAddress constructor
-    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/InterfaceIPAddress");
-    JNICache::InterfaceIPAddress = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::InterfaceIPAddress)
-
-    // InterfaceIPAddress(T, int, Short, T, T)
-    method = env->GetMethodID(
-         cls,
-         "<init>",
-         "(Ljava/net/InetAddress;ILjava/lang/Short;Ljava/net/InetAddress;Ljava/net/InetAddress;)V");
-    JNICache::InterfaceIPAddress__init_ = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::InterfaceIPAddress__init_)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // Interface constructor
-    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/Interface");
-    JNICache::Interface = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::Interface)
-
-    // Interface(int, String[, String], Long, MacAddress, List<InterfaceIPAddress<Inet4Address>>, List<InterfaceIPAddress<Inet6Address>>)
-    // (ILjava/lang/String;ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V
-    method = env->GetMethodID(cls, "<init>", (
-        "(ILjava/lang/String;"s +
-#ifdef IS_WINDOWS
-        "Ljava/lang/String;"s +;
-#endif /* IS_WINDOWS */
-        "ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V"s).c_str());
-    JNICache::Interface__init_ = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::Interface__init_)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
 
     // Boolean methods
     cls = env->FindClass("java/lang/Boolean");
@@ -242,6 +176,86 @@ jint JNI_OnLoad(JavaVM * vm, void *)
     env->DeleteLocalRef(cls);
 
     return JNI_VERSION_10;
+}
+
+bool
+OddSource::ifaddrs4j::JNICache::
+ensure_our_classes_loaded(JNIEnv * env)
+{
+    if (JNICache::Interface__init_ != NULL)
+    {
+        return true;
+    }
+
+    jclass cls;
+    jmethodID method;
+
+    // InetAddressHelper methods
+    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/InetAddressHelper");
+    JNICache::InetAddressHelper = (jclass) env->NewGlobalRef(cls);
+    IF_NULL_RETURN_FALSE(JNICache::InetAddressHelper)
+
+    method = env->GetStaticMethodID(cls, "getIPv4Address", "([B)Ljava/net/Inet4Address;");
+    JNICache::InetAddressHelper_getIPv4Address = (jmethodID) env->NewGlobalRef((jobject) method);
+    IF_NULL_RETURN_FALSE(JNICache::InetAddressHelper_getIPv4Address)
+    env->DeleteLocalRef((jobject) method);
+
+    method = env->GetStaticMethodID(cls, "getIPv6Address", "([BLjava/lang/Integer;)Ljava/net/Inet6Address;");
+    JNICache::InetAddressHelper_getIPv6Address = (jmethodID) env->NewGlobalRef((jobject) method);
+    IF_NULL_RETURN_FALSE(JNICache::InetAddressHelper_getIPv6Address)
+    env->DeleteLocalRef((jobject) method);
+
+    env->DeleteLocalRef(cls);
+
+    // MacAddress constructor
+    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/MacAddress");
+    JNICache::MacAddress = (jclass) env->NewGlobalRef(cls);
+    IF_NULL_RETURN_FALSE(JNICache::MacAddress)
+
+    // MacAddress(String, byte[])
+    method = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;[B)V");
+    JNICache::MacAddress__init_ = (jmethodID) env->NewGlobalRef((jobject) method);
+    IF_NULL_RETURN_FALSE(JNICache::MacAddress__init_)
+    env->DeleteLocalRef((jobject) method);
+
+    env->DeleteLocalRef(cls);
+
+    // InterfaceIPAddress constructor
+    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/InterfaceIPAddress");
+    JNICache::InterfaceIPAddress = (jclass) env->NewGlobalRef(cls);
+    IF_NULL_RETURN_FALSE(JNICache::InterfaceIPAddress)
+
+    // InterfaceIPAddress(T, int, Short, T, T)
+    method = env->GetMethodID(
+         cls,
+         "<init>",
+         "(Ljava/net/InetAddress;ILjava/lang/Short;Ljava/net/InetAddress;Ljava/net/InetAddress;)V");
+    JNICache::InterfaceIPAddress__init_ = (jmethodID) env->NewGlobalRef((jobject) method);
+    IF_NULL_RETURN_FALSE(JNICache::InterfaceIPAddress__init_)
+    env->DeleteLocalRef((jobject) method);
+
+    env->DeleteLocalRef(cls);
+
+    // Interface constructor
+    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/Interface");
+    JNICache::Interface = (jclass) env->NewGlobalRef(cls);
+    IF_NULL_RETURN_FALSE(JNICache::Interface)
+
+    // Interface(int, String[, String], Long, MacAddress, List<InterfaceIPAddress<Inet4Address>>, List<InterfaceIPAddress<Inet6Address>>)
+    // (ILjava/lang/String;ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V
+    method = env->GetMethodID(cls, "<init>", (
+        "(ILjava/lang/String;"s +
+#ifdef IS_WINDOWS
+        "Ljava/lang/String;"s +;
+#endif /* IS_WINDOWS */
+        "ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V"s).c_str());
+    JNICache::Interface__init_ = (jmethodID) env->NewGlobalRef((jobject) method);
+    IF_NULL_RETURN_FALSE(JNICache::Interface__init_)
+    env->DeleteLocalRef((jobject) method);
+
+    env->DeleteLocalRef(cls);
+
+    return true;
 }
 
 void JNI_OnUnload(JavaVM * vm, void *)

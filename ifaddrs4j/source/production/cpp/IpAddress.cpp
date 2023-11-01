@@ -29,6 +29,8 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::IPv4Address const & address)
 {
+    ENSURE_OUR_CLASSES_LOADED(env, NULL)
+
     auto bytes(reinterpret_cast<jbyte const *>(static_cast<in_addr const *>(address)));
     auto byte_array(env->NewByteArray(4));
     IF_NULL_RETURN_NULL(byte_array)
@@ -47,6 +49,8 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::IPv6Address const & address)
 {
+    ENSURE_OUR_CLASSES_LOADED(env, NULL)
+
     auto bytes(reinterpret_cast<jbyte const *>(static_cast<in6_addr const *>(address)));
     auto byte_array(env->NewByteArray(16));
     IF_NULL_RETURN_NULL(byte_array)

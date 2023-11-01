@@ -40,6 +40,8 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::MacAddress const & address)
 {
+    ENSURE_OUR_CLASSES_LOADED(env, NULL)
+
     jstring repr(env->NewStringUTF(::std::string(address).c_str()));
     IF_NULL_RETURN_NULL(repr)
 

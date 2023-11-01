@@ -61,10 +61,17 @@ namespace OddSource::ifaddrs4j
         static jclass EnumConstantNotPresentException;
         static jclass RuntimeException;
 
+        static bool ensure_our_classes_loaded(JNIEnv *);
+
     private:
         JNICache() = delete;
     };
 }
+
+#define ENSURE_OUR_CLASSES_LOADED(jnienv, ret) if (!OddSource::ifaddrs4j::JNICache::ensure_our_classes_loaded(jnienv)) \
+        { \
+            return ret; \
+        }
 
 jint JNI_OnLoad(JavaVM *, void *);
 
