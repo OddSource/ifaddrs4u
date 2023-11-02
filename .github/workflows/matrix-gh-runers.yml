@@ -51,9 +51,11 @@ jobs:
           - os: windows-2019
             cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe
             echo_java_info_cmd: 'echo "java = $((get-command java).Path)`njavac = $((get-command javac).Path)`nJAVA_HOME = $env:JAVA_HOME"'
+            ls_java_cmd: 'Get-ChildItem -Force "$env:JAVA_HOME'
           - os: windows-2022
             cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe
             echo_java_info_cmd: 'echo "java = $((get-command java).Path)`njavac = $((get-command javac).Path)`nJAVA_HOME = $env:JAVA_HOME"'
+            ls_java_cmd: 'Get-ChildItem -Force "$env:JAVA_HOME'
     runs-on: ${{ matrix.os }}
     name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
@@ -98,5 +100,8 @@ jobs:
         working-directory: ifaddrs4j
         run: |
              ${{ matrix.echo_java_info_cmd || 'echo -e "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"' }}
+             ${{ matrix.ls_java_cmd || 'ls -al "$JAVA_HOME' }}/lib"
+             ${{ matrix.ls_java_cmd || 'ls -al "$JAVA_HOME' }}/include"
+             ${{ matrix.ls_java_cmd || 'ls -al "$JAVA_HOME' }}/bin"
              mvn -B --version
              mvn -B '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' help:active-profiles install
