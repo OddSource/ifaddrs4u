@@ -97,6 +97,6 @@ jobs:
       - name: Build ifaddrs4j with Maven
         working-directory: ifaddrs4j
         run: |
-             ${{ matrix.echo_java_info_cmd || 'echo -e "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"' }}"
+             ${{ matrix.echo_java_info_cmd || 'echo -e "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"' }}
              mvn -B --version
              mvn -B help:active-profiles install
