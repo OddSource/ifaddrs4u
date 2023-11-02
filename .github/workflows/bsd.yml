@@ -43,15 +43,20 @@ jobs:
         java: ["11", "17", "21"]
         include:
           - java: "11"
-            python: "3.8"
+            python: "38"
           - java: "17"
-            python: "3.10"
+            python: "310"
           - java: "21"
-            python: "3.12"
+            python: "311"
           - os_name: freebsd
             os_version: "12.4"
+            pkg_command: "pkg install -y"
           - os_name: netbsd
             os_version: "9.3"
+            pkg_command: "pkg_add"
+        exclude:
+          - os_name: netbsd
+            java: "21"
     runs-on: macos-latest
     name: "${{ matrix.os_name }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
@@ -73,12 +78,14 @@ jobs:
                echo "#######################################"
                echo "# INSTALLING PREREQUISITES            #"
                echo "#######################################"
-               sudo pkg install -y cmake python${{ matrix.python }} openjdk${{ matrix.java }}
+               echo "+ sudo ${{ matrix.pkg_command }} cmake python${{ matrix.python }} openjdk${{ matrix.java }}"
+               sudo ${{ matrix.pkg_command }} cmake python${{ matrix.python }} openjdk${{ matrix.java }}
                echo
                echo "#######################################"
                echo "# STEP: CMake Prepare                 #"
                echo "#######################################"
                cd ipaddrs4cpp
+               pwd
                cmake -DCMAKE_BUILD_TYPE=Release -S . -B ./cmake-external-build
                cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-debug-test-build
                echo
