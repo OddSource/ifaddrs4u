@@ -120,7 +120,7 @@ public final class Interface
      */
     public UUID getWindowsUuid()
     {
-        if (Interface.IS_WINDOWS)
+        if (!Interface.IS_WINDOWS)
         {
             throw new UnsupportedOperationException(Interface.NO_WINDOWS);
         }
