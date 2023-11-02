@@ -16,9 +16,7 @@
 
 #pragma once
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
-#define IS_WINDOWS 1
-#endif
+#include <ifaddrs4cpp/os.h>
 
 #define IF_NULL_RETURN(thing, ret) if (thing == NULL) \
     { \

@@ -52,7 +52,7 @@ inline ::std::optional<::std::string>
 OddSource::Interfaces::VersionInfo::
 suffix()
 {
-    using std::string_literals::operator""s;
+#include "s.h" // limit the scope of the `using` to this function body
     if constexpr (std::char_traits<char>::length(IFADDRS4CPP_VERSION_SUFFIX) > 0)
     {
         return "-"s + IFADDRS4CPP_VERSION_SUFFIX;

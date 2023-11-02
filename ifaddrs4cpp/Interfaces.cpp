@@ -298,8 +298,9 @@ namespace OddSource::Interfaces
                 ifa = ifa->ifa_next;
             }
 
-            for (auto & [name, iface] : interfaces) // NOLINT(*-use-anyofallof)
+            for (auto & [name, iface] : interfaces)
             {
+                std::ignore = name;
                 if (!do_this(iface))
                 {
                     return false;

@@ -22,15 +22,13 @@
 #include <stdexcept>
 #include <string>
 
-using std::string_literals::operator""s;
-
 #if PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 8
 #error "ifaddrs4py requires Python 3.8+"
 #endif /* PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 8 */
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
-#define IS_WINDOWS 1
-#endif
+#include <ifaddrs4cpp/os.h>
+
+#include <ifaddrs4cpp/s.h>
 
 namespace OddSource::ifaddrs4py
 {

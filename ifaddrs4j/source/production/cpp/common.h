@@ -20,4 +20,6 @@
 
 #include <string>
 
-using std::string_literals::operator""s;
+#include "macros.h"
+
+#include <ifaddrs4cpp/s.h>
