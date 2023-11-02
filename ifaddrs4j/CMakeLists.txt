@@ -75,10 +75,16 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       CXX_EXTENSIONS OFF)
 
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_sources})
-target_link_libraries(${PROJECT_NAME} PUBLIC
-                      ${PROJECT_NAME}_compiler_flags
-                      "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static.${STATIC_LIBRARY_EXTENSION}"
-                      "$ENV{JAVA_HOME}/${LIB_JAVA}.${DYNAMIC_LIBRARY_EXTENSION}")
+if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
+    target_link_libraries(${PROJECT_NAME} PUBLIC
+                          ${PROJECT_NAME}_compiler_flags
+                          "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static.${STATIC_LIBRARY_EXTENSION}")
+else()
+    target_link_libraries(${PROJECT_NAME} PUBLIC
+                          ${PROJECT_NAME}_compiler_flags
+                          "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static.${STATIC_LIBRARY_EXTENSION}"
+                          "$ENV{JAVA_HOME}/${LIB_JAVA}.${DYNAMIC_LIBRARY_EXTENSION}")
+endif()
 target_include_directories(${PROJECT_NAME} PUBLIC
                            "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/include"
                            "$ENV{JAVA_HOME}/include"

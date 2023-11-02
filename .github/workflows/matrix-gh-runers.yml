@@ -100,8 +100,8 @@ jobs:
         working-directory: ifaddrs4j
         run: |
              ${{ matrix.echo_java_info_cmd || 'echo -e "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"' }}
-             ${{ matrix.ls_java_cmd || 'ls -al "$JAVA_HOME' }}/lib"
-             ${{ matrix.ls_java_cmd || 'ls -al "$JAVA_HOME' }}/include"
-             ${{ matrix.ls_java_cmd || 'ls -al "$JAVA_HOME' }}/bin"
+#             ${{ matrix.ls_java_cmd || 'ls -al "$JAVA_HOME' }}/lib"
+#             ${{ matrix.ls_java_cmd || 'ls -al "$JAVA_HOME' }}/include"
+#             ${{ matrix.ls_java_cmd || 'ls -al "$JAVA_HOME' }}/bin"
              mvn -B --version
              mvn -B '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' help:active-profiles install
