@@ -192,6 +192,7 @@
                             </goals>
                             <phase>test-compile</phase>
                             <configuration>
+                                <config>Release</config>
                                 <buildDirectory>${project.basedir}/../ifaddrs4cpp/cmake-external-build</buildDirectory>
                                 <options>
                                     <option>--verbose</option>
