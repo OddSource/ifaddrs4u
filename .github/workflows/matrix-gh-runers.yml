@@ -67,7 +67,7 @@ jobs:
              cmake -DCMAKE_BUILD_TYPE=Release -S . -B ./cmake-external-build
              cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-debug-test-build
 
-      - name: Compile ipaddrs4cpp Debug
+      - name: Compile ifaddrs4cpp Debug
         working-directory: ifaddrs4cpp
         run: cmake --build ./cmake-debug-test-build --config Debug -j 14
 

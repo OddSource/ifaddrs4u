@@ -73,9 +73,10 @@ jobs:
           version: ${{ matrix.os_version }}
           run: |
                uname -a
-               echo $SHELL
                pwd
-               ls -al
+               echo "SHELL = $SHELL"
+               echo "PATH = $PATH"
+               ls -al /usr/pkg/sbin /usr/pkg/bin || echo "rc != 0"
                echo "#######################################"
                echo "# STEP: Installing CMake              #"
                echo "#######################################"
@@ -85,13 +86,13 @@ jobs:
                echo "#######################################"
                echo "# STEP: CMake Prepare                 #"
                echo "#######################################"
-               cd ipaddrs4cpp
+               cd ifaddrs4cpp
                pwd
                cmake -DCMAKE_BUILD_TYPE=Release -S . -B ./cmake-external-build
                cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-debug-test-build
                echo
                echo "#######################################"
-               echo "# STEP: Compile ipaddrs4cpp Debug     #"
+               echo "# STEP: Compile ifaddrs4cpp Debug     #"
                echo "#######################################"
                cmake --build ./cmake-debug-test-build --config Debug -j 14
                echo
