@@ -61,7 +61,7 @@ jobs:
         exclude:
           - os_name: netbsd
             java: "21"
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     name: "${{ matrix.os_name }} ${{ matrix.os_version }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
       - name: Checkout ifaddrs4u
