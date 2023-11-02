@@ -106,6 +106,7 @@ namespace
                     "Malformed IP address string '"s + repr_str + "' or unknown RtlIpv4StringToAddress error ("s +
                     ::std::to_string(success) + "): "s + err);
             }
+            success = 1;
 #else /* IS_WINDOWS */
             success = inet_aton(repr_str.c_str(), data.get());
 #endif /* !IS_WINDOWS */

@@ -62,15 +62,17 @@ namespace
         if (predicted_length > MAX_ADAPTER_ADDRESS_LENGTH)
         {
             ::std::ostringstream oss;
-            oss << "MAC address length (" << predicted_length
-                << " bytes) too long (max " << MAX_ADAPTER_ADDRESS_LENGTH << " bytes).";
+            oss << "MAC address length (" << ::std::to_string(predicted_length)
+                << " bytes) too long (max " << ::std::to_string(MAX_ADAPTER_ADDRESS_LENGTH)
+                << " bytes).";
             throw InvalidMacAddress(oss.str());
         }
         if (predicted_length < MIN_ADAPTER_ADDRESS_LENGTH)
         {
             ::std::ostringstream oss;
-            oss << "MAC address length (" << predicted_length
-                 << " bytes) too short (min " << MIN_ADAPTER_ADDRESS_LENGTH << " bytes).";
+            oss << "MAC address length (" << ::std::to_string(predicted_length)
+                 << " bytes) too short (min " << ::std::to_string(MIN_ADAPTER_ADDRESS_LENGTH)
+                 << " bytes).";
             throw InvalidMacAddress(oss.str());
         }
 
@@ -129,14 +131,14 @@ namespace
         ::std::ostringstream oss;
         if (data_length > MAX_ADAPTER_ADDRESS_LENGTH)
         {
-            oss << "MAC address length " << data_length << " greater than allowed length "
-                << MAX_ADAPTER_ADDRESS_LENGTH;
+            oss << "MAC address length (" << ::std::to_string(data_length)
+                << ") greater than allowed length " << ::std::to_string(MAX_ADAPTER_ADDRESS_LENGTH);
             throw InvalidMacAddress(oss.str());
         }
         if (data_length < MIN_ADAPTER_ADDRESS_LENGTH)
         {
-            oss << "MAC address length (" << data_length
-                << " bytes) too short (min " << MIN_ADAPTER_ADDRESS_LENGTH << " bytes).";
+            oss << "MAC address length (" << ::std::to_string(data_length)
+                << " bytes) too short (min " << ::std::to_string(MIN_ADAPTER_ADDRESS_LENGTH) << " bytes).";
             throw InvalidMacAddress(oss.str());
         }
 

@@ -183,7 +183,7 @@ namespace OddSource::Interfaces
                     flags,
                     ifa->Mtu);
 
-                if (ifa->PhysicalAddress)
+                if (ifa->PhysicalAddress && ifa->PhysicalAddressLength > 0)
                 {
                     iface._mac_address.emplace(ifa->PhysicalAddress, (uint8_t)ifa->PhysicalAddressLength);
                 }
@@ -320,13 +320,9 @@ namespace OddSource::Interfaces
                 if (candidate->sa_family == AF_INET)
                 {
                     auto cand = reinterpret_cast<sockaddr_in *>(candidate);
-// no loss of data as indicated by MSVC
-#pragma warning( push )
-#pragma warning( disable : 4312)
-                    auto cand_bytes = reinterpret_cast<uint8_t *>(cand->sin_addr.s_addr);
-#pragma warning( pop )
-                    uint8_t i, first_byte_with_bcast(0);
-                    for (i = 3; i >= 0; i--)
+                    auto cand_bytes = reinterpret_cast<uint8_t const *>(&cand->sin_addr.s_addr);
+                    uint8_t first_byte_with_bcast(0);
+                    for (int i(3); i >= 0; i--)
                     {
                         if (cand_bytes[i] == 0xff)
                         {
@@ -358,13 +354,9 @@ namespace OddSource::Interfaces
                 if (candidate->sa_family == AF_INET)
                 {
                     auto cand = reinterpret_cast<sockaddr_in *>(candidate);
-// no loss of data as indicated by MSVC
-#pragma warning( push )
-#pragma warning( disable : 4312)
-                    auto cand_bytes = reinterpret_cast<uint8_t *>(cand->sin_addr.s_addr);
-#pragma warning( pop )
-                    uint8_t i, first_byte_with_bcast(0);
-                    for (i = 3; i >= 0; i--)
+                    auto cand_bytes = reinterpret_cast<uint8_t const *>(&cand->sin_addr.s_addr);
+                    uint8_t first_byte_with_bcast(0);
+                    for (int i(3); i >= 0; i--)
                     {
                         if (cand_bytes[i] == 0xff)
                         {
@@ -373,13 +365,9 @@ namespace OddSource::Interfaces
                     }
                     if (first_byte_with_bcast > 0)
                     {
-// no loss of data as indicated by MSVC
-#pragma warning( push )
-#pragma warning( disable : 4312)
-                        auto addr_bytes = reinterpret_cast<uint8_t *>(addr->sin_addr.s_addr);
-#pragma warning( pop )
+                        auto addr_bytes = reinterpret_cast<uint8_t const *>(&addr->sin_addr.s_addr);
                         bool dismatch(false);
-                        for (i = 0; i < first_byte_with_bcast; i++)
+                        for (int i(0); i < first_byte_with_bcast; i++)
                         {
                             if (cand_bytes[i] != addr_bytes[i])
                             {

@@ -505,14 +505,22 @@ public:
             IPv6Address a("::ffff:0:127.0.0.1");
             assert_that(a.is_v4_translated(), "::ffff:0:127.0.0.1 should be v4-translated");
             assert_equals((::std::string)a, "::ffff:0:127.0.0.1");
+#ifdef IS_WINDOWS
+            assert_equals((::std::string)a.normalize(), "::ffff:0:127.0.0.1");
+#else /* IS_WINDOWS */
             assert_equals((::std::string)a.normalize(), "::ffff:0:7f00:1");
+#endif /* !IS_WINDOWS */
         }
 
         {
             IPv6Address a("::ffff:0:201.53.78.3");
             assert_that(a.is_v4_translated(), "::ffff:0:201.53.78.3 should be v4-translated");
             assert_equals((::std::string)a, "::ffff:0:201.53.78.3");
+#ifdef IS_WINDOWS
+            assert_equals((::std::string)a.normalize(), "::ffff:0:201.53.78.3");
+#else /* IS_WINDOWS */
             assert_equals((::std::string)a.normalize(), "::ffff:0:c935:4e03");
+#endif /* !IS_WINDOWS */
         }
     }
 
