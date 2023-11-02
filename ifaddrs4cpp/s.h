@@ -9,7 +9,7 @@
 #pragma GCC diagnostic push
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wreserved-user-defined-literal"
-#elif !defined( __has_warning ) || __has_warning("-Wliteral-suffix")
+#else
 #pragma GCC diagnostic ignored "-Wliteral-suffix"
 #endif
 #endif /* IS_WINDOWS */
