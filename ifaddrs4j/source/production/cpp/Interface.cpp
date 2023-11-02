@@ -143,50 +143,50 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::InterfaceIPAddress<IPAddres
  */
 jobject
 OddSource::ifaddrs4j::
-convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & interface)
+convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & iface)
 {
     ENSURE_OUR_CLASSES_LOADED(env, NULL)
 
     using namespace OddSource::Interfaces;
 
-    jint index(interface.index());
+    jint index(iface.index());
 
-    jstring name(env->NewStringUTF(interface.name().c_str()));
+    jstring name(env->NewStringUTF(iface.name().c_str()));
     IF_NULL_RETURN_NULL(name)
 
 #ifdef IS_WINDOWS
-    jstring windows_uuid(env->NewStringUTF(interface.windows_uuid()));
+    jstring windows_uuid(env->NewStringUTF(iface.windows_uuid()));
     IF_NULL_RETURN_NULL(windows_uuid)
 #endif /* IS_WINDOWS */
 
-    jint flags(interface.flags());
+    jint flags(iface.flags());
 
     jobject mtu = NULL;
-    if (interface.mtu())
+    if (iface.mtu())
     {
-        mtu = env->CallStaticObjectMethod(JNICache::Long, JNICache::Long_valueOf, *interface.mtu());
+        mtu = env->CallStaticObjectMethod(JNICache::Long, JNICache::Long_valueOf, *iface.mtu());
         IF_NULL_RETURN_NULL(mtu);
     }
 
     jobject mac_address = NULL;
-    if (interface.mac_address())
+    if (iface.mac_address())
     {
-        mac_address = convert_to_java(env, *interface.mac_address());
+        mac_address = convert_to_java(env, *iface.mac_address());
         IF_NULL_RETURN_NULL(mac_address)
     }
 
     auto ipv4_addresses(env->NewObject(
         JNICache::ArrayList,
         JNICache::ArrayList__init__int,
-        (jint) interface.ipv4_addresses().size()));
+        (jint) iface.ipv4_addresses().size()));
     IF_NULL_RETURN_NULL(ipv4_addresses);
     auto ipv6_addresses(env->NewObject(
         JNICache::ArrayList,
         JNICache::ArrayList__init__int,
-        (jint) interface.ipv6_addresses().size()));
+        (jint) iface.ipv6_addresses().size()));
     IF_NULL_RETURN_NULL(ipv6_addresses);
 
-    auto v4(interface.ipv4_addresses());
+    auto v4(iface.ipv4_addresses());
     for (auto const & address : v4)
     {
         auto converted(convert_to_java(env, address));
@@ -197,7 +197,7 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & interface
         }
     }
 
-    auto v6(interface.ipv6_addresses());
+    auto v6(iface.ipv6_addresses());
     for (auto const & address : v6)
     {
         auto converted(convert_to_java(env, address));

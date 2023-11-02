@@ -246,7 +246,7 @@ ensure_our_classes_loaded(JNIEnv * env)
     method = env->GetMethodID(cls, "<init>", (
         "(ILjava/lang/String;"s +
 #ifdef IS_WINDOWS
-        "Ljava/lang/String;"s +;
+        "Ljava/lang/String;"s +
 #endif /* IS_WINDOWS */
         "ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V"s).c_str());
     JNICache::Interface__init_ = (jmethodID) env->NewGlobalRef((jobject) method);

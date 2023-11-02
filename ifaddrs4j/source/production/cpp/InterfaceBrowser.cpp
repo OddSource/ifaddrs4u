@@ -90,9 +90,9 @@ namespace
                 (jint) interfaces.size()));
             IF_NULL_RETURN_NULL(jInterfaces)
 
-            for (auto const & interface : interfaces)
+            for (auto const & iface : interfaces)
             {
-                auto jInterface(convert_to_java(env, interface));
+                auto jInterface(convert_to_java(env, iface));
                 IF_NULL_RETURN_NULL(jInterface)
                 if (!env->CallBooleanMethod(jInterfaces, JNICache::ArrayList_add, jInterface))
                 {
@@ -274,9 +274,9 @@ jboolean JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Exte
         function,
         jInterfaces,
         &keep_calling_callable,
-        &return_error](auto interface)
+        &return_error](auto iface)
     {
-        auto jInterface(convert_to_java(env, interface));
+        auto jInterface(convert_to_java(env, iface));
         if (jInterface == NULL)
         {
             return_error = true;
