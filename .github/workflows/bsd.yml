@@ -57,7 +57,7 @@ jobs:
             os_version: "9.3"
             pkg_export: 'export PATH="/usr/pkg/sbin:/usr/pkg/bin:$PATH"'
             pkg_command: "pkgin -y install"
-            cmake_pkgs: "automake cmake"
+            cmake_pkgs: "automake cmake gcc10"
         exclude:
           - os_name: netbsd
             java: "21"
