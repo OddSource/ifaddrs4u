@@ -102,7 +102,7 @@ namespace
 #ifdef IS_WINDOWS
     bool const is_tty(_isatty(_fileno(stdout)));
 #else /* IS_WINDOWS */
-    bool const is_tty(::isatty(::fileno(::stdin)));
+    bool const is_tty(isatty(fileno(stdin)));
 #endif /* !IS_WINDOWS */
     char const * RED = is_tty ? "\033[0;31m" : "";
     char const * ORANGE = is_tty ? "\033[0;33m" : "";
