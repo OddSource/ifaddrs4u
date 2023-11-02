@@ -21,18 +21,15 @@
 #ifdef IS_WINDOWS
 #include "winsock_includes.h"
 #else /* IS_WINDOWS */
-#include <sys/ioctl.h>
 #include <net/if.h>
+#include <netinet/in.h>
 #include <sys/types.h>
-#include <ifaddrs.h>
-#include <sys/socket.h>
+#if __has_include(<net/route.h>)
 #include <net/route.h>
+#endif /* <net/route.h> */
 #if __has_include(<netinet6/in6_var.h>)
 #include <netinet6/in6_var.h>
 #endif /* <netinet6/in6_var.h> */
-#ifdef IS_BSD
-#include <net/route.h>
-#endif /* IS_BSD */
 #endif /* IS_WINDOWS */
 
 #include <optional>
