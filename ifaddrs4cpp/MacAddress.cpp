@@ -50,12 +50,7 @@ namespace
         return count + 1;
     }
 
-#define WRONG_CHAR_THROW { \
-            if ((ch < '0' || ch > '9') && (ch < 'a' || ch > 'f')) \
-            { \
-                throw InvalidMacAddress("MAC address character out of range: "s + ch); \
-            } \
-        }
+#define MAC_ADDR_REPR_POS ::std::string(repr) + "' at position "s + std::to_string(position)
 
     ::std::unique_ptr<uint8_t[]>
     from_repr(::std::string_view const & repr)
@@ -80,42 +75,51 @@ namespace
         }
 
         auto data = ::std::make_unique<uint8_t[]>(MAX_ADAPTER_ADDRESS_LENGTH);
-        size_t size;
-        auto c = repr.begin();
-        auto end = repr.end();
-        for (size = 0; size < predicted_length; size++)
+        size_t size(0), position(0);
+        uint8_t byte(0), chars_in_byte(0);
+        for (char c : repr)
         {
-            uint8_t byte;
-
-            char ch = (char)::std::tolower(*c++);
-            WRONG_CHAR_THROW
-            byte = ::std::isdigit (ch) ? (ch - '0') : (ch - 'a' + 10);
-
-            if (c != end)
+            char ch = (char)::std::tolower(c);
+            if (ch == ':' || ch == '-')
             {
-                ch = (char)::std::tolower(*c);
-                if ((size < predicted_length - 1 && ch != ':' && ch != '-') ||
-                    (size == predicted_length - 1 && !::std::isspace(ch)))
+                if (chars_in_byte != 2)
                 {
-                    c++;
-                    WRONG_CHAR_THROW
-                    byte <<= 4;
-                    byte += ::std::isdigit (ch) ? (ch - '0') : (ch - 'a' + 10);
-                    ch = *c;
-                    if (size < predicted_length -1 && ch != ':' && ch != '-')
-                    {
-                        throw InvalidMacAddress("Malformed MAC address, expected ':' or '-' between bytes.");
-                    }
+                    throw InvalidMacAddress("Unexpected separator in MAC address '"s + MAC_ADDR_REPR_POS);
                 }
+                data[size++] = byte;
+                byte = chars_in_byte = 0;
             }
-            else if(size < predicted_length - 1)
+            else if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'))
             {
-                throw InvalidMacAddress("Malformed MAC address is not long enough.");
+                chars_in_byte++;
+                if (chars_in_byte > 2)
+                {
+                    throw InvalidMacAddress(
+                        "Invalid number of characters "s + ::std::to_string(chars_in_byte) +
+                        " between separators in MAC address '"s + MAC_ADDR_REPR_POS);
+                }
+                byte <<= 4;
+                byte += ::std::isdigit(ch) ? (ch - '0') : (ch - 'a' + 10);
+            }
+            else
+            {
+                throw InvalidMacAddress("Invalid character '"s + ch + "' in MAC address "s + MAC_ADDR_REPR_POS);
             }
 
-            data[size] = byte;
-            c++;
+            position++;
         }
+        if (chars_in_byte != 2)
+        {
+            throw InvalidMacAddress("Unexpected separator in MAC address '"s + MAC_ADDR_REPR_POS);
+        }
+        data[size++] = byte;
+        if(size != predicted_length)
+        {
+            throw InvalidMacAddress(
+                "Malformed MAC address '"s + ::std::string(repr) + "' did not match expected length "s +
+                ::std::to_string(predicted_length) + "."s);
+        }
+
         return data;
     }
 
