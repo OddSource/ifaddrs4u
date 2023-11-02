@@ -347,7 +347,7 @@ namespace OddSource::Interfaces
             auto addr = reinterpret_cast<sockaddr_in *>(sa);
             IPv4Address const address(&addr->sin_addr);
 
-            sockaddr_in * broadcast;
+            sockaddr_in * broadcast = nullptr;
             while (pre)
             {
                 LPSOCKADDR candidate = pre->Address.lpSockaddr;
@@ -387,7 +387,7 @@ namespace OddSource::Interfaces
             }
 
             static uint32_t const flags(0);
-            if (broadcast)
+            if (broadcast != nullptr)
             {
                 iface._ipv4_addresses.emplace_back(
                     address, flags, prefix_length,
