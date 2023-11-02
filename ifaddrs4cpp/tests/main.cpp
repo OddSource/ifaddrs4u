@@ -108,7 +108,7 @@ namespace
     char const * ORANGE = is_tty ? "\033[0;33m" : "";
     char const * GREEN = is_tty ? "\033[0;32m" : "";
     char const * RESET = is_tty ? "\033[0m" : "";
-    char const * ERROR = is_tty ? "\033[0;31mERROR\033[0m" : "ERROR";
+    char const * ERR = is_tty ? "\033[0;31mERROR\033[0m" : "ERROR";
     char const * FAIL = is_tty ? "\033[0;33mFAIL\033[0m" : "FAIL";
     char const * PASS = is_tty ? "\033[0;32mPASS\033[0m" : "PASS";
 }
@@ -139,7 +139,7 @@ run()
         if (error_count != this->_errors.size())
         {
             this->_error_test_count++;
-            ::std::cout << ERROR << ::std::endl;
+            ::std::cout << ERR << ::std::endl;
         }
         else if (failure_count != this->_failures.size())
         {
@@ -246,34 +246,8 @@ run_all_registered_test_cases(::std::vector<::std::string> const & matching)
     return ret;
 }
 
-#ifdef IS_WINDOWS
-#include <Winbase.h>
-#include <crtdbg.h>
-#endif /* IS_WINDOWS */
-
 int main(int argc, char * argv [])
 {
-#ifdef IS_WINDOWS
-    /*
-     * Windows applications compiled debug will open a GUI popup alert window
-     * when assertion failures and other serious issues occur. This can cause
-     * GitHub Actions and other headless runners to block indefinitely with no
-     * indication of the underlying issue. So we need to disable that behavior.
-     */
-    _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
-    _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
-    _CrtSetReportMode(_CRT_ERROR,  _CRTDBG_MODE_FILE);
-    _CrtSetReportFile(_CRT_ERROR,  _CRTDBG_FILE_STDERR);
-    _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
-
-    // prevent popups when terminate or abort is called
-    SetErrorMode(
-        SEM_FAILCRITICALERRORS |
-        SEM_NOALIGNMENTFAULTEXCEPT |
-        SEM_NOGPFAULTERRORBOX |       // if you're experiencing a crash and need a crash report, comment this line
-        SEM_NOOPENFILEERRORBOX);
-#endif /* IS_WINDOWS */
-
     ::std::vector<::std::string> matching;
     matching.reserve(argc - 1);
     for (int i = 1; i < argc; i++)
