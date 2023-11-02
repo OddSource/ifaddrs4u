@@ -39,6 +39,61 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [freebsd, netbsd]
-        java: ["11", "17"]
-        python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        os_name: [freebsd, netbsd]
+        java: ["11", "17", "21"]
+        include:
+          - java: "11"
+            python: "3.8"
+          - java: "17"
+            python: "3.10"
+          - java: "21"
+            python: "3.12"
+          - os_name: freebsd
+            os_version: "12.4"
+          - os_name: netbsd
+            os_version: "9.3"
+    runs-on: macos-latest
+    name: "${{ matrix.os_name }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
+    steps:
+      - name: Checkout ifaddrs4u
+        uses: actions/checkout@v4
+
+      - name: Execute on ${{ matrix.os.name }} Virtual Machine
+        uses: cross-platform-actions/action@v0.21.0
+        env:
+          ASSUME_ALWAYS_YES: "TRUE"
+        with:
+          environment_variables: ASSUME_ALWAYS_YES
+          operating_system: ${{ matrix.os_name }}
+          version: ${{ matrix.os_version }}
+          run: |
+               uname -a
+               echo $SHELL
+               pwd
+               echo "#######################################"
+               echo "# INSTALLING PREREQUISITES            #"
+               echo "#######################################"
+               sudo pkg install -y cmake python${{ matrix.python }} openjdk${{ matrix.java }}
+               echo
+               echo "#######################################"
+               echo "# STEP: CMake Prepare                 #"
+               echo "#######################################"
+               cd ipaddrs4cpp
+               cmake -DCMAKE_BUILD_TYPE=Release -S . -B ./cmake-external-build
+               cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-debug-test-build
+               echo
+               echo "#######################################"
+               echo "# STEP: Compile ipaddrs4cpp Debug     #"
+               echo "#######################################"
+               cmake --build ./cmake-debug-test-build --config Debug -j 14
+               echo
+               echo "#######################################"
+               echo "# STEP: Run ifaddrs4cpp Tests         #"
+               echo "#######################################"
+               ./cmake-debug-test-build/ifaddrs4cpp_tests
+               echo
+               echo "#######################################"
+               echo "# STEP: Compile ifaddrs4cpp Release   #"
+               echo "#######################################"
+               cmake --build ./cmake-external-build --config Release -j 14
+               echo
