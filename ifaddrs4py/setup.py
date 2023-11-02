@@ -169,7 +169,7 @@ def pre_build(options: Options) -> None:
         if not options.dynamic:
             extra_args.append("-DBUILD_STATIC_ONLY:BOOL=ON")
         cmake(cmake_path, "-DCMAKE_BUILD_TYPE=Release", "-S", f"{extern_cpp_base}", "-B", f"{cmake_path}", *extra_args)
-        cmake(cmake_path, "--build", f"{cmake_path}", "--target", "all", "-j", "14")
+        cmake(cmake_path, "--build", f"{cmake_path}", "--config", "Release", "all", "-j", "14")
         if options.test_cpp:
             exe = "ifaddrs4cpp_tests"
             if IS_WINDOWS:
@@ -236,7 +236,7 @@ cpp_extension = Extension(
     library_dirs=library_dirs,
     libraries=libraries,
     extra_objects=extra_objects,
-    extra_compile_args=["/std:c++17" if IS_WINDOWS else "-std=c++17"],
+    extra_compile_args=["/std:c++17", "/wd4275", "/wd4251", "/wd4455"] if IS_WINDOWS else ["-std=c++17"],
     extra_link_args=[],
     optional=False,
 )

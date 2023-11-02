@@ -75,6 +75,19 @@ jobs:
         working-directory: ifaddrs4cpp
         run: ${{ matrix.cpp_test_command || './cmake-debug-test-build/ifaddrs4cpp_tests' }}
 
-      - name: Compile ifaddrs4cpp Release
-        working-directory: ifaddrs4cpp
-        run: cmake --build ./cmake-external-build --config Release -j 14
+#      - name: Compile ifaddrs4cpp Release
+#        working-directory: ifaddrs4cpp
+#        run: cmake --build ./cmake-external-build --config Release -j 14
+
+      - name: Installing Java ${{ matrix.java }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin" # See 'Supported distributions' for available options
+          java-version: "${{ matrix.java }}"
+          java-package: "jdk"
+          cache: "maven"
+        run: echo "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"
+
+      - name: Build ifaddrs4j with Maven
+        working-directory: ifaddrs4j
+        run: mvn -B install

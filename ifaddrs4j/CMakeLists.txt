@@ -35,16 +35,18 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(IS_WINDOWS FALSE)
 set(IS_MACOS FALSE)
-set(COPY_COMMAND "cp")
 set(STATIC_LIBRARY_EXTENSION "a")
 set(DYNAMIC_LIBRARY_EXTENSION "so")
+set(IFADDRS_LIBRARY_PREFIX "lib")
+set(LIB_JAVA "lib/libjava")
 set(JAVA_PLATFORM_INCLUDE "linux")
 if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
     set(IS_WINDOWS TRUE)
-    set(COPY_COMMAND "copy")
     set(STATIC_LIBRARY_EXTENSION "lib")
     set(DYNAMIC_LIBRARY_EXTENSION "dll")
-    set(JAVA_PLATFORM_INCLUDE "win32") # TODO
+    set(IFADDRS_LIBRARY_PREFIX "Release/")
+    set(LIB_JAVA "bin/java")
+    set(JAVA_PLATFORM_INCLUDE "win32")
 elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
     set(IS_MACOS TRUE)
     set(DYNAMIC_LIBRARY_EXTENSION "dylib")
@@ -66,7 +68,7 @@ add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE cxx_std_17)
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
-                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>")
+                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3;-wd4275;-wd4251;-wd4455>>")
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       CXX_STANDARD_REQUIRED ON
                       CXX_EXTENSIONS OFF)
@@ -74,12 +76,11 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_sources})
 target_link_libraries(${PROJECT_NAME} PUBLIC
                       ${PROJECT_NAME}_compiler_flags
-                      "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/libifaddrs4cpp-static-d.${STATIC_LIBRARY_EXTENSION}"
-                      "$ENV{JAVA_HOME}/lib/libjava.${DYNAMIC_LIBRARY_EXTENSION}")
+                      "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static.${STATIC_LIBRARY_EXTENSION}"
+                      "$ENV{JAVA_HOME}/${LIB_JAVA}.${DYNAMIC_LIBRARY_EXTENSION}")
 target_include_directories(${PROJECT_NAME} PUBLIC
                            "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/include"
                            "$ENV{JAVA_HOME}/include"
                            "$ENV{JAVA_HOME}/include/${JAVA_PLATFORM_INCLUDE}")
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-                   ${COPY_COMMAND} "${CMAKE_BINARY_DIR}/libifaddrs4j.${DYNAMIC_LIBRARY_EXTENSION}"
-                                   "${CMAKE_SOURCE_DIR}/target/classes/libifaddrs4j${CLASSIFIER}.${DYNAMIC_LIBRARY_EXTENSION}")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:ifaddrs4j>" "${CMAKE_SOURCE_DIR}/target/classes/libifaddrs4j${CLASSIFIER}.${DYNAMIC_LIBRARY_EXTENSION}")

@@ -136,7 +136,7 @@
                                 <options>
                                     <option>-DENABLE_TESTS:BOOL=ON</option>
                                     <option>-DBUILD_STATIC_ONLY:BOOL=ON</option>
-                                    <option>-DCMAKE_BUILD_TYPE=Debug</option>
+                                    <option>-DCMAKE_BUILD_TYPE=Release</option>
                                 </options>
                             </configuration>
                         </execution>
@@ -150,7 +150,7 @@
                                 <sourcePath>${project.basedir}</sourcePath>
                                 <targetPath>${project.basedir}/target/cmake-build-release</targetPath>
                                 <options>
-                                    <option>-DCMAKE_BUILD_TYPE=Debug</option>
+                                    <option>-DCMAKE_BUILD_TYPE=Release</option>
                                     <option>-DCLASSIFIER=-${platform.specific.classifier}</option>
                                 </options>
                             </configuration>
@@ -162,7 +162,7 @@
                             </goals>
                             <phase>compile</phase>
                             <configuration>
-                                <target>all</target>
+                                <config>Release</config>
                                 <projectDirectory>${project.basedir}/../ifaddrs4cpp/cmake-external-build</projectDirectory>
                                 <options>
                                     <option>-j</option>
@@ -177,7 +177,7 @@
                             </goals>
                             <phase>compile</phase>
                             <configuration>
-                                <target>all</target>
+                                <config>Release</config>
                                 <projectDirectory>${project.basedir}/target/cmake-build-release</projectDirectory>
                                 <options>
                                     <option>-j</option>

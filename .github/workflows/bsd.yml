@@ -57,7 +57,7 @@ jobs:
             os_version: "9.3"
             pkg_export: 'export PATH="/usr/pkg/sbin:/usr/pkg/bin:$PATH"'
             pkg_command: "pkgin -y install"
-            cmake_pkgs: "automake cmake gcc10"
+            cmake_pkgs: "automake cmake"
         exclude:
           - os_name: netbsd
             java: "21"
@@ -111,14 +111,35 @@ jobs:
                echo "#######################################"
                cmake --build ./cmake-external-build --config Release -j 14
                echo
+               cd ..
+               echo "#######################################"
+               echo "# STEP: Installing Java               #"
+               echo "#######################################"
+               echo "+ sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}"
+               sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}
+               echo "java = $(which java)\njavac = $(which javac)"
+               export JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | tr -s ' ' | cut -d' ' -f4-)"
+               echo "JAVA_HOME = $JAVA_HOME"
+               echo "+ ls -al $JAVA_HOME/include"
+               ls -al "$JAVA_HOME/include"
+               echo "+ fetch https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz"
+               fetch https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz
+               tar -xzvf apache-maven-3.9.5-bin.tar.gz
+               export PATH="$(pwd)/apache-maven-3.9.5/bin:$PATH"
+               echo "PATH = $PATH"
+               echo
+               echo "#######################################"
+               echo "# STEP: Build ifaddrs4j with Maven    #"
+               echo "#######################################"
+               cd ifaddrs4j
+               pwd
+               mvn -B --version
+               mvn -B help:active-profiles install
+               echo
+               cd ..
 #               echo "#######################################"
 #               echo "# STEP: Installing Python             #"
 #               echo "#######################################"
 #               echo "+ sudo ${{ matrix.pkg_command }} python${{ matrix.python }}"
 #               sudo ${{ matrix.pkg_command }} python${{ matrix.python }}
 #               echo
-#               echo "#######################################"
-#               echo "# STEP: Installing Java               #"
-#               echo "#######################################"
-#               echo "+ sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}"
-#               sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}
