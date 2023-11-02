@@ -59,7 +59,6 @@ namespace OddSource::Interfaces
             assert_not_that(iface.is_flag_enabled(IsRunning));
             assert_not_that(iface.is_flag_enabled(IsUp));
             assert_not_that(iface.is_flag_enabled(NoARP));
-            assert_not_that(iface.is_flag_enabled(NoTrailers));
             assert_not_that(iface.is_flag_enabled(PromiscuousModeEnabled));
             assert_not_that(iface.is_flag_enabled(ReceiveAllMulticastPackets));
             assert_not_that(iface.is_flag_enabled(SupportsMulticast));
@@ -97,7 +96,6 @@ namespace OddSource::Interfaces
             assert_that(iface.is_flag_enabled(IsRunning));
             assert_not_that(iface.is_flag_enabled(IsUp));
             assert_that(iface.is_flag_enabled(NoARP));
-            assert_not_that(iface.is_flag_enabled(NoTrailers));
             assert_not_that(iface.is_flag_enabled(PromiscuousModeEnabled));
             assert_that(iface.is_flag_enabled(ReceiveAllMulticastPackets));
             assert_not_that(iface.is_flag_enabled(SupportsMulticast));
@@ -115,7 +113,7 @@ namespace OddSource::Interfaces
 #ifdef IS_WINDOWS
                     "b01c844e-0bb5-48fe-bc99-ddac9a284b80",
 #endif /* IS_WINDOWS */
-                    DebugEnabled | IsPointToPoint | IsUp | NoTrailers | PromiscuousModeEnabled | SupportsMulticast);
+                    DebugEnabled | IsPointToPoint | IsUp | PromiscuousModeEnabled | SupportsMulticast);
 
             assert_equals(iface.index(), 3u);
             assert_equals(iface.name(), "en0");
@@ -134,7 +132,6 @@ namespace OddSource::Interfaces
             assert_not_that(iface.is_flag_enabled(IsRunning));
             assert_that(iface.is_flag_enabled(IsUp));
             assert_not_that(iface.is_flag_enabled(NoARP));
-            assert_that(iface.is_flag_enabled(NoTrailers));
             assert_that(iface.is_flag_enabled(PromiscuousModeEnabled));
             assert_not_that(iface.is_flag_enabled(ReceiveAllMulticastPackets));
             assert_that(iface.is_flag_enabled(SupportsMulticast));

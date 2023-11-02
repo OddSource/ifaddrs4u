@@ -93,16 +93,16 @@ class InterfaceFlag(enum.IntEnum):
     IsRunning: int
     IsUp: int
     NoARP: int
-    NoTrailers: int
     PromiscuousModeEnabled: int
     ReceiveAllMulticastPackets: int
     SupportsMulticast: int
 
     # The following members may not be present on all platforms
-    TransmissionInProgress: int
-    Simplex: int
     Master: int
+    Simplex: int
     Slave: int
+    Smart: int
+    TransmissionInProgress: int
 
 
 class IllegalStateError(RuntimeError): ...

@@ -75,7 +75,7 @@ public enum InterfaceFlag
      * Obsolete: Avoid the use of trailers (though most interfaces with standard routable IP addresses
      * still support this, aka "SMART").
      */
-    NoTrailers(getConstant("NoTrailers"), "SMART"),
+    Smart(getConstant("Smart"), "SMART"),
     /**
      * A transmission is in progress on this interface (*-BSD only).
      */

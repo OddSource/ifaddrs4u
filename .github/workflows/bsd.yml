@@ -51,11 +51,13 @@ jobs:
           - os_name: freebsd
             os_version: "13.2"
             pkg_export: 'echo "pkg already on path"'
-            pkg_command: "pkg install -y"
+            pkg_command: "pkg"
+            cmake_pkgs: "cmake"
           - os_name: netbsd
             os_version: "9.3"
             pkg_export: 'export PATH="/usr/pkg/sbin:/usr/pkg/bin:$PATH"'
-            pkg_command: "pkg_add"
+            pkg_command: "pkgin"
+            cmake_pkgs: "automake cmake"
         exclude:
           - os_name: netbsd
             java: "21"
@@ -83,8 +85,8 @@ jobs:
                echo "#######################################"
                echo "# STEP: Installing CMake              #"
                echo "#######################################"
-               echo "+ sudo ${{ matrix.pkg_command }} cmake"
-               sudo ${{ matrix.pkg_command }} cmake
+               echo "+ sudo ${{ matrix.pkg_command }} install -y ${{ matrix.cmake_pkgs }}"
+               sudo ${{ matrix.pkg_command }} install -y ${{ matrix.cmake_pkgs }}
                echo
                echo "#######################################"
                echo "# STEP: CMake Prepare                 #"
@@ -112,11 +114,11 @@ jobs:
 #               echo "#######################################"
 #               echo "# STEP: Installing Python             #"
 #               echo "#######################################"
-#               echo "+ sudo ${{ matrix.pkg_command }} python${{ matrix.python }}"
-#               sudo ${{ matrix.pkg_command }} python${{ matrix.python }}
+#               echo "+ sudo ${{ matrix.pkg_command }} install -y python${{ matrix.python }}"
+#               sudo ${{ matrix.pkg_command }} install -y python${{ matrix.python }}
 #               echo
 #               echo "#######################################"
 #               echo "# STEP: Installing Java               #"
 #               echo "#######################################"
-#               echo "+ sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}"
-#               sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}
+#               echo "+ sudo ${{ matrix.pkg_command }} install -y openjdk${{ matrix.java }}"
+#               sudo ${{ matrix.pkg_command }} install -y openjdk${{ matrix.java }}

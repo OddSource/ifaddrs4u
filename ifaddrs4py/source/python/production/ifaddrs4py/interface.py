@@ -85,8 +85,10 @@ _INTERFACE_FLAG_DISPLAYS = {
     "PROMISC": InterfaceFlag.PromiscuousModeEnabled,
     "ALLMULTI": InterfaceFlag.ReceiveAllMulticastPackets,
     "NOARP": InterfaceFlag.NoARP,
-    "SMART": InterfaceFlag.NoTrailers,
 }
+if hasattr(InterfaceFlag, "Smart"):
+    # noinspection PyUnresolvedReferences
+    _INTERFACE_FLAG_DISPLAYS["SMART"] = InterfaceFlag.Smart
 if hasattr(InterfaceFlag, "TransmissionInProgress"):
     # noinspection PyUnresolvedReferences
     _INTERFACE_FLAG_DISPLAYS["OACTIVE"] = InterfaceFlag.TransmissionInProgress

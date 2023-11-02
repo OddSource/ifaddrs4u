@@ -27,9 +27,9 @@
 #include <ifaddrs.h>
 #include <sys/socket.h>
 #include <net/route.h>
-#ifdef IS_MACOS
+#if __has_include(<netinet6/in6_var.h>)
 #include <netinet6/in6_var.h>
-#endif /* IS_MACOS */
+#endif /* <netinet6/in6_var.h> */
 #ifdef IS_BSD
 #include <net/route.h>
 #endif /* IS_BSD */
@@ -79,6 +79,18 @@
 #define IN6_IFF_SECURED         0x0400  /* cryptographically generated */
 #endif
 
+// some BSD versions
+#ifndef IFF_RUNNING
+#ifdef IFF_DRV_RUNNING
+#define IFF_RUNNING IFF_DRV_RUNNING
+#endif
+#endif
+#ifndef IFF_OACTIVE
+#ifdef IFF_DRV_OACTIVE
+#define IFF_OACTIVE IFF_DRV_OACTIVE
+#endif
+#endif
+
 namespace OddSource::Interfaces
 {
     enum InterfaceIPAddressFlag : uint16_t
@@ -123,7 +135,6 @@ namespace OddSource::Interfaces
         IsRunning = 0x40,
         IsUp = 0x1,
         NoARP = 0x80, // placeholder, not applicable to Windows
-        NoTrailers = 0x20, // placeholder, not applicable to Windows
         PromiscuousModeEnabled = 0x100, // placeholder, not applicable to Windows
         ReceiveAllMulticastPackets = 0x200, // placeholder, not applicable to Windows
         SupportsMulticast = 0x8000, // inverse on Windows, e.g. !IP_ADAPTER_NO_MULTICAST
@@ -135,25 +146,27 @@ namespace OddSource::Interfaces
         IsRunning = IFF_RUNNING,
         IsUp = IFF_UP,
         NoARP = IFF_NOARP,
-        NoTrailers = IFF_NOTRAILERS, // aka "SMART"
         PromiscuousModeEnabled = IFF_PROMISC,
         ReceiveAllMulticastPackets = IFF_ALLMULTI,
         SupportsMulticast = IFF_MULTICAST,
 #endif /* !IS_WINDOWS */
 
         // *nix-Platform-Specific Flags
-#ifdef IFF_OACTIVE
-        TransmissionInProgress = IFF_OACTIVE, // *BSD only
-#endif /* IFF_OACTIVE */
-#ifdef IFF_SIMPLEX
-        Simplex = IFF_SIMPLEX, // *BSD only
-#endif /* IFF_SIMPLEX */
 #ifdef IFF_MASTER
         Master = IFF_MASTER, // Linux only
 #endif /* IFF_MASTER */
+#ifdef IFF_SIMPLEX
+        Simplex = IFF_SIMPLEX, // *BSD only
+#endif /* IFF_SIMPLEX */
 #ifdef IFF_SLAVE
         Slave = IFF_SLAVE, // Linux only
 #endif /* IFF_SLAVE */
+#ifdef IFF_NOTRAILERS
+        Smart = IFF_NOTRAILERS, // weird one, macOS only, deprecated constant doesn't match purpose?
+#endif /* IFF_NOTRAILERS */
+#ifdef IFF_OACTIVE
+        TransmissionInProgress = IFF_OACTIVE, // *BSD only
+#endif /* IFF_OACTIVE */
     };
 
     static ::std::unordered_map<::std::string, InterfaceFlag const> const InterfaceFlag_Values
@@ -165,22 +178,24 @@ namespace OddSource::Interfaces
         {"IsRunning", IsRunning},
         {"IsUp", IsUp},
         {"NoARP", NoARP},
-        {"NoTrailers", NoTrailers},
         {"PromiscuousModeEnabled", PromiscuousModeEnabled},
         {"ReceiveAllMulticastPackets", ReceiveAllMulticastPackets},
         {"SupportsMulticast", SupportsMulticast},
-#ifdef IFF_OACTIVE
-        {"TransmissionInProgress", TransmissionInProgress},
-#endif /* IFF_OACTIVE */
-#ifdef IFF_SIMPLEX
-        {"Simplex", Simplex},
-#endif /* IFF_SIMPLEX */
 #ifdef IFF_MASTER
         {"Master", Master},
 #endif /* IFF_MASTER */
+#ifdef IFF_SIMPLEX
+        {"Simplex", Simplex},
+#endif /* IFF_SIMPLEX */
 #ifdef IFF_SLAVE
         {"IFF_SLAVE", Slave},
 #endif /* IFF_SLAVE */
+#ifdef IFF_NOTRAILERS
+        {"Smart", Smart},
+#endif /* IFF_NOTRAILERS */
+#ifdef IFF_OACTIVE
+        {"TransmissionInProgress", TransmissionInProgress},
+#endif /* IFF_OACTIVE */
     };
 
     static ::std::unordered_map<InterfaceFlag, ::std::string const> InterfaceFlag_Names;

@@ -62,7 +62,9 @@ operator<<(::std::ostream & os, OddSource::Interfaces::Interface const & iface)
         {"PROMISC", PromiscuousModeEnabled},
         {"ALLMULTI", ReceiveAllMulticastPackets},
         {"NOARP", NoARP},
-        {"SMART", NoTrailers},
+#ifdef IFF_NOTRAILERS
+        {"SMART", Smart},
+#endif /* IFF_NOTRAILERS */
 #ifdef IFF_OACTIVE
         {"OACTIVE", TransmissionInProgress},
 #endif /* IFF_OACTIVE */
