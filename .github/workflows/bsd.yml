@@ -58,9 +58,9 @@ jobs:
             pkg_export: 'export PATH="/usr/pkg/sbin:/usr/pkg/bin:$PATH"'
             pkg_command: "pkgin -y install"
             cmake_pkgs: "automake cmake"
+        # Need to disable Java 21 for now, as it's not showing up in packages, despite being listed online
         exclude:
-          - os_name: netbsd
-            java: "21"
+          - java: "21"
     runs-on: ubuntu-latest
     name: "${{ matrix.os_name }} ${{ matrix.os_version }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
@@ -75,6 +75,7 @@ jobs:
           environment_variables: ASSUME_ALWAYS_YES
           operating_system: ${{ matrix.os_name }}
           version: ${{ matrix.os_version }}
+          shell: bash
           run: |
                uname -a
                pwd
@@ -117,7 +118,8 @@ jobs:
                echo "#######################################"
                echo "+ sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}"
                sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}
-               echo "java = $(which java)\njavac = $(which javac)"
+               echo "java = $(which java)"
+               echo "javac = $(which javac)"
                export JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | tr -s ' ' | cut -d' ' -f4-)"
                echo "JAVA_HOME = $JAVA_HOME"
                echo "+ ls -al $JAVA_HOME/include"

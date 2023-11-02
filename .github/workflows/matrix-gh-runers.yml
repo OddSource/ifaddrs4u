@@ -50,8 +50,10 @@ jobs:
             python: "3.12"
           - os: windows-2019
             cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe
+            echo_java_info_cmd: "java = $((get-command java).Path)`njavac = $((get-command javac).Path)`nJAVA_HOME = $env:JAVA_HOME"
           - os: windows-2022
             cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe
+            echo_java_info_cmd: "java = $((get-command java).Path)`njavac = $((get-command javac).Path)`nJAVA_HOME = $env:JAVA_HOME"
     runs-on: ${{ matrix.os }}
     name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
@@ -86,8 +88,9 @@ jobs:
           java-version: "${{ matrix.java }}"
           java-package: "jdk"
           cache: "maven"
-        run: echo "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"
 
       - name: Build ifaddrs4j with Maven
         working-directory: ifaddrs4j
-        run: mvn -B install
+        run: |
+             echo "${{ echo_java_info_cmd || 'java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME' }}"
+             mvn -B install
