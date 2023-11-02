@@ -49,8 +49,8 @@ jobs:
           - java: "21"
             python: "311"
           - os_name: freebsd
-            os_version: "12.4"
-            pkg_command: "pkg install -y"
+            os_version: "13.2"
+            pkg_command: "sudo pkg install -y"
           - os_name: netbsd
             os_version: "9.3"
             pkg_command: "pkg_add"
@@ -58,7 +58,7 @@ jobs:
           - os_name: netbsd
             java: "21"
     runs-on: macos-latest
-    name: "${{ matrix.os_name }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
+    name: "${{ matrix.os_name }} ${{ matrix.os_version }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
       - name: Checkout ifaddrs4u
         uses: actions/checkout@v4
@@ -75,11 +75,12 @@ jobs:
                uname -a
                echo $SHELL
                pwd
+               ls -al
                echo "#######################################"
-               echo "# INSTALLING PREREQUISITES            #"
+               echo "# STEP: Installing CMake              #"
                echo "#######################################"
-               echo "+ sudo ${{ matrix.pkg_command }} cmake python${{ matrix.python }} openjdk${{ matrix.java }}"
-               sudo ${{ matrix.pkg_command }} cmake python${{ matrix.python }} openjdk${{ matrix.java }}
+               echo "+ ${{ matrix.pkg_command }} cmake"
+               ${{ matrix.pkg_command }} cmake
                echo
                echo "#######################################"
                echo "# STEP: CMake Prepare                 #"
@@ -104,3 +105,14 @@ jobs:
                echo "#######################################"
                cmake --build ./cmake-external-build --config Release -j 14
                echo
+#               echo "#######################################"
+#               echo "# STEP: Installing Python             #"
+#               echo "#######################################"
+#               echo "+ ${{ matrix.pkg_command }} python${{ matrix.python }}"
+#               ${{ matrix.pkg_command }} python${{ matrix.python }}
+#               echo
+#               echo "#######################################"
+#               echo "# STEP: Installing Java               #"
+#               echo "#######################################"
+#               echo "+ ${{ matrix.pkg_command }} openjdk${{ matrix.java }}"
+#               ${{ matrix.pkg_command }} openjdk${{ matrix.java }}

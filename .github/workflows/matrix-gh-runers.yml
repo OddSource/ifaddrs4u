@@ -58,7 +58,7 @@ jobs:
       - name: Checkout ifaddrs4u
         uses: actions/checkout@v4
 
-      - name: Get CMake
+      - name: Installing CMake
         uses: lukka/get-cmake@latest
 
       - name: CMake Prepare
