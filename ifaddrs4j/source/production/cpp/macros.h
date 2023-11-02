@@ -18,11 +18,12 @@
 
 #include <ifaddrs4cpp/os.h>
 
-#define IF_NULL_RETURN(thing, ret) if (thing == NULL) \
+#define IF_NULL_STMT(thing, stmt) if (thing == NULL) \
     { \
-        return ret; \
+        stmt; \
     }
 
+#define IF_NULL_RETURN(thing, ret) IF_NULL_STMT(thing, return ret)
 #define IF_NULL_RETURN_INT(thing) IF_NULL_RETURN(thing, -1)
 #define IF_NULL_RETURN_NULL(thing) IF_NULL_RETURN(thing, NULL)
 #define IF_NULL_RETURN_FALSE(thing) IF_NULL_RETURN(thing, false)

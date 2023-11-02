@@ -156,20 +156,20 @@ void JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_c
     delete browser;
 }
 
-#define ENSURE_POPULATED(ret) if (get_interfaces(env, self) == NULL) \
+#define ENSURE_POPULATED(stmt) if (get_interfaces(env, self) == NULL) \
     { \
         if (env->ExceptionOccurred() != NULL) \
         { \
-            return ret; \
+            stmt; \
         } \
         auto interfaces(get_interfaces_list(env, browser)); \
-        IF_NULL_RETURN(interfaces, ret) \
+        IF_NULL_STMT(interfaces, stmt) \
         auto field(get_interfaces_field(env, self)); \
-        IF_NULL_RETURN(field, ret) \
+        IF_NULL_STMT(field, stmt) \
         env->SetObjectField(self, field, interfaces); \
         if (env->ExceptionOccurred() != NULL) \
         { \
-            return ret; \
+            stmt; \
         } \
     }
 
@@ -187,7 +187,7 @@ jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Exter
 
     auto browser(get_pBrowser(env, self));
     IF_NULL_RETURN_NULL(browser)
-    ENSURE_POPULATED(NULL)
+    ENSURE_POPULATED(return NULL)
 
     char const * name_c_str(env->GetStringUTFChars(name, 0));
     IF_NULL_RETURN_NULL(name_c_str)
@@ -220,7 +220,7 @@ jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Exter
 
     auto browser(get_pBrowser(env, self));
     IF_NULL_RETURN_NULL(browser)
-    ENSURE_POPULATED(NULL)
+    ENSURE_POPULATED(return NULL)
 
     try
     {
@@ -244,7 +244,7 @@ void JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_e
 {
     auto browser(get_pBrowser(env, self));
     IF_NULL_RETURN_VOID(browser)
-    ENSURE_POPULATED( )
+    ENSURE_POPULATED(return)
 }
 
 /*

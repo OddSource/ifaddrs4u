@@ -155,7 +155,7 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & iface)
     IF_NULL_RETURN_NULL(name)
 
 #ifdef IS_WINDOWS
-    jstring windows_uuid(env->NewStringUTF(iface.windows_uuid()));
+    jstring windows_uuid(env->NewStringUTF(iface.windows_uuid().c_str()));
     IF_NULL_RETURN_NULL(windows_uuid)
 #endif /* IS_WINDOWS */
 
