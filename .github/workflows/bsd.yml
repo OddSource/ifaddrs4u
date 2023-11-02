@@ -17,10 +17,10 @@
 name: "Matrix CI - BSD VMs"
 
 on:
-  pull_request:
-  push:
-  schedule:
-    - cron: "0 1 * * SUN"
+#  pull_request:
+#  push:
+#  schedule:
+#    - cron: "0 1 * * SUN"
   workflow_dispatch:
 
 concurrency:
@@ -60,7 +60,10 @@ jobs:
             cmake_pkgs: "automake cmake"
         # Need to disable Java 21 for now, as it's not showing up in packages, despite being listed online
         exclude:
-          - java: "21"
+          - os_name: freebsd
+            java: "21"
+          - os_name: netbsd
+            java: "21"
     runs-on: ubuntu-latest
     name: "${{ matrix.os_name }} ${{ matrix.os_version }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
@@ -124,6 +127,10 @@ jobs:
                echo "JAVA_HOME = $JAVA_HOME"
                echo "+ ls -al $JAVA_HOME/include"
                ls -al "$JAVA_HOME/include"
+               echo
+               echo "#######################################"
+               echo "# STEP: Installing Maven 3.9.5        #"
+               echo "#######################################"
                echo "+ fetch https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz"
                fetch https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz
                tar -xzvf apache-maven-3.9.5-bin.tar.gz
