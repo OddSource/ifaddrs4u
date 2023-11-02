@@ -33,22 +33,18 @@ if(CMAKE_CXX_COMPILER_ID IN_LIST gcc_like_ids)
 endif()
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(IS_WINDOWS FALSE)
-set(IS_MACOS FALSE)
 set(STATIC_LIBRARY_EXTENSION "a")
 set(DYNAMIC_LIBRARY_EXTENSION "so")
 set(IFADDRS_LIBRARY_PREFIX "lib")
 set(LIB_JAVA "lib/libjava")
 set(JAVA_PLATFORM_INCLUDE "linux")
 if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
-    set(IS_WINDOWS TRUE)
     set(STATIC_LIBRARY_EXTENSION "lib")
     set(DYNAMIC_LIBRARY_EXTENSION "dll")
     set(IFADDRS_LIBRARY_PREFIX "Release/")
     set(LIB_JAVA "bin/java")
     set(JAVA_PLATFORM_INCLUDE "win32")
 elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
-    set(IS_MACOS TRUE)
     set(DYNAMIC_LIBRARY_EXTENSION "dylib")
     set(JAVA_PLATFORM_INCLUDE "darwin")
 endif()
@@ -76,6 +72,7 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
 
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_sources})
 if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
+# Apparently, we do not have to link to java.dll on Windows like we link to java.so/dylib on oter platforms.
     target_link_libraries(${PROJECT_NAME} PUBLIC
                           ${PROJECT_NAME}_compiler_flags
                           "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static.${STATIC_LIBRARY_EXTENSION}")

@@ -76,7 +76,7 @@ public final class Interface
         final List<InterfaceIPAddress<Inet6Address>> ipv6Addresses
     )
     {
-        if (windowsUuid != null && Interface.IS_WINDOWS)
+        if (windowsUuid != null && !Interface.IS_WINDOWS)
         {
             throw new UnsupportedOperationException(Interface.NO_WINDOWS);
         }
