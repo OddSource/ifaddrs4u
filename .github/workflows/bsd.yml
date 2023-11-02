@@ -50,9 +50,11 @@ jobs:
             python: "311"
           - os_name: freebsd
             os_version: "13.2"
-            pkg_command: "sudo pkg install -y"
+            pkg_export: 'echo "pkg already on path"'
+            pkg_command: "pkg install -y"
           - os_name: netbsd
             os_version: "9.3"
+            pkg_export: 'export PATH="/usr/pkg/sbin:/usr/pkg/bin:$PATH"'
             pkg_command: "pkg_add"
         exclude:
           - os_name: netbsd
@@ -75,13 +77,14 @@ jobs:
                uname -a
                pwd
                echo "SHELL = $SHELL"
+               ${{ matrix.pkg_export }}
                echo "PATH = $PATH"
-               ls -al /usr/pkg/sbin /usr/pkg/bin || echo "rc != 0"
+               ls -al
                echo "#######################################"
                echo "# STEP: Installing CMake              #"
                echo "#######################################"
-               echo "+ ${{ matrix.pkg_command }} cmake"
-               ${{ matrix.pkg_command }} cmake
+               echo "+ sudo ${{ matrix.pkg_command }} cmake"
+               sudo ${{ matrix.pkg_command }} cmake
                echo
                echo "#######################################"
                echo "# STEP: CMake Prepare                 #"
@@ -109,11 +112,11 @@ jobs:
 #               echo "#######################################"
 #               echo "# STEP: Installing Python             #"
 #               echo "#######################################"
-#               echo "+ ${{ matrix.pkg_command }} python${{ matrix.python }}"
-#               ${{ matrix.pkg_command }} python${{ matrix.python }}
+#               echo "+ sudo ${{ matrix.pkg_command }} python${{ matrix.python }}"
+#               sudo ${{ matrix.pkg_command }} python${{ matrix.python }}
 #               echo
 #               echo "#######################################"
 #               echo "# STEP: Installing Java               #"
 #               echo "#######################################"
-#               echo "+ ${{ matrix.pkg_command }} openjdk${{ matrix.java }}"
-#               ${{ matrix.pkg_command }} openjdk${{ matrix.java }}
+#               echo "+ sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}"
+#               sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}
