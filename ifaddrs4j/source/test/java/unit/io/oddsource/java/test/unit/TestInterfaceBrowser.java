@@ -131,8 +131,8 @@ public class TestInterfaceBrowser
 
             assertFalse(result1);
             assertFalse(result2);
-            assertEquals(numInterfaces1.get(), 1);
-            assertEquals(numInterfaces2.get(), 2);
+            assertEquals(1, numInterfaces1.get());
+            assertEquals(2, numInterfaces2.get());
         }
     }
 

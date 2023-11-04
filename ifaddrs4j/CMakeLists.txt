@@ -58,7 +58,8 @@ set(${PROJECT_NAME}_sources
     ${SOURCES_DIRECTORY}/IpAddress.cpp
     ${SOURCES_DIRECTORY}/MacAddress.cpp
     ${SOURCES_DIRECTORY}/Samples.cpp
-    ${SOURCES_DIRECTORY}/VersionInfo.cpp)
+    ${SOURCES_DIRECTORY}/VersionInfo.cpp
+    ${SOURCES_DIRECTORY}/wrappers.cpp)
 
 add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE cxx_std_17)

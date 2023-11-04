@@ -18,45 +18,303 @@
 #include "common.h"
 #include "macros.h"
 
+#include <iostream>
+
 namespace OddSource::ifaddrs4j
 {
-    jclass JNICache::InetAddressHelper = NULL;
-    jmethodID JNICache::InetAddressHelper_getIPv4Address = NULL;
-    jmethodID JNICache::InetAddressHelper_getIPv6Address = NULL;
+    ::std::mutex ClassMethodCache::_singleton_mutex = ::std::mutex();
 
-    jclass JNICache::MacAddress = NULL;
-    jmethodID JNICache::MacAddress__init_ = NULL;
+    ::std::unique_ptr<ClassMethodCache> ClassMethodCache::_singleton = nullptr;
 
-    jclass JNICache::InterfaceIPAddress = NULL;
-    jmethodID JNICache::InterfaceIPAddress__init_ = NULL;
+    ::std::unordered_map<::std::string, ClassSearchPath> const ClassMethodCache::_class_name_to_canon = {
+        {"Boolean", {"java/lang/Boolean"}},
+        {"Short", {"java/lang/Short"}},
+        {"Integer", {"java/lang/Integer"}},
+        {"Long", {"java/lang/Long"}},
+        {"ArrayList", {"java/util/ArrayList"}},
+        {"Function", {"java/util/function/Function"}},
 
-    jclass JNICache::Interface = NULL;
-    jmethodID JNICache::Interface__init_ = NULL;
+        {"IllegalArgumentException", {"java/lang/IllegalArgumentException"}},
+        {"IllegalStateException", {"java/lang/IllegalStateException"}},
+        {"EnumConstantNotPresentException", {"java/lang/EnumConstantNotPresentException"}},
+        {"RuntimeException", {"java/lang/RuntimeException"}},
 
-    jclass JNICache::Boolean = NULL;
-    jmethodID JNICache::Boolean_booleanValue = NULL;
+        {"InetAddressHelper", {"io/oddsource/java/net/ifaddrs4j/InetAddressHelper"}},
+        {"MacAddress", {"io/oddsource/java/net/ifaddrs4j/MacAddress"}},
+        {"InterfaceIPAddress", {"io/oddsource/java/net/ifaddrs4j/InterfaceIPAddress"}},
+        {"Interface", {"io/oddsource/java/net/ifaddrs4j/Interface"}},
+    };
 
-    jclass JNICache::Short = NULL;
-    jmethodID JNICache::Short_valueOf = NULL;
+    ::std::unordered_map<::std::string, MethodSignature> const ClassMethodCache::_method_name_to_signature = {
+        {"Boolean#booleanValue()", {"booleanValue", "()Z"}},
+        {"ArrayList#ArrayList()", {"<init>", "()V"}},
+        {"ArrayList#ArrayList(int)", {"<init>", "(I)V"}},
+        {"ArrayList#add(Object)", {"add", "(Ljava/lang/Object;)Z"}},
+        {"Function#apply(Object)", {"apply", "(Ljava/lang/Object;)Ljava/lang/Object;"}},
 
-    jclass JNICache::Integer = NULL;
-    jmethodID JNICache::Integer_valueOf = NULL;
+        {"MacAddress#MacAddress(...)", {"<init>", "(Ljava/lang/String;[B)V"}},
+        {"InterfaceIPAddress#InterfaceIPAddress(...)",
+         {"<init>",
+          "(Ljava/net/InetAddress;ILjava/lang/Short;Ljava/net/InetAddress;Ljava/net/InetAddress;)V"}},
+        {"Interface#Interface(...)",
+         {"<init>",
+          "(ILjava/lang/String;"
+#ifdef IS_WINDOWS
+          "Ljava/lang/String;"
+#endif /* IS_WINDOWS */
+          "ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V"}},
+    };
 
-    jclass JNICache::Long = NULL;
-    jmethodID JNICache::Long_valueOf = NULL;
+    ::std::unordered_map<::std::string, MethodSignature> const ClassMethodCache::_static_method_name_to_signature = {
+        {"Short#valueOf(short)", {"valueOf", "(S)Ljava/lang/Short;"}},
+        {"Integer#valueOf(int)", {"valueOf", "(I)Ljava/lang/Integer;"}},
+        {"Long#valueOf(long)", {"valueOf", "(J)Ljava/lang/Long;"}},
 
-    jclass JNICache::ArrayList = NULL;
-    jmethodID JNICache::ArrayList__init_ = NULL;
-    jmethodID JNICache::ArrayList__init__int = NULL;
-    jmethodID JNICache::ArrayList_add = NULL;
+        {"InetAddressHelper#getIPv4Address(byte[])", {"getIPv4Address", "([B)Ljava/net/Inet4Address;"}},
+        {"InetAddressHelper#getIPv6Address(byte[], Integer)",
+         {"getIPv6Address", "([BLjava/lang/Integer;)Ljava/net/Inet6Address;"}},
+    };
 
-    jclass JNICache::Function = NULL;
-    jmethodID JNICache::Function_apply = NULL;
+    void
+    ClassMethodCache::
+    create_instance(JNIEnv * env)
+    {
+        ::std::unique_lock<::std::mutex> lock(ClassMethodCache::_singleton_mutex);
+        if (ClassMethodCache::_singleton)
+        {
+            ClassMethodCache::IllegalStateException(
+                env,
+                "Attempt to load ifaddrs4j dynamic library after it was already loaded");
+            return;
+        }
 
-    jclass JNICache::IllegalArgumentException = NULL;
-    jclass JNICache::IllegalStateException = NULL;
-    jclass JNICache::EnumConstantNotPresentException = NULL;
-    jclass JNICache::RuntimeException = NULL;
+        ClassMethodCache::_singleton = ::std::unique_ptr<ClassMethodCache>(new ClassMethodCache);
+    }
+
+    void
+    ClassMethodCache::
+    destroy_instance(JNIEnv * env)
+    {
+        ::std::unique_lock<::std::mutex> singleton_lock(ClassMethodCache::_singleton_mutex);
+        if (!ClassMethodCache::_singleton)
+        {
+            ClassMethodCache::IllegalStateException(
+                env,
+                "Attempt to unload ifaddrs4j dynamic library before it was loaded");
+            return;
+        }
+
+        ClassMethodCache::_singleton.reset();
+    }
+
+    bool
+    ClassMethodCache::
+    ensure_singleton(JNIEnv * env)
+    {
+        if (!ClassMethodCache::_singleton)
+        {
+            ClassMethodCache::IllegalStateException(
+                env,
+                "Attempt to get cached class/method before ifaddrs4j dynamic library was loaded");
+            return false;
+        }
+        return true;
+    }
+
+    void
+    ClassMethodCache::
+    IllegalStateException(JNIEnv * env, char const * message)
+    {
+        env->ThrowNew(env->FindClass("java/lang/IllegalStateException"), message);
+    }
+
+    jclass
+    ClassMethodCache::
+    c(JNIEnv * env, ::std::string name)
+    {
+        ::std::unique_lock<::std::mutex> singleton_lock(ClassMethodCache::_singleton_mutex);
+        if (!ClassMethodCache::ensure_singleton(env))
+        {
+            return NULL;
+        }
+        return ClassMethodCache::_singleton->get_class(env, name);
+    }
+
+    jmethodID
+    ClassMethodCache::
+    m(JNIEnv * env, ::std::string class_name, ::std::string name)
+    {
+        ::std::unique_lock<::std::mutex> singleton_lock(ClassMethodCache::_singleton_mutex);
+        if (!ClassMethodCache::ensure_singleton(env))
+        {
+            return NULL;
+        }
+        return ClassMethodCache::_singleton->get_method(env, class_name, name);
+    }
+
+    jmethodID
+    ClassMethodCache::
+    m(JNIEnv * env, jclass cls, ::std::string class_name, ::std::string name)
+    {
+        ::std::unique_lock<::std::mutex> singleton_lock(ClassMethodCache::_singleton_mutex);
+        if (!ClassMethodCache::ensure_singleton(env))
+        {
+            return NULL;
+        }
+        return ClassMethodCache::_singleton->get_method(env, cls, class_name, name);
+    }
+
+    jmethodID
+    ClassMethodCache::
+    sm(JNIEnv * env, jclass cls, ::std::string class_name, ::std::string name)
+    {
+        ::std::unique_lock<::std::mutex> singleton_lock(ClassMethodCache::_singleton_mutex);
+        if (!ClassMethodCache::ensure_singleton(env))
+        {
+            return NULL;
+        }
+        return ClassMethodCache::_singleton->get_static_method(env, cls, class_name, name);
+    }
+
+    ClassMethodCache::
+    ClassMethodCache()
+        : _class_cache(),
+          _method_cache(),
+          _static_method_cache()
+    {
+    }
+
+    ClassMethodCache::
+    ~ClassMethodCache()
+    {
+        ::std::unique_lock<::std::recursive_mutex> lock(this->_mutex);
+
+        // It would seem that we can't delete (and probably there's no point in deleting) all of our global
+        // references. On some VMs, this gets called by the C++ runtime when it's shutting down, after the VM
+        // has already exited, so we have no way of using the VM or environment to delete the references. On
+        // other VMs, this gets called by JNI_OnUnload, so we can use the VM, but then the calls to DeleteGlobalRef
+        // result in a segfault, which means the VM cleaned them up *before* unloading the library. So ... we'll
+        // just leave the global references and hope everybody else did their jobs properly.
+
+        this->_static_method_cache.clear();
+        this->_method_cache.clear();
+        this->_class_cache.clear();
+    }
+
+    jclass
+    ClassMethodCache::
+    get_class(JNIEnv * env, ::std::string name)
+    {
+        return (jclass) env->NewLocalRef(this->get_global_class_ref(env, name));
+    }
+
+    jclass
+    ClassMethodCache::
+    get_global_class_ref(JNIEnv * env, ::std::string name)
+    {
+        ::std::unique_lock<::std::recursive_mutex> lock(this->_mutex);
+        jclass cls;
+        auto found(this->_class_cache.find(name));
+        if (found == this->_class_cache.end())
+        {
+            auto canon(ClassMethodCache::_class_name_to_canon.find(name));
+            if (canon == ClassMethodCache::_class_name_to_canon.end())
+            {
+                ClassMethodCache::IllegalStateException(env, (
+                    "Attempt to create cache entry for unexpected class name '"s + name +
+                    "', for which a search path has not been programmed."s).c_str());
+                return NULL;
+            }
+
+            jclass tmp(env->FindClass(canon->second.path));
+            IF_NULL_RETURN_NULL(tmp);
+            cls = (jclass) env->NewGlobalRef(tmp);
+            env->DeleteLocalRef(tmp);
+            IF_NULL_RETURN_NULL(cls);
+
+            this->_class_cache.emplace(name, cls);
+        }
+        else
+        {
+            cls = found->second;
+        }
+
+        return cls;
+    }
+
+    jmethodID
+    ClassMethodCache::
+    get_method(JNIEnv * env, ::std::string class_name, ::std::string name)
+    {
+        ::std::unique_lock<::std::recursive_mutex> lock(this->_mutex);
+        jclass cls(this->get_global_class_ref(env, class_name));
+        IF_NULL_RETURN_NULL(cls);
+        return this->get_method(env, cls, class_name, name);
+    }
+
+    jmethodID
+    ClassMethodCache::
+    get_method(JNIEnv * env, jclass cls, ::std::string class_name, ::std::string name)
+    {
+        return this->get_any_method(
+            env, cls, class_name, name,
+            ClassMethodCache::_method_name_to_signature, this->_method_cache);
+    }
+
+    jmethodID
+    ClassMethodCache::
+    get_static_method(JNIEnv * env, jclass cls, ::std::string class_name, ::std::string name)
+    {
+        return this->get_any_method(
+            env, cls, class_name, name,
+            ClassMethodCache::_static_method_name_to_signature, this->_static_method_cache,
+            true);
+    }
+
+    jmethodID
+    ClassMethodCache::
+    get_any_method(
+        JNIEnv * env,
+        jclass cls,
+        ::std::string class_name,
+        ::std::string name,
+        ::std::unordered_map<::std::string, MethodSignature> const & signature_map,
+        ::std::unordered_map<::std::string, jmethodID> & method_cache,
+        bool is_static)
+    {
+        jmethodID method;
+        auto find_name(class_name + "#"s + name);
+        auto found(method_cache.find(find_name));
+        if (found == method_cache.end())
+        {
+            auto signature(signature_map.find(find_name));
+            if (signature == signature_map.end())
+            {
+                ClassMethodCache::IllegalStateException(env, (
+                    "Attempt to create cache entry for unexpected "s +
+                    (is_static ? "static method name '"s : "method name '"s) +
+                    find_name + "', for which a signature has not been programmed."s).c_str());
+                return NULL;
+            }
+
+            jmethodID tmp(
+                is_static ?
+                env->GetStaticMethodID(cls, signature->second.name, signature->second.signature) :
+                env->GetMethodID(cls, signature->second.name, signature->second.signature));
+            IF_NULL_RETURN_NULL(tmp);
+            method = (jmethodID) env->NewGlobalRef((jobject) tmp);
+            env->DeleteLocalRef((jobject) tmp);
+            IF_NULL_RETURN_NULL(method);
+
+            method_cache.emplace(find_name, method);
+        }
+        else
+        {
+            method = found->second;
+        }
+
+        return (jmethodID) env->NewLocalRef((jobject) method);
+    }
 }
 
 jint JNI_OnLoad(JavaVM * vm, void *)
@@ -67,195 +325,9 @@ jint JNI_OnLoad(JavaVM * vm, void *)
         return JNI_ERR;
     }
 
-    using namespace OddSource::ifaddrs4j;
-
-    jclass cls;
-    jmethodID method;
-
-    // Boolean methods
-    cls = env->FindClass("java/lang/Boolean");
-    JNICache::Boolean = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::Boolean)
-
-    method = env->GetMethodID(cls, "booleanValue", "()Z");
-    JNICache::Boolean_booleanValue = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::Boolean_booleanValue)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // Short methods
-    cls = env->FindClass("java/lang/Short");
-    JNICache::Short = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::Short)
-
-    method = env->GetStaticMethodID(cls, "valueOf", "(S)Ljava/lang/Short;");
-    JNICache::Short_valueOf = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::Short_valueOf)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // Integer methods
-    cls = env->FindClass("java/lang/Integer");
-    JNICache::Integer = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::Integer)
-
-    method = env->GetStaticMethodID(cls, "valueOf", "(I)Ljava/lang/Integer;");
-    JNICache::Integer_valueOf = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::Integer_valueOf)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // Long methods
-    cls = env->FindClass("java/lang/Long");
-    JNICache::Long = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::Long)
-
-    method = env->GetStaticMethodID(cls, "valueOf", "(J)Ljava/lang/Long;");
-    JNICache::Long_valueOf = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::Long_valueOf)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // ArrayList methods
-    cls = env->FindClass("java/util/ArrayList");
-    JNICache::ArrayList = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::ArrayList)
-
-    method = env->GetMethodID(cls, "<init>", "()V");
-    JNICache::ArrayList__init_ = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::ArrayList__init_)
-    env->DeleteLocalRef((jobject) method);
-
-    method = env->GetMethodID(cls, "<init>", "(I)V");
-    JNICache::ArrayList__init__int = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::ArrayList__init__int)
-    env->DeleteLocalRef((jobject) method);
-
-    method = env->GetMethodID(cls, "add", "(Ljava/lang/Object;)Z");
-    JNICache::ArrayList_add = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::ArrayList_add)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // Function apply
-    cls = env->FindClass("java/util/function/Function");
-    JNICache::Function = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::Function)
-
-    method = env->GetMethodID(cls, "apply", "(Ljava/lang/Object;)Ljava/lang/Object;");
-    JNICache::Function_apply = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_ERR(JNICache::Function_apply)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // Exception classes
-    cls = env->FindClass("java/lang/IllegalArgumentException");
-    JNICache::IllegalArgumentException = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::IllegalArgumentException)
-    env->DeleteLocalRef(cls);
-
-    cls = env->FindClass("java/lang/IllegalStateException");
-    JNICache::IllegalStateException = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::IllegalStateException)
-    env->DeleteLocalRef(cls);
-
-    cls = env->FindClass("java/lang/EnumConstantNotPresentException");
-    JNICache::EnumConstantNotPresentException = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::EnumConstantNotPresentException)
-    env->DeleteLocalRef(cls);
-
-    cls = env->FindClass("java/lang/RuntimeException");
-    JNICache::RuntimeException = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_ERR(JNICache::RuntimeException)
-    env->DeleteLocalRef(cls);
+    OddSource::ifaddrs4j::ClassMethodCache::create_instance(env);
 
     return JNI_VERSION_10;
-}
-
-bool
-OddSource::ifaddrs4j::JNICache::
-ensure_our_classes_loaded(JNIEnv * env)
-{
-    if (JNICache::Interface__init_ != NULL)
-    {
-        return true;
-    }
-
-    jclass cls;
-    jmethodID method;
-
-    // InetAddressHelper methods
-    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/InetAddressHelper");
-    JNICache::InetAddressHelper = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_FALSE(JNICache::InetAddressHelper)
-
-    method = env->GetStaticMethodID(cls, "getIPv4Address", "([B)Ljava/net/Inet4Address;");
-    JNICache::InetAddressHelper_getIPv4Address = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_FALSE(JNICache::InetAddressHelper_getIPv4Address)
-    env->DeleteLocalRef((jobject) method);
-
-    method = env->GetStaticMethodID(cls, "getIPv6Address", "([BLjava/lang/Integer;)Ljava/net/Inet6Address;");
-    JNICache::InetAddressHelper_getIPv6Address = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_FALSE(JNICache::InetAddressHelper_getIPv6Address)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // MacAddress constructor
-    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/MacAddress");
-    JNICache::MacAddress = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_FALSE(JNICache::MacAddress)
-
-    // MacAddress(String, byte[])
-    method = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;[B)V");
-    JNICache::MacAddress__init_ = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_FALSE(JNICache::MacAddress__init_)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // InterfaceIPAddress constructor
-    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/InterfaceIPAddress");
-    JNICache::InterfaceIPAddress = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_FALSE(JNICache::InterfaceIPAddress)
-
-    // InterfaceIPAddress(T, int, Short, T, T)
-    method = env->GetMethodID(
-         cls,
-         "<init>",
-         "(Ljava/net/InetAddress;ILjava/lang/Short;Ljava/net/InetAddress;Ljava/net/InetAddress;)V");
-    JNICache::InterfaceIPAddress__init_ = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_FALSE(JNICache::InterfaceIPAddress__init_)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    // Interface constructor
-    cls = env->FindClass("io/oddsource/java/net/ifaddrs4j/Interface");
-    JNICache::Interface = (jclass) env->NewGlobalRef(cls);
-    IF_NULL_RETURN_FALSE(JNICache::Interface)
-
-    // Interface(int, String[, String], Long, MacAddress, List<InterfaceIPAddress<Inet4Address>>, List<InterfaceIPAddress<Inet6Address>>)
-    // (ILjava/lang/String;ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V
-    method = env->GetMethodID(cls, "<init>", (
-        "(ILjava/lang/String;"s +
-#ifdef IS_WINDOWS
-        "Ljava/lang/String;"s +
-#endif /* IS_WINDOWS */
-        "ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V"s).c_str());
-    JNICache::Interface__init_ = (jmethodID) env->NewGlobalRef((jobject) method);
-    IF_NULL_RETURN_FALSE(JNICache::Interface__init_)
-    env->DeleteLocalRef((jobject) method);
-
-    env->DeleteLocalRef(cls);
-
-    return true;
 }
 
 void JNI_OnUnload(JavaVM * vm, void *)
@@ -263,43 +335,5 @@ void JNI_OnUnload(JavaVM * vm, void *)
     JNIEnv * env;
     vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_10);
 
-    using namespace OddSource::ifaddrs4j;
-
-    env->DeleteGlobalRef(JNICache::InetAddressHelper);
-    env->DeleteGlobalRef((jobject) JNICache::InetAddressHelper_getIPv4Address);
-    env->DeleteGlobalRef((jobject) JNICache::InetAddressHelper_getIPv6Address);
-
-    env->DeleteGlobalRef(JNICache::MacAddress);
-    env->DeleteGlobalRef((jobject) JNICache::MacAddress__init_);
-
-    env->DeleteGlobalRef(JNICache::InterfaceIPAddress);
-    env->DeleteGlobalRef((jobject) JNICache::InterfaceIPAddress__init_);
-
-    env->DeleteGlobalRef(JNICache::Interface);
-    env->DeleteGlobalRef((jobject) JNICache::Interface__init_);
-
-    env->DeleteGlobalRef(JNICache::Boolean);
-    env->DeleteGlobalRef((jobject) JNICache::Boolean_booleanValue);
-
-    env->DeleteGlobalRef(JNICache::Short);
-    env->DeleteGlobalRef((jobject) JNICache::Short_valueOf);
-
-    env->DeleteGlobalRef(JNICache::Integer);
-    env->DeleteGlobalRef((jobject) JNICache::Integer_valueOf);
-
-    env->DeleteGlobalRef(JNICache::Long);
-    env->DeleteGlobalRef((jobject) JNICache::Long_valueOf);
-
-    env->DeleteGlobalRef(JNICache::ArrayList);
-    env->DeleteGlobalRef((jobject) JNICache::ArrayList__init_);
-    env->DeleteGlobalRef((jobject) JNICache::ArrayList__init__int);
-    env->DeleteGlobalRef((jobject) JNICache::ArrayList_add);
-
-    env->DeleteGlobalRef(JNICache::Function);
-    env->DeleteGlobalRef((jobject) JNICache::Function_apply);
-
-    env->DeleteGlobalRef(JNICache::IllegalArgumentException);
-    env->DeleteGlobalRef(JNICache::IllegalStateException);
-    env->DeleteGlobalRef(JNICache::EnumConstantNotPresentException);
-    env->DeleteGlobalRef(JNICache::RuntimeException);
+    OddSource::ifaddrs4j::ClassMethodCache::destroy_instance(env);
 }

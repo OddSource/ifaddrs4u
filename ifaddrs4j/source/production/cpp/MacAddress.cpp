@@ -40,15 +40,17 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::MacAddress const & address)
 {
-    ENSURE_OUR_CLASSES_LOADED(env, NULL)
-
     jstring repr(env->NewStringUTF(::std::string(address).c_str()));
     IF_NULL_RETURN_NULL(repr)
 
     auto byte_array(data_to_byte_array(env, address));
     IF_NULL_RETURN_NULL(byte_array);
 
-    return env->NewObject(JNICache::MacAddress, JNICache::MacAddress__init_, repr, byte_array);
+    auto JMacAddress(JCache::c(env, "MacAddress"));
+    IF_NULL_RETURN_NULL(JMacAddress)
+    auto constructor(JCache::m(env, JMacAddress, "MacAddress", "MacAddress(...)"));
+    IF_NULL_RETURN_NULL(constructor)
+    return env->NewObject(JMacAddress, constructor, repr, byte_array);
 }
 
 /*
@@ -65,7 +67,9 @@ jbyteArray JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getDataFromRe
 
     if (representation == NULL || env->GetStringLength(representation) < 2)
     {
-        env->ThrowNew(JNICache::IllegalArgumentException, "Representation must be a non-null, non-blank string");
+        auto IllegalArgumentException(JCache::c(env, "IllegalArgumentException"));
+        IF_NULL_RETURN_NULL(IllegalArgumentException)
+        env->ThrowNew(IllegalArgumentException, "Representation must be a non-null, non-blank string");
         return NULL;
     }
 
@@ -80,7 +84,7 @@ jbyteArray JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getDataFromRe
         OddSource::Interfaces::MacAddress address(repr_str);
         return data_to_byte_array(env, address);
     }
-    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN(JNICache::IllegalArgumentException, return NULL)
+    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN("IllegalArgumentException", return NULL)
 }
 
 /*
@@ -98,7 +102,9 @@ jstring JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getReprFromData(
     jsize length;
     if (data == NULL || (length = env->GetArrayLength(data)) < 1)
     {
-        env->ThrowNew(JNICache::IllegalArgumentException, "Data must be a non-null, non-blank byte array");
+        auto IllegalArgumentException(JCache::c(env, "IllegalArgumentException"));
+        IF_NULL_RETURN_NULL(IllegalArgumentException)
+        env->ThrowNew(IllegalArgumentException, "Data must be a non-null, non-blank byte array");
         return NULL;
     }
 
@@ -120,5 +126,5 @@ jstring JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getReprFromData(
         jstring repr(env->NewStringUTF(::std::string(address).c_str()));
         return repr;
     }
-    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN(JNICache::IllegalArgumentException, return NULL)
+    CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN("IllegalArgumentException", return NULL)
 }

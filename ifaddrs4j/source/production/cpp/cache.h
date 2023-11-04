@@ -18,61 +18,84 @@
 
 #include "common.h"
 
-namespace OddSource::ifaddrs4j
-{
-    class JNICache
-    {
-    public:
-        static jclass InetAddressHelper;
-        static jmethodID InetAddressHelper_getIPv4Address;
-        static jmethodID InetAddressHelper_getIPv6Address;
-
-        static jclass MacAddress;
-        static jmethodID MacAddress__init_;
-
-        static jclass InterfaceIPAddress;
-        static jmethodID InterfaceIPAddress__init_;
-
-        static jclass Interface;
-        static jmethodID Interface__init_;
-
-        static jclass Boolean;
-        static jmethodID Boolean_booleanValue;
-
-        static jclass Short;
-        static jmethodID Short_valueOf;
-
-        static jclass Integer;
-        static jmethodID Integer_valueOf;
-
-        static jclass Long;
-        static jmethodID Long_valueOf;
-
-        static jclass ArrayList;
-        static jmethodID ArrayList__init_;
-        static jmethodID ArrayList__init__int;
-        static jmethodID ArrayList_add;
-
-        static jclass Function;
-        static jmethodID Function_apply;
-
-        static jclass IllegalArgumentException;
-        static jclass IllegalStateException;
-        static jclass EnumConstantNotPresentException;
-        static jclass RuntimeException;
-
-        static bool ensure_our_classes_loaded(JNIEnv *);
-
-    private:
-        JNICache() = delete;
-    };
-}
-
-#define ENSURE_OUR_CLASSES_LOADED(jnienv, ret) if (!OddSource::ifaddrs4j::JNICache::ensure_our_classes_loaded(jnienv)) \
-        { \
-            return ret; \
-        }
+#include <memory>
+#include <mutex>
+#include <unordered_map>
 
 jint JNI_OnLoad(JavaVM *, void *);
 
 void JNI_OnUnload(JavaVM *, void *);
+
+namespace OddSource::ifaddrs4j
+{
+    struct ClassSearchPath
+    {
+        char const * path;
+    };
+
+    struct MethodSignature
+    {
+        char const * name;
+        char const * signature;
+    };
+
+    class ClassMethodCache
+    {
+    public:
+        ~ClassMethodCache();
+
+        static jclass c(JNIEnv *, ::std::string);
+
+        static jmethodID m(JNIEnv *, ::std::string, ::std::string);
+
+        static jmethodID m(JNIEnv *, jclass, ::std::string, ::std::string);
+
+        static jmethodID sm(JNIEnv *, jclass, ::std::string, ::std::string);
+
+    private:
+        friend jint (::JNI_OnLoad)(JavaVM *, void *);
+        friend void (::JNI_OnUnload)(JavaVM *, void *);
+
+        ClassMethodCache();
+
+        static void create_instance(JNIEnv *);
+
+        static void destroy_instance(JNIEnv *);
+
+        static bool ensure_singleton(JNIEnv *);
+
+        static void IllegalStateException(JNIEnv *, char const *);
+
+        static ::std::mutex _singleton_mutex;
+        static ::std::unique_ptr<ClassMethodCache> _singleton;
+        static ::std::unordered_map<::std::string, ClassSearchPath> const _class_name_to_canon;
+        static ::std::unordered_map<::std::string, MethodSignature> const _method_name_to_signature;
+        static ::std::unordered_map<::std::string, MethodSignature> const _static_method_name_to_signature;
+
+        jclass get_class(JNIEnv *, ::std::string);
+
+        jclass get_global_class_ref(JNIEnv *, ::std::string);
+
+        jmethodID get_method(JNIEnv *, ::std::string, ::std::string);
+
+        jmethodID get_method(JNIEnv *, jclass, ::std::string, ::std::string);
+
+        jmethodID get_static_method(JNIEnv *, jclass, ::std::string, ::std::string);
+
+        jmethodID get_any_method(
+            JNIEnv *,
+            jclass,
+            ::std::string,
+            ::std::string,
+            ::std::unordered_map<::std::string, MethodSignature> const &,
+            ::std::unordered_map<::std::string, jmethodID> &,
+            bool is_static = false);
+
+        ::std::recursive_mutex _mutex;
+        ::std::unordered_map<::std::string, jclass> _class_cache;
+        ::std::unordered_map<::std::string, jmethodID> _method_cache;
+        ::std::unordered_map<::std::string, jmethodID> _static_method_cache;
+    };
+
+    typedef ClassMethodCache JCache;
+}

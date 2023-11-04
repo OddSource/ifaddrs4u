@@ -24,6 +24,7 @@
 #include "IpAddress.h"
 #include "MacAddress.h"
 #include "macros.h"
+#include "wrappers.h"
 
 #define UNSUPPORTED_FLAG_NAME "UNSUPPORTED_FLAG"
 #define UNSUPPORTED_FLAG 2147483645
@@ -82,10 +83,11 @@ jint JNICALL Java_io_oddsource_java_net_ifaddrs4j_EnumConstantsHelper_getInterfa
     auto found = InterfaceIPAddressFlag_Values.find(enum_name_str);
     if (found == InterfaceIPAddressFlag_Values.end())
     {
+        auto EnumConstantNotPresentException(JCache::c(env, "EnumConstantNotPresentException"));
+        IF_NULL_RETURN_INT(EnumConstantNotPresentException)
         env->ThrowNew(
-            JNICache::EnumConstantNotPresentException,
-            ("Enum constant "s + enum_name_str +
-             " did not match any constants in the underlying C++ API, "s +
+            EnumConstantNotPresentException,
+            ("Enum constant "s + enum_name_str + " did not match any constants in the underlying C++ API, "s +
              "likely mismatch between Java code and C++ extension"s).c_str());
         return -1;
     }
@@ -101,21 +103,15 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::InterfaceIPAddress<IPAddressT> const & interface_address)
 {
-    ENSURE_OUR_CLASSES_LOADED(env, NULL)
-
     auto address(convert_to_java(env, interface_address.address()));
     IF_NULL_RETURN_NULL(address)
 
     jint flags(interface_address.flags());
 
-    jobject prefix_length = NULL;
-    if (interface_address.prefix_length())
+    jobject prefix_length(Boxers::Short(env, interface_address.prefix_length()));
+    if (env->ExceptionOccurred() != NULL)
     {
-        prefix_length = env->CallStaticObjectMethod(
-            JNICache::Short,
-            JNICache::Short_valueOf,
-            *interface_address.prefix_length());
-        IF_NULL_RETURN_NULL(prefix_length);
+        return NULL;
     }
 
     jobject broadcast = NULL;
@@ -132,10 +128,11 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::InterfaceIPAddress<IPAddres
         IF_NULL_RETURN_NULL(point_to_point)
     }
 
-    return env->NewObject(
-        JNICache::InterfaceIPAddress,
-        JNICache::InterfaceIPAddress__init_,
-        address, flags, prefix_length, broadcast, point_to_point);
+    auto JInterfaceIPAddress(JCache::c(env, "InterfaceIPAddress"));
+    IF_NULL_RETURN_NULL(JInterfaceIPAddress)
+    auto constructor(JCache::m(env, JInterfaceIPAddress, "InterfaceIPAddress", "InterfaceIPAddress(...)"));
+    IF_NULL_RETURN_NULL(constructor)
+    return env->NewObject(JInterfaceIPAddress, constructor, address, flags, prefix_length, broadcast, point_to_point);
 }
 
 /**
@@ -145,8 +142,6 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & iface)
 {
-    ENSURE_OUR_CLASSES_LOADED(env, NULL)
-
     using namespace OddSource::Interfaces;
 
     jint index(iface.index());
@@ -161,11 +156,10 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & iface)
 
     jint flags(iface.flags());
 
-    jobject mtu = NULL;
-    if (iface.mtu())
+    jobject mtu(Boxers::Long(env, iface.mtu()));
+    if (env->ExceptionOccurred() != NULL)
     {
-        mtu = env->CallStaticObjectMethod(JNICache::Long, JNICache::Long_valueOf, *iface.mtu());
-        IF_NULL_RETURN_NULL(mtu);
+        return NULL;
     }
 
     jobject mac_address = NULL;
@@ -175,23 +169,15 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & iface)
         IF_NULL_RETURN_NULL(mac_address)
     }
 
-    auto ipv4_addresses(env->NewObject(
-        JNICache::ArrayList,
-        JNICache::ArrayList__init__int,
-        (jint) iface.ipv4_addresses().size()));
-    IF_NULL_RETURN_NULL(ipv4_addresses);
-    auto ipv6_addresses(env->NewObject(
-        JNICache::ArrayList,
-        JNICache::ArrayList__init__int,
-        (jint) iface.ipv6_addresses().size()));
-    IF_NULL_RETURN_NULL(ipv6_addresses);
+    ArrayList ipv4_addresses(env, (jint) iface.ipv4_addresses().size());
+    ArrayList ipv6_addresses(env, (jint) iface.ipv6_addresses().size());
 
     auto v4(iface.ipv4_addresses());
     for (auto const & address : v4)
     {
         auto converted(convert_to_java(env, address));
         IF_NULL_RETURN_NULL(converted);
-        if (!env->CallBooleanMethod(ipv4_addresses, JNICache::ArrayList_add, converted))
+        if (!ipv4_addresses.add(converted))
         {
             return NULL;
         }
@@ -202,18 +188,22 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & iface)
     {
         auto converted(convert_to_java(env, address));
         IF_NULL_RETURN_NULL(converted);
-        if (!env->CallBooleanMethod(ipv6_addresses, JNICache::ArrayList_add, converted))
+        if (!ipv6_addresses.add(converted))
         {
             return NULL;
         }
     }
 
+    auto JInterface(JCache::c(env, "Interface"));
+    IF_NULL_RETURN_NULL(JInterface);
+    auto constructor(JCache::m(env, JInterface, "Interface", "Interface(...)"));
+    IF_NULL_RETURN_NULL(constructor)
     return env->NewObject(
-        JNICache::Interface,
-        JNICache::Interface__init_,
+        JInterface,
+        constructor,
         index, name,
 #ifdef IS_WINDOWS
         windows_uuid,
 #endif /* IS_WINDOWS */
-        flags, mtu, mac_address, ipv4_addresses, ipv6_addresses);
+        flags, mtu, mac_address, ipv4_addresses.unwrap(), ipv6_addresses.unwrap());
 }

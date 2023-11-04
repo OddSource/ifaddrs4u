@@ -17,6 +17,7 @@
 #include "cache.h"
 #include "IpAddress.h"
 #include "macros.h"
+#include "wrappers.h"
 
 // https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/types.html
 // https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/functions.html
@@ -29,17 +30,16 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::IPv4Address const & address)
 {
-    ENSURE_OUR_CLASSES_LOADED(env, NULL)
-
     auto bytes(reinterpret_cast<jbyte const *>(static_cast<in_addr const *>(address)));
     auto byte_array(env->NewByteArray(4));
     IF_NULL_RETURN_NULL(byte_array)
     env->SetByteArrayRegion(byte_array, 0, 4, bytes);
 
-    return env->CallStaticObjectMethod(
-        JNICache::InetAddressHelper,
-        JNICache::InetAddressHelper_getIPv4Address,
-        byte_array);
+    auto InetAddressHelper(JCache::c(env, "InetAddressHelper"));
+    IF_NULL_RETURN_NULL(InetAddressHelper)
+    auto getIPv4Address(JCache::sm(env, InetAddressHelper, "InetAddressHelper", "getIPv4Address(byte[])"));
+    IF_NULL_RETURN_NULL(getIPv4Address)
+    return env->CallStaticObjectMethod(InetAddressHelper, getIPv4Address, byte_array);
 }
 
 /**
@@ -49,22 +49,20 @@ jobject
 OddSource::ifaddrs4j::
 convert_to_java(JNIEnv * env, OddSource::Interfaces::IPv6Address const & address)
 {
-    ENSURE_OUR_CLASSES_LOADED(env, NULL)
-
     auto bytes(reinterpret_cast<jbyte const *>(static_cast<in6_addr const *>(address)));
     auto byte_array(env->NewByteArray(16));
     IF_NULL_RETURN_NULL(byte_array)
     env->SetByteArrayRegion(byte_array, 0, 16, bytes);
 
-    jobject scope_id(NULL);
-    if (address.scope_id() && *address.scope_id() > 0)
+    jobject scope_id(Boxers::Integer(env, address.scope_id()));
+    if (env->ExceptionOccurred() != NULL)
     {
-        scope_id = env->CallStaticObjectMethod(JNICache::Integer, JNICache::Integer_valueOf, *address.scope_id());
-        IF_NULL_RETURN_NULL(scope_id);
+        return NULL;
     }
 
-    return env->CallStaticObjectMethod(
-        JNICache::InetAddressHelper,
-        JNICache::InetAddressHelper_getIPv6Address,
-        byte_array, scope_id);
+    auto InetAddressHelper(JCache::c(env, "InetAddressHelper"));
+    IF_NULL_RETURN_NULL(InetAddressHelper)
+    auto getIPv6Address(JCache::sm(env, InetAddressHelper, "InetAddressHelper", "getIPv6Address(byte[], Integer)"));
+    IF_NULL_RETURN_NULL(getIPv6Address)
+    return env->CallStaticObjectMethod(InetAddressHelper, getIPv6Address, byte_array, scope_id);
 }

@@ -23,6 +23,11 @@
         stmt; \
     }
 
+#define IF_INVALID_STMT(wrapper, stmt) if (!wrapper.is_valid()) \
+    { \
+        stmt; \
+    }
+
 #define IF_NULL_RETURN(thing, ret) IF_NULL_STMT(thing, return ret)
 #define IF_NULL_RETURN_INT(thing) IF_NULL_RETURN(thing, -1)
 #define IF_NULL_RETURN_NULL(thing) IF_NULL_RETURN(thing, NULL)
@@ -34,7 +39,9 @@
     { \
         if (env->ExceptionOccurred() == NULL) \
         { \
-            env->ThrowNew(err, e.what()); \
+            auto exc(JCache::c(env, err)); \
+            IF_NULL_STMT(exc, ret) \
+            env->ThrowNew(exc, e.what()); \
         } \
         ret; \
     }
