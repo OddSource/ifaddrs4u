@@ -57,7 +57,7 @@
         <project.tasks.maximum.memory>256m</project.tasks.maximum.memory>
         <version.dependency.test.junit>4.13.2</version.dependency.test.junit>
         <version.dependency.test.log4j>2.21.0</version.dependency.test.log4j>
-        <version.plugin.cmake>3.25.2-b1</version.plugin.cmake>
+        <version.plugin.cmake>3.27.7-b1</version.plugin.cmake>
         <version.plugin.resources>3.3.1</version.plugin.resources>
         <version.plugin.surefire>3.2.1</version.plugin.surefire>
         <version.plugin.reports>3.4.5</version.plugin.reports>
