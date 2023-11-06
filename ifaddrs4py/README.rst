@@ -52,7 +52,7 @@ Installing and Building
     - to run tests and other checks -
     $ pip install --verbose .[test]
     $ pytest --verbose -s
-    $ mypy source/python/
+    $ mypy .
     $ flake8 .
 
   Do not use :code:`python setup.py install`, as this is a deprecated convention that will cause deprecation

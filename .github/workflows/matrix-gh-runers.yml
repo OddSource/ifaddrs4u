@@ -120,7 +120,7 @@ jobs:
              pip install --config-setting="--build-option=--clean" --config-setting="--build-option=--test-cpp" --verbose .[test]
              echo "+ pytest --verbose -s"
              pytest --verbose -s
-             echo "+ mypy source/python/"
-             mypy source/python/
+             echo "+ mypy ."
+             mypy .
              echo "+ flake8 ."
              flake8 .

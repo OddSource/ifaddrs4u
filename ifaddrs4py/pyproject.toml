@@ -73,6 +73,7 @@ python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
 follow_imports = "normal"
+exclude = ["build"]
 
 [[tool.mypy.overrides]]
 module = "ifaddrs4py.*"

@@ -73,6 +73,8 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       CXX_EXTENSIONS OFF)
 
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_sources})
+set_target_properties(${PROJECT_NAME} PROPERTIES
+                      CXX_VISIBILITY_PRESET hidden)
 if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
 # Apparently, we do not have to link to java.dll on Windows like we link to java.so/dylib on oter platforms.
     target_link_libraries(${PROJECT_NAME} PUBLIC

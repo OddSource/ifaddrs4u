@@ -443,30 +443,66 @@ static struct PyGetSetDef InterfaceBrowser_getters_and_setters [] =
 
 static PyMappingMethods InterfaceBrowser_mapping =
 {
-    .mp_length = (lenfunc) InterfaceBrowser___len__,
-    .mp_subscript = (binaryfunc) InterfaceBrowser___getitem___mapping,
+    (lenfunc) InterfaceBrowser___len__, // .mp_length
+    (binaryfunc) InterfaceBrowser___getitem___mapping, // .mp_subscript
+    NULL, // .mp_ass_subscript
 };
 
 static PyTypeObject InterfaceBrowser_PyType =
 {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    .tp_name = "ifaddrs4py.extern.InterfaceBrowser",
-    .tp_basicsize = sizeof(InterfaceBrowser_PyObj),
-    .tp_dealloc = (destructor) InterfaceBrowser_dealloc,
-    .tp_repr = (reprfunc) InterfaceBrowser___repr__,
-    .tp_as_mapping = &InterfaceBrowser_mapping,
-    .tp_str = (reprfunc) InterfaceBrowser___repr__,
+    "ifaddrs4py.extern.InterfaceBrowser", // .tp_name
+    sizeof(InterfaceBrowser_PyObj), // .tp_basicsize
+    0, // .tp_itemsize
+    (destructor) InterfaceBrowser_dealloc, // .tp_dealloc
+    0, // .tp_vectorcall_offset
+    NULL, // .tp_getattr
+    NULL, // .tp_setattr
+    NULL, // .tp_as_async
+    (reprfunc) InterfaceBrowser___repr__, // .tp_repr
+    NULL, // .tp_as_number
+    NULL, // .tp_as_sequence
+    &InterfaceBrowser_mapping, // .tp_as_mapping
+    NULL, // .tp_hash
+    NULL, // .tp_call
+    (reprfunc) InterfaceBrowser___repr__, // .tp_str
+    NULL, // .tp_getattro
+    NULL, // .tp_setattro
+    NULL, // .tp_as_buffer
 #if PY_MINOR_VERSION > 9
-    .tp_flags = Py_TPFLAGS_METHOD_DESCRIPTOR | Py_TPFLAGS_IMMUTABLETYPE,
+    Py_TPFLAGS_METHOD_DESCRIPTOR | Py_TPFLAGS_IMMUTABLETYPE, // .tp_flags
 #else
-    .tp_flags = Py_TPFLAGS_METHOD_DESCRIPTOR,
+    Py_TPFLAGS_METHOD_DESCRIPTOR, // .tp_flags
 #endif
-    .tp_iter = (getiterfunc) InterfaceBrowser___iter__,
-    .tp_methods = InterfaceBrowser_methods,
-    .tp_members = InterfaceBrowser_members,
-    .tp_getset = InterfaceBrowser_getters_and_setters,
-    .tp_init = (initproc) InterfaceBrowser___init__,
-    .tp_new = PyType_GenericNew,
+    NULL, // .tp_doc
+    NULL, // .tp_traverse
+    NULL, // .tp_clear
+    NULL, // .tp_richcompare
+    0, // .tp_weaklistoffset
+    (getiterfunc) InterfaceBrowser___iter__, // .tp_iter
+    NULL, // .tp_iternext
+    InterfaceBrowser_methods, // .tp_methods
+    InterfaceBrowser_members, // .tp_members
+    InterfaceBrowser_getters_and_setters, // .tp_getset
+    NULL, // .tp_base
+    NULL, // .tp_dict
+    NULL, // .tp_descr_get
+    NULL, // .tp_descr_set
+    0, // .tp_dictoffset
+    (initproc) InterfaceBrowser___init__, // .tp_init
+    NULL, // .tp_alloc
+    PyType_GenericNew, // .tp_new
+    NULL, // .tp_free
+    NULL, // .tp_is_gc
+    NULL, // .tp_bases
+    NULL, // .tp_mro
+    NULL, // .tp_cache
+    NULL, // .tp_subclasses
+    NULL, // .tp_weaklist
+    NULL, // .tp_del
+    0, // .tp_version_tag
+    NULL, // .tp_finalize
+    NULL, // .tp_vectorcall
 };
 
 static struct PyMethodDef ifaddrs4py_methods [] =
@@ -482,11 +518,15 @@ static struct PyMethodDef ifaddrs4py_methods [] =
 
 static struct PyModuleDef ifaddrs4py_module =
 {
-    .m_base = PyModuleDef_HEAD_INIT,
-    .m_name = "ifaddrs4py.extern",   /* name of module */
-    .m_doc = NULL, /* module documentation, may be NULL */
-    .m_size = -1, /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
-    .m_methods = ifaddrs4py_methods,
+    PyModuleDef_HEAD_INIT, // .m_base
+    "ifaddrs4py.extern", // .m_name, name of module
+    NULL, // .m_doc, module documentation, may be NULL
+    -1, // .m_size, size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
+    ifaddrs4py_methods, // .m_methods
+    NULL, // .m_slots
+    NULL, // .m_traverse
+    NULL, // .m_clear
+    NULL, // .m_free
 };
 
 #ifndef IS_WINDOWS

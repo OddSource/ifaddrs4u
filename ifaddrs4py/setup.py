@@ -19,16 +19,18 @@ import dataclasses
 import functools
 import os
 import pathlib
-from setuptools import (
-    Extension,
-    setup,
-)
+
 import shutil
 import subprocess
 import sys
 import sysconfig
 from typing import (
     List,
+)
+
+from setuptools import (  # type: ignore
+    Extension,
+    setup,
 )
 
 UTF_8 = "utf-8"
@@ -235,7 +237,16 @@ if IS_WINDOWS:
     extra_compile_args = ["/std:c++17", "/wd4275", "/wd4251", "/wd4455"]
     extra_link_args = []
 else:
-    extra_compile_args = ["-std=c++17", "-Wdeprecated", "-Wextra", "-Wpedantic", "-Wshadow", "-Wunused", "-Werror"]
+    extra_compile_args = [
+        "-std=c++17",
+        "-fvisibility=hidden",
+        "-Wdeprecated",
+        "-Wextra",
+        "-Wpedantic",
+        "-Wshadow",
+        "-Wunused",
+        "-Werror",
+    ]
     extra_link_args = []
     if IS_MACOS:
         target = (

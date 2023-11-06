@@ -100,6 +100,8 @@ if(NOT ${BUILD_STATIC_ONLY})
     add_library(${PROJECT_NAME}-shared SHARED ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-shared PUBLIC ${PROJECT_NAME}_compiler_flags)
     target_include_directories(${PROJECT_NAME}-shared PUBLIC "${PROJECT_BINARY_DIR}")
+    set_target_properties(${PROJECT_NAME}-shared PROPERTIES
+                          CXX_VISIBILITY_PRESET hidden)
 endif()
 
 if(NOT ${BUILD_DYNAMIC_ONLY})
@@ -107,7 +109,8 @@ if(NOT ${BUILD_DYNAMIC_ONLY})
     target_link_libraries(${PROJECT_NAME}-static PUBLIC ${PROJECT_NAME}_compiler_flags)
     target_include_directories(${PROJECT_NAME}-static PUBLIC "${PROJECT_BINARY_DIR}")
     set_target_properties(${PROJECT_NAME}-static PROPERTIES
-                          POSITION_INDEPENDENT_CODE ON)
+                          POSITION_INDEPENDENT_CODE ON
+                          CXX_VISIBILITY_PRESET hidden)
 endif()
 
 if (${ENABLE_TESTS})
@@ -123,6 +126,8 @@ if (${ENABLE_TESTS})
     target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}_compiler_flags)
     target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}-static)
     target_include_directories(${PROJECT_NAME}_tests PUBLIC "${PROJECT_BINARY_DIR}")
+    set_target_properties(${PROJECT_NAME}_tests PROPERTIES
+                          CXX_VISIBILITY_PRESET hidden)
 
     enable_testing()
     add_test(NAME Tests COMMAND ${PROJECT_NAME}_tests)
