@@ -18,11 +18,14 @@ package io.oddsource.java.net.ifaddrs4j;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * Represents a network interface (adapter) on the system, including its index, name, UUID if on Windows,
@@ -30,7 +33,7 @@ import java.util.UUID;
  *
  * @since 1.0.0
  */
-public final class Interface
+public final class Interface implements Iterable<InterfaceIPAddress<? extends InetAddress>>
 {
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase(Locale.US).contains("win");
 
@@ -166,7 +169,27 @@ public final class Interface
      */
     public Iterator<InterfaceIPAddress<Inet4Address>> getIpv4Addresses()
     {
-        return new AddressIterator<>(this.ipv4Addresses.iterator());
+        return new SpecificAddressIterator<>(this.ipv4Addresses.iterator());
+    }
+
+    /**
+     * Get a filterable stream of all IPv4 addresses configured on this interface.
+     *
+     * @return a stream of IPv4 addresses.
+     */
+    public Stream<InterfaceIPAddress<Inet4Address>> ipv4Addresses()
+    {
+        return this.ipv4Addresses.stream();
+    }
+
+    /**
+     * Returns the number of IPv4 addresses configured on this interface.
+     *
+     * @return the number of addresses.
+     */
+    public int getNumberOfIPv4Addresses()
+    {
+        return this.ipv4Addresses.size();
     }
 
     /**
@@ -177,7 +200,61 @@ public final class Interface
     public Iterator<InterfaceIPAddress<Inet6Address>> getIpv6Addresses()
     {
 
-        return new AddressIterator<>(ipv6Addresses.iterator());
+        return new SpecificAddressIterator<>(ipv6Addresses.iterator());
+    }
+
+    /**
+     * Get a filterable stream of all IPv6 addresses configured on this interface.
+     *
+     * @return a stream of IPv6 addresses.
+     */
+    public Stream<InterfaceIPAddress<Inet6Address>> ipv6Addresses()
+    {
+        return this.ipv6Addresses.stream();
+    }
+
+    /**
+     * Returns the number of IPv6 addresses configured on this interface.
+     *
+     * @return the number of addresses.
+     */
+    public int getNumberOfIPv6Addresses()
+    {
+        return this.ipv6Addresses.size();
+    }
+
+    /**
+     * Get an immutable iterator of all IP addresses (v4 and v6) configured on this interface.
+     *
+     * @return an unmodifiable iterator over the interface's IPv4 and IPv6 addresses (in that order).
+     */
+    @Override
+    public Iterator<InterfaceIPAddress<? extends InetAddress>> iterator()
+    {
+        return new GenericAddressIterator(
+            this.ipv4Addresses.iterator(),
+            this.ipv6Addresses.iterator()
+        );
+    }
+
+    /**
+     * Get a filterable stream of all IP addresses (v4 and v6) configured on this interface.
+     *
+     * @return a stream of the interface's IPv4 and IPv6 addresses (in that order).
+     */
+    public Stream<InterfaceIPAddress<? extends InetAddress>> addresses()
+    {
+        return Stream.concat(this.ipv4Addresses.stream(), this.ipv6Addresses.stream());
+    }
+
+    /**
+     * Returns the total number of IP addresses (v4 and v6) configured on this interface.
+     *
+     * @return the number of addresses.
+     */
+    public int getNumberOfAddresses()
+    {
+        return this.ipv4Addresses.size() + this.ipv6Addresses.size();
     }
 
     @Override
@@ -221,25 +298,55 @@ public final class Interface
         return builder.toString();
     }
 
-    private static class AddressIterator<InterfaceIPAddress> implements Iterator<InterfaceIPAddress>
+    private static class SpecificAddressIterator<IPAddressT extends InetAddress>
+        implements Iterator<InterfaceIPAddress<IPAddressT>>
     {
-        private final Iterator<InterfaceIPAddress> iterator;
+        private final Iterator<InterfaceIPAddress<IPAddressT>> wrapped;
 
-        AddressIterator(final Iterator<InterfaceIPAddress> iterator)
+        SpecificAddressIterator(final Iterator<InterfaceIPAddress<IPAddressT>> wrapped)
         {
-            this.iterator = iterator;
+            this.wrapped = wrapped;
         }
 
         @Override
         public boolean hasNext()
         {
-            return this.iterator.hasNext();
+            return this.wrapped.hasNext();
         }
 
         @Override
-        public InterfaceIPAddress next()
+        public InterfaceIPAddress<IPAddressT> next()
         {
-            return this.iterator.next();
+            return this.wrapped.next();
+        }
+    }
+
+    private static class GenericAddressIterator implements Iterator<InterfaceIPAddress<? extends InetAddress>>
+    {
+        private final Iterator<Iterator<? extends InterfaceIPAddress<? extends InetAddress>>> wrappedIterators;
+
+        private Iterator<? extends InterfaceIPAddress<? extends InetAddress>> currentIterator;
+
+        @SafeVarargs
+        GenericAddressIterator(final Iterator<? extends InterfaceIPAddress<? extends InetAddress>>... iterators)
+        {
+            this.wrappedIterators = Arrays.asList(iterators).iterator();
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return this.wrappedIterators.hasNext() || this.currentIterator != null && this.currentIterator.hasNext();
+        }
+
+        @Override
+        public InterfaceIPAddress<? extends InetAddress> next()
+        {
+            if (this.currentIterator == null || !this.currentIterator.hasNext() && this.wrappedIterators.hasNext())
+            {
+                this.currentIterator = this.wrappedIterators.next();
+            }
+            return this.currentIterator.next();
         }
     }
 }

@@ -24,8 +24,69 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * Browse network interfaces/adapters configured on this system. To ensure resources are cleaned
- * up, be sure to {@link #close()} the browser when you are done with it.
+ * A tool for browsing network interfaces/adapters configured on this system. To ensure memory resources are cleaned
+ * up properly, be sure to {@link #close()} the browser when you are done with it, such as with a try-with-resources
+ * block. Example uses are detailed below.<br>
+ * <br>
+ * Iterate over the browser to inspect all interfaces:
+ * <pre>{@code
+ * try(var browser = new InterfaceBrowser())
+ * {
+ *     ...
+ *     for(var anInterface : browser)
+ *     {
+ *         System.out.println(anInterface.toString());
+ *     }
+ *     ...
+ * }
+ * }</pre>
+ * For-each all interfaces with a lambda, stopping iteration when the lambda returns {@code false}:
+ * <pre>{@code
+ * try(var browser = new InterfaceBrowser())
+ * {
+ *     ...
+ *     var notFound = browser.forEachInterface(iface -> {
+ *         if(... some test against iface ...)
+ *         {
+ *             ... // use the iface
+ *             return false; // to stop iteration
+ *         }
+ *         return true; // to continue iteration
+ *     });
+ *     if(notFound)
+ *     {
+ *         ... // react to this situation
+ *     }
+ * }
+ * }</pre>
+ * Other actions you can take, all of which should be surrounded with try-with-resources:
+ * <pre>{@code
+ * // get an interface if you know its system name (on Windows, you can use its
+ * // UUID string or friendly name; either will match)
+ * var iface = browser.getInterface("eth0");
+ *
+ * // get an interface if you know its system index
+ * var iface = browser.getInterface(1);
+ *
+ * // get an enumeration of all interfaces
+ * var interfaces = browser.getInterfaces();
+ *
+ * // stream over the interfaces, finding the first non-loopback, status-up interface
+ * // with at least one non-link-local IPv6 address
+ * var iface = browser.interfaces().
+ *                     filter(i -> i.isFlagEnabled(InterfaceFlag.IsUp) &&
+ *                                 !i.isFlagEnabled(InterfaceFlag.IsLoopback)).
+ *                     findFirst(i -> i.ipv6Addresses().findFirst(
+ *                         a -> !a.getAddress().isLinkLocalAddress()
+ *                     ) != null);
+ * }</pre>
+ * @implNote
+ *     This browser's data does not become "exhausted," though it could become stale. Upon first post-construction
+ *     use of {@link #interfaces()}, {@link #iterator()}, {@link #forEachInterface(Function)},
+ *     {@link #getInterfaces()}, {@link #getInterface(String)}, or {@link #getInterface(int)}, the browser holds
+ *     a snapshot-in-time of the system's network interface configuration, which may immediately become stale. These
+ *     six accessor methods can be used any number of times, in any order, in any combination, and by multiple
+ *     threads if necessary.
  *
  * @since 1.0.0
  */
@@ -42,37 +103,28 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
 
     private static final Cleaner cleaner = Cleaner.create();
 
-    private final BrowserCleaner browserCleaner;
+    private final NativeBrowser internal;
 
-    private final Extern extern;
-
-    private boolean closed;
+    private final Cleaner.Cleanable cleanable;
 
     /**
      * Construct an interface browser.
      */
     public InterfaceBrowser()
     {
-        this.browserCleaner = new BrowserCleaner();
-        InterfaceBrowser.cleaner.register(this, this.browserCleaner);
-
-        this.extern = new Extern();
-        this.extern.init();
+        this.internal = new NativeBrowser();
+        this.cleanable = InterfaceBrowser.cleaner.register(this, new BrowserCleaner(this.internal));
     }
 
     @Override
-    public synchronized void close()
+    public void close()
     {
-        if(this.extern != null && !this.closed)
-        {
-            this.closed = true;
-            this.extern.close();
-        }
+        this.cleanable.clean();
     }
 
     private synchronized void ready()
     {
-        if(this.extern == null || this.closed)
+        if(this.internal == null || this.internal.isClosed())
         {
             throw new IllegalStateException("This interface browser has been closed or is in an unusable state.");
         }
@@ -81,8 +133,11 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
     /**
      * Get the interface with the given name, or {@code null} if no such interface exists. On Windows,
      * an attempt will be made to match the given name against the friendly name, the UUID, and the
-     * UUID with curly braces around it. The complexity of this method is {@code O(n)} on the first call
-     * to any methods on this instance and then {@code O(1)} for all subsequent calls.
+     * UUID with curly braces around it.<br>
+     *
+     * @implNote
+     *     The complexity of this method is {@code O(n)} on the first call to any of the six accessor
+     *     methods on this instance and then {@code O(1)} for all subsequent calls.
      *
      * @param name The interface name or, optionally on Windows (only), the UUID or <code>{UUID}</code>
      * @return the matched interface or {@code null}.
@@ -90,13 +145,15 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
     public Interface getInterface(final String name)
     {
         this.ready();
-        return this.extern.getInterface(name);
+        return this.internal.getInterface(name);
     }
 
     /**
-     * Get the interface with the given index, or {@code null} if no such interface exists. The complexity
-     * of this method is {@code O(n)} on the first call to any methods on this instance and then {@code O(1)}
-     * for all subsequent calls.
+     * Get the interface with the given index, or {@code null} if no such interface exists.<br>
+     *
+     * @implNote
+     *     The complexity of this method is {@code O(n)} on the first call to any of the six accessor
+     *     methods on this instance and then {@code O(1)} for all subsequent calls.
      *
      * @param index The interface index
      * @return the matched interface or {@code null}.
@@ -104,7 +161,7 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
     public Interface getInterface(final int index)
     {
         this.ready();
-        return this.extern.getInterface(index);
+        return this.internal.getInterface(index);
     }
 
     /**
@@ -119,7 +176,7 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
     public Enumeration<Interface> getInterfaces()
     {
         this.ready();
-        return new InterfaceEnumeration(this.extern.getInterfaces().listIterator());
+        return new InterfaceEnumeration(this.internal.getInterfaces().listIterator());
     }
 
     /**
@@ -136,22 +193,25 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
     public Iterator<Interface> iterator()
     {
         this.ready();
-        return new InterfaceIterator(this.extern.getInterfaces().listIterator());
+        return new InterfaceIterator(this.internal.getInterfaces().listIterator());
     }
 
     /**
      * Get a filterable stream of all interfaces configured on the system.<br>
-     * <br>
-     * Note that there is no guaranteed order in which interfaces will be streamed, and that the
-     * order can change from one call to the next (though that would not be typical). If you need
-     * a particular order, consider sorting this stream.
+     *
+     * @implNote
+     *     That there is no guaranteed order in which interfaces will be streamed unless you
+     *     {@link Stream#sorted(java.util.Comparator) sort} the stream. The only guarantee is that subsequent streams
+     *     will always be in the same order, and that streaming, {@link #iterator() iterating},
+     *     {@link #getInterfaces() enumerating}, and {@link #forEachInterface(Function) for-each-ing} will occur in
+     *     the same order.
      *
      * @return a stream of interfaces.
      */
     public Stream<Interface> interfaces()
     {
         this.ready();
-        return this.extern.getInterfaces().stream();
+        return this.internal.getInterfaces().stream();
     }
 
     /**
@@ -171,33 +231,34 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
     public boolean forEachInterface(final Function<Interface, Boolean> doThis)
     {
         this.ready();
-        return this.extern.forEachInterface(doThis);
+        return this.internal.forEachInterface(doThis);
     }
 
     @Override
     public String toString()
     {
         final var builder = new StringBuilder("<io.oddsource.java.net.ifaddrs4j.InterfaceBrowser: ");
-        if (this.extern == null)
+        if (this.internal == null)
         {
             builder.append("uninitialized/unusable");
         }
-        else if(this.closed)
+        else if(this.internal.isClosed())
         {
             builder.append("closed/unusable");
         }
-        else if(this.extern.pBrowser == 0)
+        else if(this.internal.pBrowser == 0)
         {
             builder.append("internally uninitialized/unusable");
         }
-        else if(this.extern.interfaces == null)
+        else if(this.internal.interfaces == null)
         {
-            builder.append("pending population, internal pointer = 0x").append(Long.toHexString(this.extern.pBrowser));
+            builder.append("pending population, internal pointer = 0x").
+                    append(Long.toHexString(this.internal.pBrowser));
         }
         else
         {
-            builder.append("contains info on ").append(this.extern.interfaces.size()).append(" interfaces");
-            builder.append(", internal pointer = 0x").append(Long.toHexString(this.extern.pBrowser));
+            builder.append("contains info on ").append(this.internal.interfaces.size()).append(" interfaces").
+                    append(", internal pointer = 0x").append(Long.toHexString(this.internal.pBrowser));
         }
         builder.append(">");
         return builder.toString();
@@ -247,41 +308,60 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
         }
     }
 
-    private static final class Extern implements AutoCloseable
+    private static final class NativeBrowser implements AutoCloseable
     {
         /**
          * Stores the C++ native pointer to the OddSource::Interfaces::InterfaceBrowser object, used
          * internally by native code.
          */
+        @SuppressWarnings("unused") // it is used by native code
         private long pBrowser;
 
         /**
          * Stores the cached Java conversions of the native interface info, set internally by native code.
          */
+        @SuppressWarnings("unused") // it is used by native code
         private List<Interface> interfaces;
 
-        Extern()
+        private boolean closed;
+
+        NativeBrowser()
         {
+            this.init();
         }
 
-        native void init();
+        private synchronized native void init();
+
+        public synchronized boolean isClosed()
+        {
+            return this.closed;
+        }
 
         @Override
-        public native void close();
+        public synchronized void close()
+        {
+            if (!this.closed)
+            {
+                this.closed = true;
+                this.closeInternal();
+            }
+        }
 
-        native Interface getInterface(String name);
+        private native void closeInternal();
 
-        native Interface getInterface(int index);
+        synchronized native Interface getInterface(String name);
 
-        List<Interface> getInterfaces()
+        synchronized native Interface getInterface(int index);
+
+        synchronized List<Interface> getInterfaces()
         {
             this.ensureInterfacesPopulated();
             return this.interfaces;
         }
 
-        private native void ensureInterfacesPopulated();
+        private synchronized native void ensureInterfacesPopulated();
 
-        boolean forEachInterface(final Function<Interface, Boolean> doThis)
+        synchronized boolean forEachInterface(final Function<Interface, Boolean> doThis)
         {
             if (this.interfaces != null)
             {
@@ -298,19 +378,22 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
             return this.forEachInterfaceAndPopulate(doThis);
         }
 
-        native boolean forEachInterfaceAndPopulate(Function<Interface, Boolean> doThis);
+        synchronized native boolean forEachInterfaceAndPopulate(Function<Interface, Boolean> doThis);
     }
 
-    private final class BrowserCleaner implements Runnable
+    private static final class BrowserCleaner implements Runnable
     {
-        BrowserCleaner()
+        private final NativeBrowser subject;
+
+        BrowserCleaner(final NativeBrowser subject)
         {
+            this.subject = subject;
         }
 
         @Override
         public void run()
         {
-            InterfaceBrowser.this.close();
+            this.subject.close();
         }
     }
 }

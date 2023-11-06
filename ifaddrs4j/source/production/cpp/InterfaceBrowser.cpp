@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "generated/io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_Extern.h"
+#include "generated/io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_NativeBrowser.h"
 
 #include <ifaddrs4cpp/Interfaces.h>
 
@@ -106,11 +106,12 @@ namespace
 }
 
 /*
- * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_Extern
+ * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_NativeBrowser
  * Method:    init
  * Signature: ()V
  */
-void JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_init(
+void JNICALL
+Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_init(
     JNIEnv * env,
     jobject self)
 {
@@ -143,11 +144,12 @@ void JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_i
 }
 
 /*
- * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_Extern
- * Method:    close
+ * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_NativeBrowser
+ * Method:    closeInternal
  * Signature: ()V
  */
-void JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_close(
+void JNICALL
+Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_closeInternal(
     JNIEnv * env,
     jobject self)
 {
@@ -175,11 +177,12 @@ void JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_c
     }
 
 /*
- * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_Extern
+ * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_NativeBrowser
  * Method:    getInterface
  * Signature: (Ljava/lang/String;)Lio/oddsource/java/net/ifaddrs4j/Interface;
  */
-jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_getInterface__Ljava_lang_String_2(
+jobject JNICALL
+Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_getInterface__Ljava_lang_String_2(
     JNIEnv * env,
     jobject self,
     jstring name)
@@ -208,11 +211,12 @@ jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Exter
 }
 
 /*
- * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_Extern
+ * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_NativeBrowser
  * Method:    getInterface
  * Signature: (I)Lio/oddsource/java/net/ifaddrs4j/Interface;
  */
-jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_getInterface__I(
+jobject JNICALL
+Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_getInterface__I(
     JNIEnv * env,
     jobject self,
     jint index)
@@ -235,11 +239,12 @@ jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Exter
 }
 
 /*
- * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_Extern
+ * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_NativeBrowser
  * Method:    ensureInterfacesPopulated
  * Signature: ()V
  */
-void JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_ensureInterfacesPopulated(
+void JNICALL
+Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_ensureInterfacesPopulated(
     JNIEnv * env,
     jobject self)
 {
@@ -249,11 +254,12 @@ void JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_e
 }
 
 /*
- * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_Extern
+ * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_NativeBrowser
  * Method:    forEachInterfaceAndPopulate
  * Signature: (Ljava/util/function/Function;)Z
  */
-jboolean JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024Extern_forEachInterfaceAndPopulate(
+jboolean JNICALL
+Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_forEachInterfaceAndPopulate(
     JNIEnv * env,
     jobject self,
     jobject function)

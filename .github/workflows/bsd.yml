@@ -19,8 +19,8 @@ name: "Matrix CI - BSD VMs"
 on:
   pull_request:
   push:
-  schedule:
-    - cron: "0 1 * * SUN"
+#  schedule:
+#    - cron: "0 1 * * SUN"
   workflow_dispatch:
 
 concurrency:
@@ -64,14 +64,14 @@ jobs:
             java: "21"
           - os_name: netbsd
             java: "21"
-    runs-on: ubuntu-latest
+    runs-on: macos-12
     name: "${{ matrix.os_name }} ${{ matrix.os_version }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
       - name: Checkout ifaddrs4u
         uses: actions/checkout@v4
 
       - name: Execute on ${{ matrix.os.name }} Virtual Machine
-        uses: cross-platform-actions/action@v0.21.0
+        uses: cross-platform-actions/action@v0.21.1
         env:
           ASSUME_ALWAYS_YES: "TRUE"
         with:
@@ -121,6 +121,7 @@ jobs:
                echo "#######################################"
                echo "+ sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}"
                sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}
+               if test -f /usr/pkg/java/openjdk${{ matrix.java }}/bin/java; then export PATH="/usr/pkg/java/openjdk${{ matrix.java }}:$PATH"; fi
                echo "java = $(which java)"
                echo "javac = $(which javac)"
                export JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | tr -s ' ' | cut -d' ' -f4-)"
