@@ -30,6 +30,11 @@ if sys.version_info >= (3, 9):
 else:
     from typing import Tuple
 
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
+
 __all__ = (
     "IPv4Address",
     "IPv6Address",
@@ -78,6 +83,24 @@ class IPv6Address(_IPv6Address):
             self._scope_number = int(self._scope_id)
 
     if not _base_has_scope:
+        @override
+        def __str__(self):
+            ip_str = super().__str__()
+            return ip_str + '%' + self._scope_id if self._scope_id else ip_str
+
+        @override
+        def __hash__(self):
+            return hash((self._ip, self._scope_id))
+
+        @override
+        def __eq__(self, other):
+            address_equal = super().__eq__(other)
+            if address_equal is NotImplemented:
+                return NotImplemented
+            if not address_equal:
+                return False
+            return self._scope_id == getattr(other, '_scope_id', None)
+
         @property
         def scope_id(self) -> Optional[str]:
             return self._scope_id

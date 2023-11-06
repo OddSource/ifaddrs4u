@@ -28,6 +28,21 @@
 
 #include <ifaddrs4cpp/Interfaces.h>
 
+#if PY_MINOR_VERSION < 10
+int PyModule_AddObjectRef(PyObject * module, char const * name, PyObject * value)
+{
+    int result = PyModule_AddObject(module, name, value);
+    if (result == 0)
+    {
+        // PyModule_AddObject is different from PyModule_AddObjectRef in that it "steals a reference to value on
+        // success (if it returns 0)", but the caller is expecting to unconditionally Py_DECREF the value, so
+        // increment the reference count to emulate the behavior of PyModule_AddObjectRef.
+        Py_XINCREF(value);
+    }
+    return result;
+}
+#endif
+
 static PyObject * IllegalStateError;
 
 typedef struct
@@ -395,6 +410,18 @@ InterfaceBrowser_get_interface(InterfaceBrowser_PyObj * self, PyObject * const *
     return InterfaceBrowser___getitem___mapping(self, args[0]);
 }
 
+#ifndef IS_WINDOWS
+#ifndef __clang__
+#pragma GCC diagnostic push
+// "cast between incompatible function types from <...> to ‘PyCFunction’"
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+// "C++ designated initializers only available with ‘-std=c++2a’ or ‘-std=gnu++2a’", but this is the "Python Way"
+#pragma GCC diagnostic ignored "-Wpedantic"
+// "missing initializer for member <...>", but this is the "Python Way"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif /* __clang__ */
+#endif /* IS_WINDOWS */
+
 static struct PyMemberDef InterfaceBrowser_members [] =
 {
     {NULL, 0, 0, 0, NULL}  /* Sentinel */
@@ -461,6 +488,12 @@ static struct PyModuleDef ifaddrs4py_module =
     .m_size = -1, /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
     .m_methods = ifaddrs4py_methods,
 };
+
+#ifndef IS_WINDOWS
+#ifndef __clang__
+#pragma GCC diagnostic pop
+#endif /* __clang__ */
+#endif /* IS_WINDOWS */
 
 PyMODINIT_FUNC
 PyInit_extern(void)

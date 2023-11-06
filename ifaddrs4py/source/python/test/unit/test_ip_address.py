@@ -32,7 +32,7 @@ class TestIPv6Address(TestCase):
         self.assertEqual("en5", address.scope_id)
         self.assertIsNone(address.scope_number)
 
-    def test_int_scope_in_adress(self) -> None:
+    def test_int_scope_in_address(self) -> None:
         address = IPv6Address("fe80::aede:48ff:fe00:1122%4")
         self.assertEqual(f"{address}", "fe80::aede:48ff:fe00:1122%4")
         self.assertEqual("4", address.scope_id)

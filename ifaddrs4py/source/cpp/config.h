@@ -26,6 +26,10 @@
 #error "ifaddrs4py requires Python 3.8+"
 #endif /* PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 8 */
 
+#if PY_MINOR_VERSION < 10
+int PyModule_AddObjectRef(PyObject * module, char const * name, PyObject * value);
+#endif
+
 #include <ifaddrs4cpp/os.h>
 
 #include <ifaddrs4cpp/s.h>
