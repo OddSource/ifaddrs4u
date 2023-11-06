@@ -121,8 +121,8 @@ jobs:
                echo "#######################################"
                echo "# STEP: Installing Java               #"
                echo "#######################################"
-               echo "+ ${{ matrix.jdk21_preinstall | echo 'Not updating package repo for JDK' }}"
-               ${{ matrix.jdk21_preinstall | echo 'Not updating package repo for JDK' }}
+               echo "+ ${{ matrix.jdk21_preinstall || echo 'Not updating package repo for JDK' }}"
+               ${{ matrix.jdk21_preinstall || echo 'Not updating package repo for JDK' }}
                echo "+ sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}"
                sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}
                echo '+ if test -f /usr/pkg/java/openjdk${{ matrix.java }}/bin/java; then export PATH="/usr/pkg/java/openjdk${{ matrix.java }}:$PATH"; fi'

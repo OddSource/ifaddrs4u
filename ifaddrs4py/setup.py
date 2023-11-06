@@ -119,6 +119,11 @@ def cmake(cwd: pathlib.Path, *args: str) -> None:
     execute(cwd, which(CMAKE), *args)
 
 
+def ctest(cwd: pathlib.Path, *args: str) -> None:
+    """Simple wrapper to make calling ctest easier"""
+    execute(cwd, which(CTEST), *args)
+
+
 include_dirs: List[str] = []
 library_dirs: List[str] = []
 libraries: List[str] = []
@@ -169,12 +174,9 @@ def pre_build(options: Options) -> None:
         if not options.dynamic:
             extra_args.append("-DBUILD_STATIC_ONLY:BOOL=ON")
         cmake(cmake_path, "-DCMAKE_BUILD_TYPE=Release", "-S", f"{extern_cpp_base}", "-B", f"{cmake_path}", *extra_args)
-        cmake(cmake_path, "--build", f"{cmake_path}", "--config", "Release", "all", "-j", "14")
+        cmake(cmake_path, "--build", f"{cmake_path}", "--config", "Release", "-j", "14")
         if options.test_cpp:
-            exe = "ifaddrs4cpp_tests"
-            if IS_WINDOWS:
-                exe += ".exe"
-            execute(cmake_path, f"{cmake_path / exe}")
+            ctest(cmake_path, "--build-config", "Release", "--verbose", "--test-action", "Test", "--output-on-failure")
 
 
 def pre_sdist() -> None:

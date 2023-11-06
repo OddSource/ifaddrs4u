@@ -77,7 +77,7 @@ jobs:
 
       - name: Run ifaddrs4cpp Tests
         working-directory: ifaddrs4cpp
-        run: ${{ matrix.cpp_test_command || './cmake-debug-test-build/ifaddrs4cpp_tests' }}
+        run: ctest --build-config Debug --verbose --test-action Test --output-on-failure
 
 #      - name: Compile ifaddrs4cpp Release
 #        working-directory: ifaddrs4cpp
@@ -116,8 +116,8 @@ jobs:
         working-directory: ifaddrs4py
         run: |
              pip --version
-             echo '+ pip install --config-setting="--build-option=--clean" --verbose .[test]'
-             pip install --config-setting="--build-option=--clean" --verbose .[test]
+             echo '+ pip install --config-setting="--build-option=--clean" --config-setting="--build-option=--test-cpp" --verbose .[test]'
+             pip install --config-setting="--build-option=--clean" --config-setting="--build-option=--test-cpp" --verbose .[test]
              echo "+ pytest --verbose -s"
              pytest --verbose -s
              echo "+ mypy source/python/"
