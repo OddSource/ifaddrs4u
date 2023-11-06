@@ -397,7 +397,7 @@ InterfaceBrowser_get_interface(InterfaceBrowser_PyObj * self, PyObject * const *
 
 static struct PyMemberDef InterfaceBrowser_members [] =
 {
-    {NULL}  /* Sentinel */
+    {NULL, 0, 0, 0, NULL}  /* Sentinel */
 };
 
 static struct PyMethodDef InterfaceBrowser_methods [] =
@@ -406,12 +406,12 @@ static struct PyMethodDef InterfaceBrowser_methods [] =
     {"length", (PyCFunction) InterfaceBrowser_length, METH_NOARGS, NULL},
     {"get_interface", (PyCFunction) InterfaceBrowser_get_interface, METH_FASTCALL, NULL},
     {"for_each_interface", (PyCFunction) InterfaceBrowser_for_each_interface, METH_FASTCALL, NULL},
-    {NULL}  /* Sentinel */
+    {NULL, NULL, 0, NULL}  /* Sentinel */
 };
 
 static struct PyGetSetDef InterfaceBrowser_getters_and_setters [] =
 {
-    {NULL}  /* Sentinel */
+    {NULL, NULL, NULL, NULL, NULL}  /* Sentinel */
 };
 
 static PyMappingMethods InterfaceBrowser_mapping =
@@ -429,7 +429,11 @@ static PyTypeObject InterfaceBrowser_PyType =
     .tp_repr = (reprfunc) InterfaceBrowser___repr__,
     .tp_as_mapping = &InterfaceBrowser_mapping,
     .tp_str = (reprfunc) InterfaceBrowser___repr__,
+#if PY_MINOR_VERSION > 9
     .tp_flags = Py_TPFLAGS_METHOD_DESCRIPTOR | Py_TPFLAGS_IMMUTABLETYPE,
+#else
+    .tp_flags = Py_TPFLAGS_METHOD_DESCRIPTOR,
+#endif
     .tp_iter = (getiterfunc) InterfaceBrowser___iter__,
     .tp_methods = InterfaceBrowser_methods,
     .tp_members = InterfaceBrowser_members,
@@ -446,16 +450,16 @@ static struct PyMethodDef ifaddrs4py_methods [] =
     {"get_sample_interface", extern_get_sample_interface, METH_NOARGS, NULL},
     {"get_mac_address_data_from_repr", (PyCFunction) extern_get_mac_address_data_from_repr, METH_FASTCALL, NULL},
     {"get_mac_address_repr_from_data", (PyCFunction) extern_get_mac_address_repr_from_data, METH_FASTCALL, NULL},
-    {NULL}        /* Sentinel */
+    {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
 static struct PyModuleDef ifaddrs4py_module =
 {
-    PyModuleDef_HEAD_INIT,
-    "ifaddrs4py.extern",   /* name of module */
-    NULL, /* module documentation, may be NULL */
-    -1, /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
-    ifaddrs4py_methods
+    .m_base = PyModuleDef_HEAD_INIT,
+    .m_name = "ifaddrs4py.extern",   /* name of module */
+    .m_doc = NULL, /* module documentation, may be NULL */
+    .m_size = -1, /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    .m_methods = ifaddrs4py_methods,
 };
 
 PyMODINIT_FUNC

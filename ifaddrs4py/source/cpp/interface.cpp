@@ -259,7 +259,7 @@ convert_to_python(OddSource::Interfaces::Interface const & interface)
 }
 
 PyObject *
-extern_get_sample_interface_ipv4_address(PyObject * module_self, PyObject * Py_UNUSED(ignore))
+extern_get_sample_interface_ipv4_address(PyObject * Py_UNUSED(module_self), PyObject * Py_UNUSED(ignore))
 {
     static OddSource::Interfaces::InterfaceIPv4Address const IPv4(
         OddSource::Interfaces::IPv4Address("192.168.0.42"),
@@ -275,7 +275,7 @@ extern_get_sample_interface_ipv4_address(PyObject * module_self, PyObject * Py_U
 }
 
 PyObject *
-extern_get_sample_interface_ipv6_address(PyObject * module_self, PyObject * Py_UNUSED(ignore))
+extern_get_sample_interface_ipv6_address(PyObject * Py_UNUSED(module_self), PyObject * Py_UNUSED(ignore))
 {
     static OddSource::Interfaces::InterfaceIPv6Address const IPv6(
         OddSource::Interfaces::IPv6Address("2001:470:2ccb:a61b:e:acf8:6736:d81e"),
@@ -290,7 +290,7 @@ extern_get_sample_interface_ipv6_address(PyObject * module_self, PyObject * Py_U
 }
 
 PyObject *
-extern_get_sample_interface_scoped_ipv6_address(PyObject * module_self, PyObject * Py_UNUSED(ignore))
+extern_get_sample_interface_scoped_ipv6_address(PyObject * Py_UNUSED(module_self), PyObject * Py_UNUSED(ignore))
 {
     using namespace OddSource::Interfaces;
     static InterfaceIPv6Address const Scoped_IPv6(
@@ -306,7 +306,7 @@ extern_get_sample_interface_scoped_ipv6_address(PyObject * module_self, PyObject
 }
 
 PyObject *
-extern_get_sample_interface(PyObject * module_self, PyObject * Py_UNUSED(ignore))
+extern_get_sample_interface(PyObject * Py_UNUSED(module_self), PyObject * Py_UNUSED(ignore))
 {
     try
     {

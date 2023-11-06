@@ -17,6 +17,7 @@
 
 import dataclasses
 import functools
+import os
 import pathlib
 from setuptools import (
     Extension,
@@ -25,6 +26,7 @@ from setuptools import (
 import shutil
 import subprocess
 import sys
+import sysconfig
 from typing import (
     List,
 )
@@ -38,6 +40,29 @@ CMAKE_BUILD_DIRECTORY = "cmake-external-build"
 
 IS_MACOS = sys.platform == "darwin" or sys.platform == "macos"
 IS_WINDOWS = sys.platform == "win32" or sys.platform == "win64" or sys.platform == "cygwin"
+
+if IS_MACOS:
+    # Sometimes, Python selects clang instead of gcc/g++ on macOS. Technically they point to the same
+    # compiler, but the clang command applies some additional restrictions, such as not providing the
+    # entire C++17 SDK unless the target OS is set to macOS 12 or higher. Running with gcc/g++ does
+    # not do this.
+    os.environ["CC"] = "g++"
+    os.environ["CPP"] = "g++"
+    os.environ["CXX"] = "g++"
+
+    ccshared = sysconfig.get_config_var("CCSHARED")
+    if ccshared and ccshared.startswith("clang"):
+        if " " in ccshared:
+            os.environ["CCSHARED"] = " ".join(["g++", ccshared.split(" ", maxsplit=1)[1]])
+        else:
+            os.environ["CCSHARED"] = "g++"
+
+    ldshared = sysconfig.get_config_var("LDSHARED")
+    if ldshared and ccshared.startswith("clang"):
+        if " " in ldshared:
+            os.environ["LDSHARED"] = " ".join(["g++", ldshared.split(" ", maxsplit=1)[1]])
+        else:
+            os.environ["LDSHARED"] = "g++"
 
 CMAKE = "cmake"
 CTEST = "ctest"
@@ -70,7 +95,8 @@ def print_fast(string):
 def which(executable: str) -> str:
     """For determining full paths to necessary system commands and installed executables"""
     try:
-        value = subprocess.check_output(WHICH_COMMAND + [executable], encoding=UTF_8).strip()
+        value = subprocess.check_output(WHICH_COMMAND + [executable], encoding=UTF_8). \
+                           strip().splitlines()[0].strip()
         print_fast(f"Using {executable} at {value}...")
         return value
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
@@ -224,6 +250,13 @@ if __name__ == "__main__":
         pre_sdist()
 
 
+extra_compile_args: List[str]
+if IS_WINDOWS:
+    extra_compile_args = ["/std:c++17", "/wd4275", "/wd4251", "/wd4455"]
+else:
+    extra_compile_args = ["-std=c++17", "-Wdeprecated", "-Wextra", "-Wpedantic", "-Wshadow", "-Wunused", "-Werror"]
+
+
 cpp_extension = Extension(
     name="ifaddrs4py.extern",
     language="c++",
@@ -238,8 +271,9 @@ cpp_extension = Extension(
     library_dirs=library_dirs,
     libraries=libraries,
     extra_objects=extra_objects,
-    extra_compile_args=["/std:c++17", "/wd4275", "/wd4251", "/wd4455"] if IS_WINDOWS else ["-std=c++17"],
+    extra_compile_args=extra_compile_args,
     extra_link_args=[],
+    define_macros=[("ODDSOURCE_BUILDING_LIBRARY", "1")],
     optional=False,
 )
 

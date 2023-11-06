@@ -92,7 +92,7 @@ convert_to_python(OddSource::Interfaces::MacAddress const & address)
 }
 
 PyObject *
-extern_get_mac_address_data_from_repr(PyObject * module_self, PyObject * const * args, Py_ssize_t nargs)
+extern_get_mac_address_data_from_repr(PyObject * Py_UNUSED(module_self), PyObject * const * args, Py_ssize_t nargs)
 {
     if (nargs != 1)
     {
@@ -141,7 +141,7 @@ extern_get_mac_address_data_from_repr(PyObject * module_self, PyObject * const *
 }
 
 PyObject *
-extern_get_mac_address_repr_from_data(PyObject * module_self, PyObject * const * args, Py_ssize_t nargs)
+extern_get_mac_address_repr_from_data(PyObject * Py_UNUSED(module_self), PyObject * const * args, Py_ssize_t nargs)
 {
     if (nargs != 1)
     {
@@ -184,7 +184,7 @@ extern_get_mac_address_repr_from_data(PyObject * module_self, PyObject * const *
         return NULL;
     }
 
-    uint8_t data[data_length];
+    auto data = ::std::make_unique<uint8_t[]>(data_length);
     for(Py_ssize_t i = 0; i < data_length; i++)
     {
         PyObject * item(PyTuple_GetItem(args[0], i));
@@ -201,7 +201,7 @@ extern_get_mac_address_repr_from_data(PyObject * module_self, PyObject * const *
 
     try
     {
-        ::std::string repr(OddSource::Interfaces::MacAddress(data, data_length));
+        ::std::string repr(OddSource::Interfaces::MacAddress(data.get(), data_length));
         return PyUnicode_FromStringAndSize(repr.c_str(), repr.length());
     }
     catch (::std::exception const & e)
