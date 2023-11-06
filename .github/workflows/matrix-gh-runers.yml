@@ -105,3 +105,22 @@ jobs:
              ${{ matrix.echo_java_info_cmd || 'echo -e "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"' }}
              mvn -B --version
              mvn -B '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' help:active-profiles install
+
+      - name: Installing Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ matrix.python }}"
+          cache: "pip" # caching pip dependencies
+
+      - name: Building ifaddrs4py with Pip
+        working-directory: ifaddrs4py
+        run: |
+             pip --version
+             echo '+ pip install --config-setting="--build-option=--clean" --verbose .[test]'
+             pip install --config-setting="--build-option=--clean" --verbose .[test]
+             echo "+ pytest --verbose -s"
+             pytest --verbose -s
+             echo "+ mypy source/python/"
+             mypy source/python/
+             echo "+ flake8 ."
+             flake8 .

@@ -48,6 +48,7 @@ jobs:
             python: "310"
           - java: "21"
             python: "311"
+            jdk21_preinstall: "sudo pkg update -f"
           - os_name: freebsd
             os_version: "13.2"
             pkg_export: 'echo "pkg already on path"'
@@ -60,8 +61,8 @@ jobs:
             cmake_pkgs: "automake cmake"
         # Need to disable Java 21 for now, as it's not showing up in packages, despite being listed online
         exclude:
-          - os_name: freebsd
-            java: "21"
+#          - os_name: freebsd
+#            java: "21"
           - os_name: netbsd
             java: "21"
     runs-on: macos-12
@@ -76,9 +77,10 @@ jobs:
           ASSUME_ALWAYS_YES: "TRUE"
         with:
           environment_variables: ASSUME_ALWAYS_YES
+          hypervisor: qemu
           operating_system: ${{ matrix.os_name }}
-          version: ${{ matrix.os_version }}
           shell: bash
+          version: ${{ matrix.os_version }}
           run: |
                uname -a
                pwd
@@ -119,9 +121,13 @@ jobs:
                echo "#######################################"
                echo "# STEP: Installing Java               #"
                echo "#######################################"
+               echo "+ ${{ matrix.jdk21_preinstall | echo 'Not updating package repo for JDK' }}"
+               ${{ matrix.jdk21_preinstall | echo 'Not updating package repo for JDK' }}
                echo "+ sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}"
                sudo ${{ matrix.pkg_command }} openjdk${{ matrix.java }}
-               if test -f /usr/pkg/java/openjdk${{ matrix.java }}/bin/java; then export PATH="/usr/pkg/java/openjdk${{ matrix.java }}:$PATH"; fi
+               echo '+ if test -f /usr/pkg/java/openjdk${{ matrix.java }}/bin/java; then export PATH="/usr/pkg/java/openjdk${{ matrix.java }}:$PATH"; fi'
+               if test -f /usr/pkg/java/openjdk${{ matrix.java }}/bin/java; then export PATH="/usr/pkg/java/openjdk${{ matrix.java }}/bin:$PATH"; fi
+               echo "PATH = $PATH"
                echo "java = $(which java)"
                echo "javac = $(which javac)"
                export JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | tr -s ' ' | cut -d' ' -f4-)"
