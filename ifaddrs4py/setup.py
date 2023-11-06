@@ -40,6 +40,9 @@ EXTERN_CPP_SOURCE_SDIST = BASE_PATH / "extern" / "ifaddrs4cpp"
 EXTERN_CPP_SOURCE_GIT = BASE_PATH.parent / "ifaddrs4cpp"
 CMAKE_BUILD_DIRECTORY = "cmake-external-build"
 
+CONFIG_RELEASE = "Release"
+CONFIG_DEBUG = "Debug"
+
 IS_MACOS = sys.platform == "darwin" or sys.platform == "macos"
 IS_WINDOWS = sys.platform == "win32" or sys.platform == "win64" or sys.platform == "cygwin"
 
@@ -90,6 +93,7 @@ def which(executable: str) -> str:
 @dataclasses.dataclass
 class Options:
     clean: bool = False
+    config: str = CONFIG_RELEASE
     dynamic: bool = False
     test_cpp: bool = False
 
@@ -98,6 +102,7 @@ def preprocess_options(argv: List[str]) -> Options:
     """For extracting custom command-line arguments from the setup command"""
     args = {
         "--clean": False,
+        "--config": CONFIG_RELEASE,
         "--dynamic": False,
         "--test-cpp": False,
     }
@@ -164,7 +169,11 @@ def pre_build(options: Options) -> None:
                 print_fast(f"Cleaning {d}")
                 shutil.rmtree(d, ignore_errors=True)
 
-    static_lib_file = cmake_path / f"libifaddrs4cpp-static.{STATIC_LIBRARY_EXTENSION}"
+    static_lib_file: pathlib.Path
+    if IS_WINDOWS:
+        static_lib_file = cmake_path / options.config / f"ifaddrs4cpp-static.{STATIC_LIBRARY_EXTENSION}"
+    else:
+        static_lib_file = cmake_path / f"libifaddrs4cpp-static.{STATIC_LIBRARY_EXTENSION}"
     extra_objects.append(f"{static_lib_file}")
 
     test_executable = cmake_path / "ifaddrs4cpp_tests"
@@ -180,10 +189,22 @@ def pre_build(options: Options) -> None:
             extra_args.append("-DENABLE_TESTS:BOOL=ON")
         if not options.dynamic:
             extra_args.append("-DBUILD_STATIC_ONLY:BOOL=ON")
-        cmake(cmake_path, "-DCMAKE_BUILD_TYPE=Release", "-S", f"{extern_cpp_base}", "-B", f"{cmake_path}", *extra_args)
-        cmake(cmake_path, "--build", f"{cmake_path}", "--config", "Release", "-j", "14")
+        cmake(
+            cmake_path,
+            f"-DCMAKE_BUILD_TYPE={options.config}",
+            "-S", f"{extern_cpp_base}",
+            "-B", f"{cmake_path}",
+            *extra_args
+        )
+        cmake(cmake_path, "--build", f"{cmake_path}", "--config", options.config, "-j", "14")
         if options.test_cpp:
-            ctest(cmake_path, "--build-config", "Release", "--verbose", "--test-action", "Test", "--output-on-failure")
+            ctest(
+                cmake_path,
+                "--build-config", options.config,
+                "--verbose",
+                "--test-action", "Test",
+                "--output-on-failure",
+            )
 
 
 def pre_sdist() -> None:

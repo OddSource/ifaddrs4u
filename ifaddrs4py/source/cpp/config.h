@@ -28,7 +28,7 @@
 
 #if PY_MINOR_VERSION < 10
 int PyModule_AddObjectRef(PyObject * module, char const * name, PyObject * value);
-#endif
+#endif /* PY_MINOR_VERSION < 10 */
 
 #include <ifaddrs4cpp/os.h>
 

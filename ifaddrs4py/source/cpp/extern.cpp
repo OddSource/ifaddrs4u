@@ -41,7 +41,7 @@ int PyModule_AddObjectRef(PyObject * module, char const * name, PyObject * value
     }
     return result;
 }
-#endif
+#endif /* PY_MINOR_VERSION < 10 */
 
 static PyObject * IllegalStateError;
 
@@ -415,10 +415,6 @@ InterfaceBrowser_get_interface(InterfaceBrowser_PyObj * self, PyObject * const *
 #pragma GCC diagnostic push
 // "cast between incompatible function types from <...> to ‘PyCFunction’"
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-// "C++ designated initializers only available with ‘-std=c++2a’ or ‘-std=gnu++2a’", but this is the "Python Way"
-#pragma GCC diagnostic ignored "-Wpedantic"
-// "missing initializer for member <...>", but this is the "Python Way"
-#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif /* __clang__ */
 #endif /* IS_WINDOWS */
 
@@ -447,6 +443,12 @@ static PyMappingMethods InterfaceBrowser_mapping =
     (binaryfunc) InterfaceBrowser___getitem___mapping, // .mp_subscript
     NULL, // .mp_ass_subscript
 };
+
+#ifndef IS_WINDOWS
+#pragma GCC diagnostic push
+// "error: 'tp_print' is deprecated" on Py3.8, but if you remove it, you get compiler errors about missing tp_print
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif /* IS_WINDOWS */
 
 static PyTypeObject InterfaceBrowser_PyType =
 {
@@ -503,7 +505,16 @@ static PyTypeObject InterfaceBrowser_PyType =
     0, // .tp_version_tag
     NULL, // .tp_finalize
     NULL, // .tp_vectorcall
+#if PY_MINOR_VERSION < 9
+    0, // Py_DEPRECATED(3.8) .tp_print
+#elif PY_MINOR_VERSION > 11
+    0, // .tp_watched added in 3.12
+#endif /* PY_MINOR_VERSION < 9 */
 };
+
+#ifndef IS_WINDOWS
+#pragma GCC diagnostic pop
+#endif /* IS_WINDOWS */
 
 static struct PyMethodDef ifaddrs4py_methods [] =
 {
@@ -535,7 +546,16 @@ static struct PyModuleDef ifaddrs4py_module =
 #endif /* __clang__ */
 #endif /* IS_WINDOWS */
 
+#if PY_MINOR_VERSION < 9
+#ifndef IS_WINDOWS
+// On Python 3.8 and non-Windows only, PyMODINIT_FUNC is missing an export specifier, so do this manually
+extern "C" __attribute((visibility("default"))) PyObject *
+#else
 PyMODINIT_FUNC
+#endif /* IS_WINDOWS */
+#else
+PyMODINIT_FUNC
+#endif /* PY_MINOR_VERSION < 9 */
 PyInit_extern(void)
 {
     if (PyType_Ready(&InterfaceBrowser_PyType) != 0)

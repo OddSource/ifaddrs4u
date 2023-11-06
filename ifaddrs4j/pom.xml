@@ -62,6 +62,7 @@
         <version.plugin.surefire>3.2.1</version.plugin.surefire>
         <version.plugin.reports>3.4.5</version.plugin.reports>
         <cmake.download>false</cmake.download>
+        <cpp.config>Release</cpp.config>
     </properties>
 
     <dependencyManagement>
@@ -136,7 +137,7 @@
                                 <options>
                                     <option>-DENABLE_TESTS:BOOL=ON</option>
                                     <option>-DBUILD_STATIC_ONLY:BOOL=ON</option>
-                                    <option>-DCMAKE_BUILD_TYPE=Release</option>
+                                    <option>-DCMAKE_BUILD_TYPE=${cpp.config}</option>
                                 </options>
                             </configuration>
                         </execution>
@@ -150,7 +151,7 @@
                                 <sourcePath>${project.basedir}</sourcePath>
                                 <targetPath>${project.basedir}/target/cmake-build-release</targetPath>
                                 <options>
-                                    <option>-DCMAKE_BUILD_TYPE=Release</option>
+                                    <option>-DCMAKE_BUILD_TYPE=${cpp.config}</option>
                                     <option>-DCLASSIFIER=-${platform.specific.classifier}</option>
                                 </options>
                             </configuration>
@@ -162,7 +163,7 @@
                             </goals>
                             <phase>compile</phase>
                             <configuration>
-                                <config>Release</config>
+                                <config>${cpp.config}</config>
                                 <projectDirectory>${project.basedir}/../ifaddrs4cpp/cmake-external-build</projectDirectory>
                                 <options>
                                     <option>-j</option>
@@ -177,7 +178,7 @@
                             </goals>
                             <phase>compile</phase>
                             <configuration>
-                                <config>Release</config>
+                                <config>${cpp.config}</config>
                                 <projectDirectory>${project.basedir}/target/cmake-build-release</projectDirectory>
                                 <options>
                                     <option>-j</option>
@@ -192,7 +193,7 @@
                             </goals>
                             <phase>test-compile</phase>
                             <configuration>
-                                <config>Release</config>
+                                <config>${cpp.config}</config>
                                 <buildDirectory>${project.basedir}/../ifaddrs4cpp/cmake-external-build</buildDirectory>
                                 <options>
                                     <option>--verbose</option>
@@ -403,6 +404,13 @@
     </reporting>
 
     <profiles>
+        <profile>
+            <id>cpp-debug</id>
+            <properties>
+                <cpp.config>Debug</cpp.config>
+            </properties>
+        </profile>
+
         <profile>
             <id>macos-intel64</id>
             <activation>
