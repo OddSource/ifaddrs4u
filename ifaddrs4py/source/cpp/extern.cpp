@@ -123,11 +123,11 @@ _get_interfaces(OddSource::Interfaces::InterfaceBrowser & browser)
         }
 
         int i(0);
-        for (auto const & interface : interfaces)
+        for (auto const & iface : interfaces)
         {
             try
             {
-                PyObject * item = OddSource::ifaddrs4py::convert_to_python(interface);
+                PyObject * item = OddSource::ifaddrs4py::convert_to_python(iface);
                 if (PyTuple_SetItem(tuple, i++, item) != 0)
                 {
                     Py_XDECREF(item);
@@ -160,15 +160,15 @@ namespace
 
         for (Py_ssize_t i(0); i < num_interfaces; i++)
         {
-            PyObject * interface(PyTuple_GetItem((PyObject *) self->interfaces, i));
-            if (interface == NULL)
+            PyObject * iface(PyTuple_GetItem((PyObject *) self->interfaces, i));
+            if (iface == NULL)
             {
                 return NULL;
             }
 
-            Py_INCREF(interface);
-            PyObject * result = PyObject_CallFunctionObjArgs(callable, interface, NULL);
-            Py_DECREF(interface);
+            Py_INCREF(iface);
+            PyObject * result = PyObject_CallFunctionObjArgs(callable, iface, NULL);
+            Py_DECREF(iface);
             if (result == NULL)
             {
                 return NULL;
@@ -205,18 +205,18 @@ namespace
         ::std::function<bool(Interface const &)> do_this =
         [callable, &keep_calling_callable, &return_error, &temp_list](auto cpp_interface)
         {
-            PyObject * interface;
+            PyObject * iface;
             try
             {
-                interface = OddSource::ifaddrs4py::convert_to_python(cpp_interface);
+                iface = OddSource::ifaddrs4py::convert_to_python(cpp_interface);
             }
             CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return_error = true; return false)
 
             if (!return_error && keep_calling_callable)
             {
-                Py_INCREF(interface);
-                PyObject * result = PyObject_CallFunctionObjArgs(callable, interface, NULL);
-                Py_DECREF(interface);
+                Py_INCREF(iface);
+                PyObject * result = PyObject_CallFunctionObjArgs(callable, iface, NULL);
+                Py_DECREF(iface);
                 if (result == NULL)
                 {
                     return_error = true;
@@ -236,12 +236,12 @@ namespace
                 Py_DECREF(result);
             }
 
-            if (!return_error && PyList_Append(temp_list, interface) != 0)
+            if (!return_error && PyList_Append(temp_list, iface) != 0)
             {
                 return_error = true;
             }
 
-            Py_DECREF(interface);
+            Py_DECREF(iface);
             return !return_error;
         };
 

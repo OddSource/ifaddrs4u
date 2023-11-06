@@ -17,8 +17,8 @@
 name: "Matrix CI - BSD VMs"
 
 on:
-  pull_request:
-  push:
+#  pull_request:
+#  push:
 #  schedule:
 #    - cron: "0 1 * * SUN"
   workflow_dispatch:

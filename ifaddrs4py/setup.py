@@ -41,28 +41,7 @@ CMAKE_BUILD_DIRECTORY = "cmake-external-build"
 IS_MACOS = sys.platform == "darwin" or sys.platform == "macos"
 IS_WINDOWS = sys.platform == "win32" or sys.platform == "win64" or sys.platform == "cygwin"
 
-if IS_MACOS:
-    # Sometimes, Python selects clang instead of gcc/g++ on macOS. Technically they point to the same
-    # compiler, but the clang command applies some additional restrictions, such as not providing the
-    # entire C++17 SDK unless the target OS is set to macOS 12 or higher. Running with gcc/g++ does
-    # not do this.
-    os.environ["CC"] = "g++"
-    os.environ["CPP"] = "g++"
-    os.environ["CXX"] = "g++"
-
-    ccshared = sysconfig.get_config_var("CCSHARED")
-    if ccshared and ccshared.startswith("clang"):
-        if " " in ccshared:
-            os.environ["CCSHARED"] = " ".join(["g++", ccshared.split(" ", maxsplit=1)[1]])
-        else:
-            os.environ["CCSHARED"] = "g++"
-
-    ldshared = sysconfig.get_config_var("LDSHARED")
-    if ldshared and ccshared.startswith("clang"):
-        if " " in ldshared:
-            os.environ["LDSHARED"] = " ".join(["g++", ldshared.split(" ", maxsplit=1)[1]])
-        else:
-            os.environ["LDSHARED"] = "g++"
+MACOS_TARGET = "10.15"
 
 CMAKE = "cmake"
 CTEST = "ctest"
@@ -251,10 +230,25 @@ if __name__ == "__main__":
 
 
 extra_compile_args: List[str]
+extra_link_args: List[str]
 if IS_WINDOWS:
     extra_compile_args = ["/std:c++17", "/wd4275", "/wd4251", "/wd4455"]
+    extra_link_args = []
 else:
     extra_compile_args = ["-std=c++17", "-Wdeprecated", "-Wextra", "-Wpedantic", "-Wshadow", "-Wunused", "-Werror"]
+    extra_link_args = []
+    if IS_MACOS:
+        target = (
+            sysconfig.get_config_var("MACOSX_DEPLOYMENT_TARGET") or
+            sysconfig.get_config_var("MACOS_DEPLOYMENT_TARGET")
+        )
+        if not target or tuple(int(i) for i in target.split(".")) < (10, 15):
+            print_fast(f"Using MACOSX_DEPLOYMENT_TARGET = {MACOS_TARGET}, currently {target}")
+            os.environ["MACOSX_DEPLOYMENT_TARGET"] = MACOS_TARGET
+            os.environ["MACOS_DEPLOYMENT_TARGET"] = MACOS_TARGET
+        target_opts = [f"-mmacosx-version-min={MACOS_TARGET}"]
+        extra_compile_args.extend(target_opts)
+        extra_link_args.extend(target_opts)
 
 
 cpp_extension = Extension(
@@ -272,7 +266,7 @@ cpp_extension = Extension(
     libraries=libraries,
     extra_objects=extra_objects,
     extra_compile_args=extra_compile_args,
-    extra_link_args=[],
+    extra_link_args=extra_link_args,
     define_macros=[("ODDSOURCE_BUILDING_LIBRARY", "1")],
     optional=False,
 )

@@ -130,11 +130,11 @@ convert_to_python(OddSource::Interfaces::InterfaceIPAddress<IPAddressT> const & 
 
 PyObject *
 OddSource::ifaddrs4py::
-convert_to_python(OddSource::Interfaces::Interface const & interface)
+convert_to_python(OddSource::Interfaces::Interface const & iface)
 {
-    ::std::string name(interface.name());
+    ::std::string name(iface.name());
 #ifdef IS_WINDOWS
-    ::std::string windows_uuid(interface.windows_uuid());
+    ::std::string windows_uuid(iface.windows_uuid());
 #endif /* IS_WINDOWS */
 
     PyObject * index = NULL, * flags = NULL, * mtu = NULL, * mac_address = NULL,
@@ -143,21 +143,21 @@ convert_to_python(OddSource::Interfaces::Interface const & interface)
 
     try
     {
-        index = PyLong_FromUnsignedLong(interface.index());
+        index = PyLong_FromUnsignedLong(iface.index());
         if (index == NULL)
         {
             throw ::std::runtime_error("Failed to create index long");
         }
 
-        flags = PyLong_FromUnsignedLong(interface.flags());
+        flags = PyLong_FromUnsignedLong(iface.flags());
         if (flags == NULL)
         {
             throw ::std::runtime_error("Failed to create flags long");
         }
 
-        if (interface.mtu())
+        if (iface.mtu())
         {
-            mtu = PyLong_FromUnsignedLongLong(*interface.mtu());
+            mtu = PyLong_FromUnsignedLongLong(*iface.mtu());
             if (mtu == NULL)
             {
                 throw ::std::runtime_error("Unable to create MTU long");
@@ -168,17 +168,17 @@ convert_to_python(OddSource::Interfaces::Interface const & interface)
             mtu = Py_None;
         }
 
-        mac_address = interface.mac_address() ?
-            convert_to_python(*interface.mac_address()) :
+        mac_address = iface.mac_address() ?
+            convert_to_python(*iface.mac_address()) :
             Py_None;
 
-        ipv4_addresses = PyTuple_New(interface.ipv4_addresses().size());
+        ipv4_addresses = PyTuple_New(iface.ipv4_addresses().size());
         if (ipv4_addresses == NULL)
         {
             throw ::std::runtime_error("Unable to create tuple of IPv4 interface addresses");
         }
         int i(0);
-        for (auto const & ipv4_address : interface.ipv4_addresses())
+        for (auto const & ipv4_address : iface.ipv4_addresses())
         {
             PyObject * item = convert_to_python(ipv4_address);
             if (PyTuple_SetItem(ipv4_addresses, i++, item) != 0)
@@ -188,13 +188,13 @@ convert_to_python(OddSource::Interfaces::Interface const & interface)
             }
         }
 
-        ipv6_addresses = PyTuple_New(interface.ipv6_addresses().size());
+        ipv6_addresses = PyTuple_New(iface.ipv6_addresses().size());
         if (ipv6_addresses == NULL)
         {
             throw ::std::runtime_error("Unable to create tuple of IPv6 interface addresses");
         }
         i = 0;
-        for (auto const & ipv6_address : interface.ipv6_addresses())
+        for (auto const & ipv6_address : iface.ipv6_addresses())
         {
             PyObject * item = convert_to_python(ipv6_address);
             if (PyTuple_SetItem(ipv6_addresses, i++, item) != 0)

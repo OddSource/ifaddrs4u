@@ -64,6 +64,7 @@ if(CMAKE_CXX_COMPILER_ID IN_LIST gcc_like_ids)
     set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 endif()
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
 
 set(${PROJECT_NAME}_sources
     Interface.cpp
