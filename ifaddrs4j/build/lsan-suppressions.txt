@@ -10,3 +10,9 @@ leak:^Compiler::
 leak:^GraphBuilder::
 leak:^Java_java_util_zip_Inflater
 leak:^Java_com_sun_management_internal_DiagnosticCommandImpl
+leak:^initInetAddressIDs
+leak:^JLI_Launch
+leak:^JVM_NewInstanceFromConstructor
+leak:^InterpreterRuntime::_new
+leak:^SharedRuntime::handle_wrong_method_ic_miss
+leak:^SharedRuntime::resolve_virtual_call_C
