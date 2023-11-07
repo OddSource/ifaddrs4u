@@ -101,7 +101,7 @@ jobs:
         run: |
              echo -e "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"
              mvn -B --version
-             mvn -B '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' help:active-profiles install
+             mvn -B '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' help:active-profiles install || (cat hs_err*.log && false)
 
       - name: Installing Python ${{ matrix.python }}
         uses: actions/setup-python@v4
