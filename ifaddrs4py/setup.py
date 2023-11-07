@@ -93,7 +93,7 @@ def which(executable: str) -> str:
 @dataclasses.dataclass
 class Options:
     clean: bool = False
-    config: str = CONFIG_RELEASE
+    cpp_debug: bool = False
     dynamic: bool = False
     test_cpp: bool = False
 
@@ -102,7 +102,7 @@ def preprocess_options(argv: List[str]) -> Options:
     """For extracting custom command-line arguments from the setup command"""
     args = {
         "--clean": False,
-        "--config": CONFIG_RELEASE,
+        "--cpp-debug": False,
         "--dynamic": False,
         "--test-cpp": False,
     }
@@ -169,16 +169,19 @@ def pre_build(options: Options) -> None:
                 print_fast(f"Cleaning {d}")
                 shutil.rmtree(d, ignore_errors=True)
 
+    config = CONFIG_DEBUG if options.cpp_debug else CONFIG_RELEASE
+    suffix = "-d" if options.cpp_debug else ""
+
     static_lib_file: pathlib.Path
     if IS_WINDOWS:
-        static_lib_file = cmake_path / options.config / f"ifaddrs4cpp-static.{STATIC_LIBRARY_EXTENSION}"
+        static_lib_file = cmake_path / config / f"ifaddrs4cpp-static{suffix}.{STATIC_LIBRARY_EXTENSION}"
     else:
-        static_lib_file = cmake_path / f"libifaddrs4cpp-static.{STATIC_LIBRARY_EXTENSION}"
+        static_lib_file = cmake_path / f"libifaddrs4cpp-static{suffix}.{STATIC_LIBRARY_EXTENSION}"
     extra_objects.append(f"{static_lib_file}")
 
     test_executable = cmake_path / "ifaddrs4cpp_tests"
     if IS_WINDOWS:
-        test_executable = cmake_path / "ifaddrs4cpp_tests.exe"
+        test_executable = cmake_path / config / "ifaddrs4cpp_tests.exe"
 
     if not cmake_path.exists():
         print_fast(f"Creating ifaddrs4cpp build directory {cmake_path}...")
@@ -191,16 +194,16 @@ def pre_build(options: Options) -> None:
             extra_args.append("-DBUILD_STATIC_ONLY:BOOL=ON")
         cmake(
             cmake_path,
-            f"-DCMAKE_BUILD_TYPE={options.config}",
+            f"-DCMAKE_BUILD_TYPE={config}",
             "-S", f"{extern_cpp_base}",
             "-B", f"{cmake_path}",
             *extra_args
         )
-        cmake(cmake_path, "--build", f"{cmake_path}", "--config", options.config, "-j", "14")
+        cmake(cmake_path, "--build", f"{cmake_path}", "--config", config, "-j", "14")
         if options.test_cpp:
             ctest(
                 cmake_path,
-                "--build-config", options.config,
+                "--build-config", config,
                 "--verbose",
                 "--test-action", "Test",
                 "--output-on-failure",

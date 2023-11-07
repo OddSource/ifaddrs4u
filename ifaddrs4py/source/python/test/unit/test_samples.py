@@ -15,6 +15,7 @@
 #
 
 from unittest import TestCase
+import uuid
 
 from ifaddrs4py.constants import IS_WINDOWS
 from ifaddrs4py import extern
@@ -64,7 +65,7 @@ class TestSamples(TestCase):
 
         if IS_WINDOWS:
             self.assertTrue(hasattr(interface, "windows_uuid"))
-            self.assertEqual(interface.windows_uuid, "24af9519-2a42-4f62-99fa-1ed3147ad90a")
+            self.assertEqual(interface.windows_uuid, uuid.UUID("24af9519-2a42-4f62-99fa-1ed3147ad90a"))
         else:
             self.assertFalse(hasattr(interface, "windows_uuid"))
 
