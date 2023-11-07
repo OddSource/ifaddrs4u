@@ -53,6 +53,11 @@ elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
     set(JAVA_PLATFORM_INCLUDE "darwin")
 endif()
 
+set(IFADDRS_LIBRARY_SUFFIX "")
+if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    set(IFADDRS_LIBRARY_SUFFIX "-d")
+endif()
+
 if(${ENABLE_ADDRESS_SANITIZER})
     if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
     else()
@@ -62,11 +67,11 @@ if(${ENABLE_ADDRESS_SANITIZER})
 
     if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
     else()
-        add_compile_options(-fsanitize=address -fsanitize-address-use-after-scope -shared-libsan)
-        add_link_options(-fsanitize=address -fsanitize-address-use-after-scope -shared-libsan)
+        add_compile_options(-fsanitize=address -fsanitize-address-use-after-scope)
+        add_link_options(-fsanitize=address -fsanitize-address-use-after-scope)
         if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
-            add_compile_options(-fsanitize-address-use-odr-indicator)
-            add_link_options(-fsanitize-address-use-odr-indicator)
+            add_compile_options(-fsanitize-address-use-odr-indicator -shared-libsan)
+            add_link_options(-fsanitize-address-use-odr-indicator -shared-libsan)
         endif()
     endif()
 endif()
@@ -100,11 +105,11 @@ if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
 # Apparently, we do not have to link to java.dll on Windows like we link to java.so/dylib on oter platforms.
     target_link_libraries(${PROJECT_NAME} PUBLIC
                           ${PROJECT_NAME}_compiler_flags
-                          "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static.${STATIC_LIBRARY_EXTENSION}")
+                          "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static${IFADDRS_LIBRARY_SUFFIX}.${STATIC_LIBRARY_EXTENSION}")
 else()
     target_link_libraries(${PROJECT_NAME} PUBLIC
                           ${PROJECT_NAME}_compiler_flags
-                          "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static.${STATIC_LIBRARY_EXTENSION}"
+                          "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static${IFADDRS_LIBRARY_SUFFIX}.${STATIC_LIBRARY_EXTENSION}"
                           "$ENV{JAVA_HOME}/${LIB_JAVA}.${DYNAMIC_LIBRARY_EXTENSION}")
 endif()
 target_include_directories(${PROJECT_NAME} PUBLIC
