@@ -9,9 +9,9 @@ leak:^jni_GetStaticFieldID
 leak:^G1RootProcessor::
 leak:^initializeDirectBufferSupport
 leak:^JNI_CreateJavaVM
-#leak:^CompilationPolicy::
-#leak:^CompileBroker::
-#leak:^Compiler::
+leak:^CompilationPolicy::
+leak:^CompileBroker::
+leak:^Compiler::
 #leak:^GraphBuilder::
 leak:^Java_java_util_zip_Inflater
 leak:^Java_com_sun_management_internal_DiagnosticCommandImpl
