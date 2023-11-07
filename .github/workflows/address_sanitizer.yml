@@ -74,7 +74,7 @@ jobs:
       - name: Run ifaddrs4cpp Tests
         working-directory: ifaddrs4cpp
         shell: bash
-        ensv:
+        env:
           ASAN_OPTIONS: "${{ matrix.asan_options }}"
         run: ./cmake-debug-test-build/ifaddrs4cpp_tests
 
