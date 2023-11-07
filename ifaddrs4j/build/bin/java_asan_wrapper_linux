@@ -3,7 +3,7 @@
 java="${JAVA_HOME}/bin/java"
 
 export ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0
-LD_PRELOAD="$(gcc -print-file-name=libasan.so)"
+LD_PRELOAD="$(gcc -print-file-name=libasan.so) $(gcc -print-file-name=libstdc++.so)}"
 export LD_PRELOAD
 
 # only echo to stderr to prevent "Corrupted channel by directly writing to native stream in forked JVM 1"
