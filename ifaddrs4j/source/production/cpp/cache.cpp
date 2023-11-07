@@ -205,7 +205,7 @@ namespace OddSource::ifaddrs4j
     ClassMethodCache::
     get_class(JNIEnv * env, ::std::string name)
     {
-        return (jclass) env->NewLocalRef(this->get_global_class_ref(env, name));
+        return this->get_global_class_ref(env, name);
     }
 
     jclass
@@ -213,9 +213,14 @@ namespace OddSource::ifaddrs4j
     get_global_class_ref(JNIEnv * env, ::std::string name)
     {
         ::std::unique_lock<::std::recursive_mutex> lock(this->_mutex);
-        jclass cls;
+        jclass cls(NULL);
         auto found(this->_class_cache.find(name));
-        if (found == this->_class_cache.end())
+        if (found != this->_class_cache.end())
+        {
+            cls = (jclass) env->NewLocalRef((jobject) found->second);
+            // cls may be NULL here if the class the WeakGlobalRef points to was garbage collected
+        }
+        if (cls == NULL)
         {
             auto canon(ClassMethodCache::_class_name_to_canon.find(name));
             if (canon == ClassMethodCache::_class_name_to_canon.end())
@@ -226,17 +231,12 @@ namespace OddSource::ifaddrs4j
                 return NULL;
             }
 
-            jclass tmp(env->FindClass(canon->second.path));
-            IF_NULL_RETURN_NULL(tmp);
-            cls = (jclass) env->NewGlobalRef(tmp);
-            env->DeleteLocalRef(tmp);
+            cls = env->FindClass(canon->second.path);
             IF_NULL_RETURN_NULL(cls);
+            auto weak((jclass) env->NewWeakGlobalRef((jobject) cls));
+            IF_NULL_RETURN_NULL(weak);
 
-            this->_class_cache.emplace(name, cls);
-        }
-        else
-        {
-            cls = found->second;
+            this->_class_cache.emplace(name, weak);
         }
 
         return cls;
@@ -282,10 +282,15 @@ namespace OddSource::ifaddrs4j
         ::std::unordered_map<::std::string, jmethodID> & method_cache,
         bool is_static)
     {
-        jmethodID method;
+        jmethodID method(NULL);
         auto find_name(class_name + "#"s + name);
         auto found(method_cache.find(find_name));
-        if (found == method_cache.end())
+        if (found != method_cache.end())
+        {
+            method = (jmethodID) env->NewLocalRef((jobject) found->second);
+            // method may be NULL here if the method the WeakGlobalRef points to was garbage collected
+        }
+        if (method == NULL)
         {
             auto signature(signature_map.find(find_name));
             if (signature == signature_map.end())
@@ -297,23 +302,17 @@ namespace OddSource::ifaddrs4j
                 return NULL;
             }
 
-            jmethodID tmp(
-                is_static ?
-                env->GetStaticMethodID(cls, signature->second.name, signature->second.signature) :
-                env->GetMethodID(cls, signature->second.name, signature->second.signature));
-            IF_NULL_RETURN_NULL(tmp);
-            method = (jmethodID) env->NewGlobalRef((jobject) tmp);
-            env->DeleteLocalRef((jobject) tmp);
+            method = is_static ?
+                     env->GetStaticMethodID(cls, signature->second.name, signature->second.signature) :
+                     env->GetMethodID(cls, signature->second.name, signature->second.signature);
             IF_NULL_RETURN_NULL(method);
+            auto weak((jmethodID) env->NewWeakGlobalRef((jobject) method));
+            IF_NULL_RETURN_NULL(weak);
 
-            method_cache.emplace(find_name, method);
-        }
-        else
-        {
-            method = found->second;
+            method_cache.emplace(find_name, weak);
         }
 
-        return (jmethodID) env->NewLocalRef((jobject) method);
+        return method;
     }
 }
 

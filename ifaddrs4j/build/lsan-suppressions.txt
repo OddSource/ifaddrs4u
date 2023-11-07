@@ -1,0 +1,5 @@
+leak:^G1RootProcessor::
+leak:^initializeDirectBufferSupport
+leak:^JNI_CreateJavaVM
+leak:^Compiler::
+leak:^Java_java_util_zip_Inflater

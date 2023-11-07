@@ -87,6 +87,28 @@ jbyteArray JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getDataFromRe
     CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN("IllegalArgumentException", return NULL)
 }
 
+namespace
+{
+    class ByteArrayElementsReleaser
+    {
+    public:
+        ByteArrayElementsReleaser(JNIEnv * env, jbyteArray data, jbyte * bytes)
+            : _env(env), _data(data), _bytes(bytes)
+        {
+        }
+
+        ~ByteArrayElementsReleaser()
+        {
+            this->_env->ReleaseByteArrayElements(this->_data, this->_bytes, JNI_ABORT);
+        }
+
+    private:
+        JNIEnv * _env;
+        jbyteArray _data;
+        jbyte * _bytes;
+    };
+}
+
 /*
  * Class:     io_oddsource_java_net_ifaddrs4j_MacAddress
  * Method:    getReprFromData
@@ -111,6 +133,9 @@ jstring JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getReprFromData(
     jbyte * bytes(env->GetByteArrayElements(data, NULL));
     IF_NULL_RETURN_NULL(bytes)
 
+    // will automatically release the byte array elements when the function returns, however it returns
+    ByteArrayElementsReleaser releaser(env, data, bytes);
+
     try
     {
 #ifdef IS_WINDOWS
@@ -122,7 +147,6 @@ jstring JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getReprFromData(
 #ifdef IS_WINDOWS
 #pragma warning( pop )
 #endif /* IS_WINDOWS */
-        env->ReleaseByteArrayElements(data, bytes, JNI_ABORT);
         jstring repr(env->NewStringUTF(::std::string(address).c_str()));
         return repr;
     }
