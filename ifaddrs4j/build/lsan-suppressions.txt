@@ -1,18 +1,25 @@
-leak:^OddSource::ifaddrs4j::ClassMethodCache::
+# The JVM does not ever garbage collect initialized methods ID objects, so no matter what code calls it wherever,
+# it will always trigger LSAN
+leak:^jni_GetMethodID
+leak:^jni_GetStaticMethodID
 
 # These leaks are in the JVM itself, not our code
-leak:^G1RootProcessor::
-leak:^initializeDirectBufferSupport
-leak:^JNI_CreateJavaVM
-leak:^CompilationPolicy::
-leak:^CompileBroker::
-leak:^Compiler::
-leak:^GraphBuilder::
-leak:^Java_java_util_zip_Inflater
-leak:^Java_com_sun_management_internal_DiagnosticCommandImpl
-leak:^initInetAddressIDs
-leak:^JLI_Launch
-leak:^JVM_NewInstanceFromConstructor
-leak:^InterpreterRuntime::_new
-leak:^SharedRuntime::handle_wrong_method_ic_miss
-leak:^SharedRuntime::resolve_virtual_call_C
+#leak:^G1RootProcessor::
+#leak:^initializeDirectBufferSupport
+#leak:^JNI_CreateJavaVM
+#leak:^CompilationPolicy::
+#leak:^CompileBroker::
+#leak:^Compiler::
+#leak:^GraphBuilder::
+#leak:^Java_java_util_zip_Inflater
+#leak:^Java_com_sun_management_internal_DiagnosticCommandImpl
+#leak:^initInetAddressIDs
+#leak:^JLI_Launch
+#leak:^JVM_NewInstanceFromConstructor
+#leak:^InterpreterRuntime::_new
+#leak:^SharedRuntime::handle_wrong_method_ic_miss
+#leak:^SharedRuntime::resolve_virtual_call_C
+#leak:^CompiledMethod::add_handler_for_exception_and_pc
+#leak:libnet.so
+#leak:^JVM_AddModuleExports
+#leak:^WatcherThread::run
