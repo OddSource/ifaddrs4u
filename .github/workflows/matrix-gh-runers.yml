@@ -49,13 +49,9 @@ jobs:
           - java: "21"
             python: "3.12"
           - os: windows-2019
-            set_e: '$ErrorActionPreference = "Stop"'  # default pwsh does not fail when commands fail, neither does cmd
-            cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe
             echo_java_info_cmd: 'echo "java = $((get-command java).Path)`njavac = $((get-command javac).Path)`nJAVA_HOME = $env:JAVA_HOME"'
             ls_java_cmd: 'Get-ChildItem -Force "$env:JAVA_HOME'
           - os: windows-2022
-            set_e: '$ErrorActionPreference = "Stop"'  # default pwsh does not fail when commands fail, neither does cmd
-            cpp_test_command: cmake-debug-test-build\Debug\ifaddrs4cpp_tests.exe
             echo_java_info_cmd: 'echo "java = $((get-command java).Path)`njavac = $((get-command javac).Path)`nJAVA_HOME = $env:JAVA_HOME"'
             ls_java_cmd: 'Get-ChildItem -Force "$env:JAVA_HOME'
     runs-on: ${{ matrix.os }}
@@ -69,21 +65,24 @@ jobs:
 
       - name: CMake Prepare
         working-directory: ifaddrs4cpp
+        shell: bash
         run: |
-             ${{ matrix.set_e || 'echo [using Bash]' }}
              cmake -DCMAKE_BUILD_TYPE=Release -S . -B ./cmake-external-build
              cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-debug-test-build
 
       - name: Compile ifaddrs4cpp Debug
         working-directory: ifaddrs4cpp
+        shell: bash
         run: cmake --build ./cmake-debug-test-build --config Debug -j 14
 
       - name: Run ifaddrs4cpp Tests
         working-directory: ifaddrs4cpp
+        shell: bash
         run: ctest --build-config Debug --verbose --test-action Test --output-on-failure
 
 #      - name: Compile ifaddrs4cpp Release
 #        working-directory: ifaddrs4cpp
+#        shell: bash
 #        run: cmake --build ./cmake-external-build --config Release -j 14
 
       - name: Installing Java ${{ matrix.java }}
@@ -104,9 +103,9 @@ jobs:
 #             ${{ matrix.ls_java_cmd || 'ls -al "$JAVA_HOME' }}/bin"
       - name: Build ifaddrs4j with Maven
         working-directory: ifaddrs4j
+        shell: bash
         run: |
-             ${{ matrix.set_e || 'echo [using Bash]' }}
-             ${{ matrix.echo_java_info_cmd || 'echo -e "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"' }}
+             echo -e "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"
              mvn -B --version
              mvn -B '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' help:active-profiles install
 
@@ -118,8 +117,8 @@ jobs:
 
       - name: Building ifaddrs4py with Pip
         working-directory: ifaddrs4py
+        shell: bash
         run: |
-             ${{ matrix.set_e || 'echo [using Bash]' }}
              pip --version
              echo '+ pip install --config-setting="--build-option=--clean" --config-setting="--build-option=--test-cpp" --verbose .[test]'
              pip install --config-setting="--build-option=--clean" --config-setting="--build-option=--test-cpp" --verbose .[test]
