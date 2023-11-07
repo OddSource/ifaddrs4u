@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+java="${JAVA_HOME}/bin/java"
+
+export ASAN_OPTIONS=detect_stack_use_after_return=1:verify_asan_link_order=0
+DYLD_INSERT_LIBRARIES="$(clang -print-file-name=libclang_rt.asan_osx_dynamic.dylib)"
+export DYLD_INSERT_LIBRARIES
+
+# only echo to stderr to prevent "Corrupted channel by directly writing to native stream in forked JVM 1"
+>&2 echo "Wrapping java command as follows to enable Address Sanitizer:"
+>&2 echo "export ASAN_OPTIONS='${ASAN_OPTIONS}'"
+>&2 echo "export DYLD_INSERT_LIBRARIES='${DYLD_INSERT_LIBRARIES}'"
+>&2 echo "exec '${java}'" "$@"
+>&2 echo
+
+exec "$java" "$@"

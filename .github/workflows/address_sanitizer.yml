@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-name: "Matrix CI - GH Runners"
+name: "Address Sanitizer Analysis"
 
 on:
   pull_request:
@@ -39,17 +39,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-11, macos-13, ubuntu-20.04, windows-2019, windows-2022]
-        java: ["11", "17", "21"]
+        os: [macos-13, ubuntu-20.04, ubuntu-22.04]
+        java: ["17", "21"]
         include:
-          - java: "11"
-            python: "3.8"
           - java: "17"
-            python: "3.10"
+            python: "3.9"
           - java: "21"
-            python: "3.12"
+            python: "3.11"
+          - os: macos-13
+            asan_options: detect_stack_use_after_return=1:verify_asan_link_order=0
+          - os: ubuntu-20.04
+            asan_options: detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0
+          - os: ubuntu-22.04
+            asan_options: detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0
     runs-on: ${{ matrix.os }}
-    name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
+    name: "ASAN on ${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
       - name: Checkout ifaddrs4u
         uses: actions/checkout@v4
@@ -60,9 +64,7 @@ jobs:
       - name: CMake Prepare
         working-directory: ifaddrs4cpp
         shell: bash
-        run: |
-             cmake -DCMAKE_BUILD_TYPE=Release -S . -B ./cmake-external-build
-             cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-debug-test-build
+        run: cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -DENABLE_ADDRESS_SANITIZER:BOOL=ON -S . -B ./cmake-debug-test-build
 
       - name: Compile ifaddrs4cpp Debug
         working-directory: ifaddrs4cpp
@@ -72,12 +74,9 @@ jobs:
       - name: Run ifaddrs4cpp Tests
         working-directory: ifaddrs4cpp
         shell: bash
-        run: ctest --build-config Debug --verbose --test-action Test --output-on-failure
-
-#      - name: Compile ifaddrs4cpp Release
-#        working-directory: ifaddrs4cpp
-#        shell: bash
-#        run: cmake --build ./cmake-external-build --config Release -j 14
+        ensv:
+          ASAN_OPTIONS: "${{ matrix.asan_options }}"
+        run: ./cmake-debug-test-build/ifaddrs4cpp_tests
 
       - name: Installing Java ${{ matrix.java }}
         uses: actions/setup-java@v3
@@ -92,33 +91,10 @@ jobs:
         with:
           maven-version: 3.9.5
 
-#             ls -al "$JAVA_HOME/lib"
-#             ls -al "$JAVA_HOME/include"
-#             ls -al "$JAVA_HOME/bin"
       - name: Build ifaddrs4j with Maven
         working-directory: ifaddrs4j
         shell: bash
         run: |
              echo -e "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"
              mvn -B --version
-             mvn -B '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' help:active-profiles install
-
-      - name: Installing Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: "${{ matrix.python }}"
-          cache: "pip" # caching pip dependencies
-
-      - name: Building ifaddrs4py with Pip
-        working-directory: ifaddrs4py
-        shell: bash
-        run: |
-             pip --version
-             echo '+ pip install --config-setting="--build-option=--clean" --config-setting="--build-option=--test-cpp" --verbose .[test]'
-             pip install --config-setting="--build-option=--clean" --config-setting="--build-option=--test-cpp" --verbose .[test]
-             echo "+ pytest --verbose -s"
-             pytest --verbose -s
-             echo "+ mypy ."
-             mypy .
-             echo "+ flake8 ."
-             flake8 .
+             mvn -B -P cpp-asan -P cpp-debug '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' help:active-profiles install

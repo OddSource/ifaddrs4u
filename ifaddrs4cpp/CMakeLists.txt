@@ -31,6 +31,12 @@ option(BUILD_STATIC_ONLY
 option(BUILD_DYNAMIC_ONLY
        "If enabled, only a dynamic library will be built, otherwise both static and dynamic will be built."
        False)
+option(ENABLE_ADDRESS_SANITIZER
+       "If enabled, Address Sanitizer (ASAN) will be enabled on macOS and Linux, and also Leak Sanitizer (LSAN) on Linux"
+       False)
+option(SHARED_ADDRESS_SANITIZER
+       "If enabled with ENABLE_ADDRESS_SANITIZER, the -shared-libsan option will be used (ignored without ENABLE_ADDRESS_SANITIZER)"
+       False)
 
 if(${BUILD_STATIC_ONLY} AND ${BUILD_DYNAMIC_ONLY})
     message(FATAL_ERROR
@@ -65,6 +71,24 @@ if(CMAKE_CXX_COMPILER_ID IN_LIST gcc_like_ids)
 endif()
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
+
+if(${ENABLE_ADDRESS_SANITIZER})
+    if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    else()
+        message(FATAL_ERROR
+                "Option ENABLE_ADDRESS_SANITIZER requires configuration Debug.")
+    endif()
+
+    if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
+    else()
+        if(${SHARED_ADDRESS_SANITIZER})
+            add_compile_options(-fsanitize=address -fsanitize-address-use-after-scope -fsanitize-address-use-odr-indicator -shared-libsan)
+        else()
+            add_compile_options(-fsanitize=address -fsanitize-address-use-after-scope -fsanitize-address-use-odr-indicator)
+        endif()
+        add_link_options(-fsanitize=address -fsanitize-address-use-after-scope -fsanitize-address-use-odr-indicator)
+    endif()
+endif()
 
 set(${PROJECT_NAME}_sources
     Interface.cpp

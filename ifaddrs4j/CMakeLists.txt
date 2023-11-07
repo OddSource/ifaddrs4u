@@ -22,6 +22,9 @@ project(ifaddrs4j
         LANGUAGES CXX)
 
 set(CLASSIFIER "" CACHE STRING "Classifier, including leading hyphen, to append to copied dynamic library name")
+option(ENABLE_ADDRESS_SANITIZER
+       "If enabled, Address Sanitizer (ASAN) will be enabled on macOS and Linux, and also Leak Sanitizer (LSAN) on Linux"
+       False)
 
 set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(gcc_like_ids ARMClang AppleClang Clang GNU LCC)
@@ -48,6 +51,20 @@ if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
 elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
     set(DYNAMIC_LIBRARY_EXTENSION "dylib")
     set(JAVA_PLATFORM_INCLUDE "darwin")
+endif()
+
+if(${ENABLE_ADDRESS_SANITIZER})
+    if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    else()
+        message(FATAL_ERROR
+                "Option ENABLE_ADDRESS_SANITIZER requires configuration Debug.")
+    endif()
+
+    if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
+    else()
+        add_compile_options(-fsanitize=address -fsanitize-address-use-after-scope -fsanitize-address-use-odr-indicator -shared-libsan)
+        add_link_options(-fsanitize=address -fsanitize-address-use-after-scope -fsanitize-address-use-odr-indicator -shared-libsan)
+    endif()
 endif()
 
 set(SOURCES_DIRECTORY source/production/cpp)

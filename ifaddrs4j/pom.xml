@@ -63,6 +63,9 @@
         <version.plugin.reports>3.4.5</version.plugin.reports>
         <cmake.download>false</cmake.download>
         <cpp.config>Release</cpp.config>
+        <enable.asan>OFF</enable.asan>
+        <test.jvm.executable /><!-- set only by profiles -->
+        <test.jvm.executable.value /><!-- set only by profiles -->
     </properties>
 
     <dependencyManagement>
@@ -138,6 +141,8 @@
                                     <option>-DENABLE_TESTS:BOOL=ON</option>
                                     <option>-DBUILD_STATIC_ONLY:BOOL=ON</option>
                                     <option>-DCMAKE_BUILD_TYPE=${cpp.config}</option>
+                                    <option>-DENABLE_ADDRESS_SANITIZER:BOOL=${enable.asan}</option>
+                                    <option>-DSHARED_ADDRESS_SANITIZER:BOOL=${enable.asan}</option>
                                 </options>
                             </configuration>
                         </execution>
@@ -151,8 +156,10 @@
                                 <sourcePath>${project.basedir}</sourcePath>
                                 <targetPath>${project.basedir}/target/cmake-build-release</targetPath>
                                 <options>
-                                    <option>-DCMAKE_BUILD_TYPE=${cpp.config}</option>
                                     <option>-DCLASSIFIER=-${platform.specific.classifier}</option>
+                                    <option>-DCMAKE_BUILD_TYPE=${cpp.config}</option>
+                                    <option>-DENABLE_ADDRESS_SANITIZER:BOOL=${enable.asan}</option>
+                                    <!-- do not need SHARED_ADDRESS_SANITIZER because we always build as a shared lib -->
                                 </options>
                             </configuration>
                         </execution>
@@ -274,6 +281,18 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${version.plugin.surefire}</version>
+                    <configuration>
+                        <forkCount>1</forkCount>
+                        <reuseForks>true</reuseForks>
+                        <jvm>${test.jvm.executable}</jvm>
+                        <environmentVariables>
+                            <!-- When we override <jvm> for ASAN wrapping purposes, Surefire tries to change
+                                 JAVA_HOME to the grandparent directory of the executable, which in our case is
+                                 ${project.basedir}/build. We don't want that, so explicitly setting JAVA_HOME
+                                 to ${java.home} prevents this behavior. -->
+                            <JAVA_HOME>${java.home}</JAVA_HOME>
+                        </environmentVariables>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>surefire-test-test</id>
@@ -408,6 +427,37 @@
             <id>cpp-debug</id>
             <properties>
                 <cpp.config>Debug</cpp.config>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>macos-asan-properties</id>
+            <activation>
+                <os><family>mac</family></os>
+            </activation>
+            <properties>
+                <test.jvm.executable.value>${project.basedir}/build/bin/java_asan_wrapper_macos</test.jvm.executable.value>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-asan-properties</id>
+            <activation>
+                <!-- Because we have ASAN support only for macOS and Linux, it doesn't matter if this profile
+                     gets activated on BSD and Windows. It will be ignored. -->
+                <os><family>!mac</family></os>
+            </activation>
+            <properties>
+                <test.jvm.executable.value>${project.basedir}/build/bin/java_asan_wrapper_linux</test.jvm.executable.value>
+            </properties>
+        </profile>
+        <profile>
+            <id>cpp-asan</id>
+            <properties>
+                <!-- This is the actual property used in <jvm> in the Surefire plugin. It pulls its value
+                     from the auto-activated macOS or Linux profile, but its only present if cpp-asan is
+                     manually activated with -P. -->
+                <test.jvm.executable>${test.jvm.executable.value}</test.jvm.executable>
+                <enable.asan>ON</enable.asan>
             </properties>
         </profile>
 
