@@ -19,13 +19,14 @@ import dataclasses
 import functools
 import os
 import pathlib
-
 import shutil
 import subprocess
 import sys
 import sysconfig
 from typing import (
+    Dict,
     List,
+    Optional,
 )
 
 from setuptools import (  # type: ignore
@@ -93,18 +94,20 @@ def which(executable: str) -> str:
 @dataclasses.dataclass
 class Options:
     clean: bool = False
+    cpp_asan: bool = False
     cpp_debug: bool = False
+    cpp_test: bool = False
     dynamic: bool = False
-    test_cpp: bool = False
 
 
 def preprocess_options(argv: List[str]) -> Options:
     """For extracting custom command-line arguments from the setup command"""
     args = {
         "--clean": False,
+        "--cpp-asan": False,
         "--cpp-debug": False,
+        "--cpp-test": False,
         "--dynamic": False,
-        "--test-cpp": False,
     }
 
     to_del: List[int] = []
@@ -116,14 +119,27 @@ def preprocess_options(argv: List[str]) -> Options:
     for i in reversed(to_del):
         del argv[i]
 
-    return Options(**{k.replace("--", "").replace("-", "_"): v for k, v in args.items()})
+    o = Options(**{k.replace("--", "").replace("-", "_"): v for k, v in args.items()})
+
+    if o.cpp_asan:
+        if IS_WINDOWS:
+            raise ValueError("Option --cpp-asan is not supported on Windows platforms")
+        if not o.cpp_debug:
+            raise ValueError("Option --cpp-asan requires option --cpp-debug")
+
+    return o
 
 
-def execute(cwd: pathlib.Path, *args: str) -> None:
-    r = '", "'.join(args)
-    print_fast(f"+\"{r}\"")
+def execute(cwd: pathlib.Path, *args: str, extra_env: Optional[Dict[str, str]] = None) -> None:
     """Simple wrapper to make calling system commands and executables easier"""
-    subprocess.check_call(list(args), cwd=f"{cwd}", stdout=sys.stdout, stderr=sys.stderr)
+    r = '", "'.join(args)
+    print_fast(f"+ \"{r}\"")
+
+    env: Optional[Dict[str, str]] = None
+    if extra_env:
+        env = {**os.environ, **extra_env}
+
+    subprocess.check_call(list(args), cwd=f"{cwd}", stdout=sys.stdout, stderr=sys.stderr, env=env)
 
 
 def cmake(cwd: pathlib.Path, *args: str) -> None:
@@ -140,6 +156,33 @@ include_dirs: List[str] = []
 library_dirs: List[str] = []
 libraries: List[str] = []
 extra_objects: List[str] = []
+extra_compile_args: List[str] = []
+extra_link_args: List[str] = []
+if IS_WINDOWS:
+    extra_compile_args.extend(["/std:c++17", "/wd4275", "/wd4251", "/wd4455"])
+else:
+    extra_compile_args.extend([
+        "-std=c++17",
+        "-fvisibility=hidden",
+        "-Wdeprecated",
+        "-Wextra",
+        "-Wpedantic",
+        "-Wshadow",
+        "-Wunused",
+        "-Werror",
+    ])
+    if IS_MACOS:
+        target = (
+            sysconfig.get_config_var("MACOSX_DEPLOYMENT_TARGET") or
+            sysconfig.get_config_var("MACOS_DEPLOYMENT_TARGET")
+        )
+        if not target or tuple(int(i) for i in target.split(".")) < (10, 15):
+            print_fast(f"Using MACOSX_DEPLOYMENT_TARGET = {MACOS_TARGET}, currently {target}")
+            os.environ["MACOSX_DEPLOYMENT_TARGET"] = MACOS_TARGET
+            os.environ["MACOS_DEPLOYMENT_TARGET"] = MACOS_TARGET
+        target_opts = [f"-mmacosx-version-min={MACOS_TARGET}"]
+        extra_compile_args.extend(target_opts)
+        extra_link_args.extend(target_opts)
 
 
 def pre_build(options: Options) -> None:
@@ -172,42 +215,57 @@ def pre_build(options: Options) -> None:
     config = CONFIG_DEBUG if options.cpp_debug else CONFIG_RELEASE
     suffix = "-d" if options.cpp_debug else ""
 
+    asan_options: List[str] = []
+    if options.cpp_asan:
+        asan_options.extend(["-fsanitize=address", "-fsanitize-address-use-after-scope"])
+        if IS_MACOS:
+            asan_options.extend(["-fsanitize-address-use-odr-indicator", "-shared-libsan"])
+        extra_compile_args.extend(asan_options)
+        extra_link_args.extend(asan_options)
+
     static_lib_file: pathlib.Path
+    test_executable: pathlib.Path
     if IS_WINDOWS:
         static_lib_file = cmake_path / config / f"ifaddrs4cpp-static{suffix}.{STATIC_LIBRARY_EXTENSION}"
+        test_executable = cmake_path / config / "ifaddrs4cpp_tests.exe"
     else:
         static_lib_file = cmake_path / f"libifaddrs4cpp-static{suffix}.{STATIC_LIBRARY_EXTENSION}"
+        test_executable = cmake_path / "ifaddrs4cpp_tests"
     extra_objects.append(f"{static_lib_file}")
 
-    test_executable = cmake_path / "ifaddrs4cpp_tests"
-    if IS_WINDOWS:
-        test_executable = cmake_path / config / "ifaddrs4cpp_tests.exe"
-
-    if not cmake_path.exists():
-        print_fast(f"Creating ifaddrs4cpp build directory {cmake_path}...")
-        cmake_path.mkdir(parents=True, exist_ok=True)
-    if not static_lib_file.exists() or (options.test_cpp and not test_executable.exists()):
+    if not static_lib_file.exists() or (options.cpp_test and not test_executable.exists()):
         extra_args: List[str] = []
-        if options.test_cpp:
+        if options.cpp_test:
             extra_args.append("-DENABLE_TESTS:BOOL=ON")
+        if options.cpp_asan:
+            extra_args.extend(["-DENABLE_ADDRESS_SANITIZER:BOOL=ON", "-DSHARED_ADDRESS_SANITIZER:BOOL=ON"])
         if not options.dynamic:
             extra_args.append("-DBUILD_STATIC_ONLY:BOOL=ON")
         cmake(
-            cmake_path,
+            extern_cpp_base,
             f"-DCMAKE_BUILD_TYPE={config}",
             "-S", f"{extern_cpp_base}",
             "-B", f"{cmake_path}",
             *extra_args
         )
         cmake(cmake_path, "--build", f"{cmake_path}", "--config", config, "-j", "14")
-        if options.test_cpp:
-            ctest(
-                cmake_path,
-                "--build-config", config,
-                "--verbose",
-                "--test-action", "Test",
-                "--output-on-failure",
-            )
+        if options.cpp_test:
+            if options.cpp_asan:
+                extra_env: Dict[str, str] = {}
+                if IS_MACOS:
+                    extra_env["ASAN_OPTIONS"] = "detect_stack_use_after_return=1:verify_asan_link_order=0"
+                else:
+                    extra_env["ASAN_OPTIONS"] = \
+                        "detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0"
+                execute(cmake_path, f"{test_executable}", extra_env=extra_env)
+            else:
+                ctest(
+                    cmake_path,
+                    "--build-config", config,
+                    "--verbose",
+                    "--test-action", "Test",
+                    "--output-on-failure",
+                )
 
 
 def pre_sdist() -> None:
@@ -253,37 +311,6 @@ if __name__ == "__main__":
 
     if command == "sdist":
         pre_sdist()
-
-
-extra_compile_args: List[str]
-extra_link_args: List[str]
-if IS_WINDOWS:
-    extra_compile_args = ["/std:c++17", "/wd4275", "/wd4251", "/wd4455"]
-    extra_link_args = []
-else:
-    extra_compile_args = [
-        "-std=c++17",
-        "-fvisibility=hidden",
-        "-Wdeprecated",
-        "-Wextra",
-        "-Wpedantic",
-        "-Wshadow",
-        "-Wunused",
-        "-Werror",
-    ]
-    extra_link_args = []
-    if IS_MACOS:
-        target = (
-            sysconfig.get_config_var("MACOSX_DEPLOYMENT_TARGET") or
-            sysconfig.get_config_var("MACOS_DEPLOYMENT_TARGET")
-        )
-        if not target or tuple(int(i) for i in target.split(".")) < (10, 15):
-            print_fast(f"Using MACOSX_DEPLOYMENT_TARGET = {MACOS_TARGET}, currently {target}")
-            os.environ["MACOSX_DEPLOYMENT_TARGET"] = MACOS_TARGET
-            os.environ["MACOS_DEPLOYMENT_TARGET"] = MACOS_TARGET
-        target_opts = [f"-mmacosx-version-min={MACOS_TARGET}"]
-        extra_compile_args.extend(target_opts)
-        extra_link_args.extend(target_opts)
 
 
 cpp_extension = Extension(

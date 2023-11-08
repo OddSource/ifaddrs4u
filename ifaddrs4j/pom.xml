@@ -65,7 +65,6 @@
         <cpp.config>Release</cpp.config>
         <enable.asan>OFF</enable.asan>
         <test.jvm.executable /><!-- set only by profiles -->
-        <test.jvm.executable.value /><!-- set only by profiles -->
     </properties>
 
     <dependencyManagement>
@@ -431,33 +430,10 @@
         </profile>
 
         <profile>
-            <id>macos-asan-properties</id>
-            <activation>
-                <os><family>mac</family></os>
-            </activation>
-            <properties>
-                <test.jvm.executable.value>${project.basedir}/build/bin/java_asan_wrapper_macos</test.jvm.executable.value>
-            </properties>
-        </profile>
-        <profile>
-            <id>linux-asan-properties</id>
-            <activation>
-                <!-- Because we have ASAN support only for macOS and Linux, it doesn't matter if this profile
-                     gets activated on BSD and Windows. It will be ignored. -->
-                <os><family>!mac</family></os>
-            </activation>
-            <properties>
-                <test.jvm.executable.value>${project.basedir}/build/bin/java_asan_wrapper_linux</test.jvm.executable.value>
-            </properties>
-        </profile>
-        <profile>
             <id>cpp-asan</id>
             <properties>
-                <!-- This is the actual property used in <jvm> in the Surefire plugin. It pulls its value
-                     from the auto-activated macOS or Linux profile, but its only present if cpp-asan is
-                     manually activated with -P. -->
-                <test.jvm.executable>${test.jvm.executable.value}</test.jvm.executable>
                 <enable.asan>ON</enable.asan>
+                <test.jvm.executable>${project.basedir}/build/bin/java_asan</test.jvm.executable>
             </properties>
         </profile>
 

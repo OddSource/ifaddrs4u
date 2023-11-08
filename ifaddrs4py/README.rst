@@ -46,14 +46,17 @@ Installing and Building
     $ cd ifaddrs4u/ifaddrs4py
     $ pip install --verbose .
     - or, to run CPP tests before installing -
-    $ pip install --config-setting="--build-option=--test-cpp" --verbose .
+    $ pip install -C--build-option=--cpp-test --verbose .
     - as another option, you can clean all C++ Compile output before installing -
-    $ pip install --config-setting="--build-option=--clean" --verbose .
+    $ pip install -C--build-option=--clean --verbose .
     - to run tests and other checks -
     $ pip install --verbose .[test]
     $ pytest --verbose -s
     $ mypy .
     $ flake8 .
+    - to build and test with Address Sanitizer to check for memory misuse and leaks -
+    $ pip install -C--build-option=--clean -C--build-option=--cpp-test -C--build-option=--cpp-debug -C--build-option=--cpp-asan --verbose .[test]
+    $ ./python_asan -m pytest --verbose -s
 
   Do not use :code:`python setup.py install`, as this is a deprecated convention that will cause deprecation
   warnings. See `Why you shouldn't invoke setup.py directly`_ for more information.
@@ -64,7 +67,7 @@ Installing and Building
     $ cd ifaddrs4u/ifaddrs4py
     $ python -m build --wheel
     - or, to run CPP tests before building wheel -
-    $ python -m build --wheel --config-setting="--build-option=--test-cpp"
+    $ python -m build --wheel -C--build-option=--cpp-test
 
 - From source, create and upload sdist (see `Build Requirements`_)::
 

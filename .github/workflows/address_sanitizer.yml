@@ -98,3 +98,18 @@ jobs:
              echo -e "java = $(which java)\njavac = $(which javac)\nJAVA_HOME = $JAVA_HOME"
              mvn -B --version
              mvn -B -P cpp-asan -P cpp-debug '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' help:active-profiles install
+
+      - name: Installing Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ matrix.python }}"
+          cache: "pip" # caching pip dependencies
+
+      - name: Building ifaddrs4py with Pip
+        working-directory: ifaddrs4py
+        shell: bash
+        run: |
+             echo '+ pip install -C--build-option=--clean -C--build-option=--cpp-test -C--build-option=--cpp-debug -C--build-option=--cpp-asan --verbose .[test]'
+             pip install -C--build-option=--clean -C--build-option=--cpp-test -C--build-option=--cpp-debug -C--build-option=--cpp-asan --verbose .[test]
+             echo "+ ./python_asan -m pytest --verbose -s"
+             ./python_asan -m pytest --verbose -s

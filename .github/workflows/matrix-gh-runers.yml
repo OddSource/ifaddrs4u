@@ -114,8 +114,8 @@ jobs:
         shell: bash
         run: |
              pip --version
-             echo '+ pip install --config-setting="--build-option=--clean" --config-setting="--build-option=--test-cpp" --verbose .[test]'
-             pip install --config-setting="--build-option=--clean" --config-setting="--build-option=--test-cpp" --verbose .[test]
+             echo '+ pip install -C--build-option=--clean -C--build-option=--cpp-test --verbose .[test]'
+             pip install -C--build-option=--clean -C--build-option=--cpp-test --verbose .[test]
              echo "+ pytest --verbose -s"
              pytest --verbose -s
              echo "+ mypy ."
