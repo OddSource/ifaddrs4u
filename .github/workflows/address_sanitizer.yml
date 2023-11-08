@@ -111,5 +111,7 @@ jobs:
         run: |
              echo '+ pip install -C--build-option=--clean -C--build-option=--cpp-test -C--build-option=--cpp-debug -C--build-option=--cpp-asan --verbose .[test]'
              pip install -C--build-option=--clean -C--build-option=--cpp-test -C--build-option=--cpp-debug -C--build-option=--cpp-asan --verbose .[test]
-             echo "+ ./python_asan -m pytest --verbose -s"
-             ./python_asan -m pytest --verbose -s
+             echo "+ ./python_asan -I -X showrefcount -c pass"
+             ./python_asan -I -X showrefcount -c pass
+             echo "+ ./python_asan -X showrefcount -m pytest --verbose -s"
+             ./python_asan -X showrefcount -m pytest --verbose -s
