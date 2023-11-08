@@ -27,7 +27,7 @@ then
 else
   LD_PRELOAD="$(realpath "$(gcc -print-file-name=libasan.so)") $(realpath "$(gcc -print-file-name=libstdc++.so)")"
   export LD_PRELOAD
-  export LSAN_OPTIONS=print_suppressions=1:suppressions=build/lsan-suppressions.txt
+  export LSAN_OPTIONS=print_suppressions=1:suppressions=build_tools/lsan-suppressions.txt
   export ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0
 
   >&2 echo "export LD_PRELOAD='${LD_PRELOAD}'"
@@ -35,7 +35,7 @@ else
 fi
 
 >&2 echo "export ASAN_OPTIONS='${ASAN_OPTIONS}'"
->&2 echo "exec python -m" "$@"
+>&2 echo "exec python" "$@"
 >&2 echo
 
 exec python "$@"
