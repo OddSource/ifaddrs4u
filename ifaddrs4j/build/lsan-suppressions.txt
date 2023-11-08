@@ -7,10 +7,11 @@ leak:^jni_GetStaticFieldID
 leak:^jni_FindClass
 
 # These leaks are in the JVM itself, not our code
+leak:^JavaCalls::call_helper
 leak:^Compiler::
 leak:^InterpreterRuntime::_new
-leak:^JavaCalls::call_helper
 leak:^GraphBuilder::
+leak:^SystemDictionary::resolve_instance_class_or_null
 leak:^JNI_CreateJavaVM
 leak:^G1RootProcessor::
 leak:^CompileBroker::
