@@ -6,22 +6,20 @@ leak:^jni_GetStaticMethodID
 leak:^jni_GetStaticFieldID
 
 # These leaks are in the JVM itself, not our code
-leak:^G1RootProcessor::
-leak:^initializeDirectBufferSupport
-leak:^JNI_CreateJavaVM
-leak:^CompilationPolicy::
-leak:^CompileBroker::
 leak:^Compiler::
 leak:^GraphBuilder::
+leak:^JNI_CreateJavaVM
+leak:^CompilationPolicy::
+leak:^G1RootProcessor::
+leak:^CompileBroker::
 leak:^Java_java_util_zip_Inflater
+leak:^SharedRuntime::handle_wrong_method_ic_miss
+leak:^SharedRuntime::resolve_virtual_call_C
+leak:^initializeDirectBufferSupport
 leak:^Java_com_sun_management_internal_DiagnosticCommandImpl
 leak:^initInetAddressIDs
 leak:^JLI_Launch
-#leak:^JVM_NewInstanceFromConstructor
-#leak:^InterpreterRuntime::_new
-leak:^SharedRuntime::handle_wrong_method_ic_miss
-leak:^SharedRuntime::resolve_virtual_call_C
-#leak:^CompiledMethod::add_handler_for_exception_and_pc
-#leak:libnet.so
+leak:^JVM_NewInstanceFromConstructor
 leak:^JVM_AddModuleExports
 leak:^WatcherThread::run
+leak:^Unsafe_AllocateMemory0
