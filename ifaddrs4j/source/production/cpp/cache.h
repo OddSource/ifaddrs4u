@@ -74,8 +74,6 @@ namespace OddSource::ifaddrs4j
 
         jclass get_class(JNIEnv *, ::std::string);
 
-        jclass get_global_class_ref(JNIEnv *, ::std::string);
-
         jmethodID get_method(JNIEnv *, ::std::string, ::std::string);
 
         jmethodID get_method(JNIEnv *, jclass, ::std::string, ::std::string);

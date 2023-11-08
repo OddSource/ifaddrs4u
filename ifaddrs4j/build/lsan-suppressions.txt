@@ -1,25 +1,25 @@
-# The JVM does not ever garbage collect initialized methods ID objects, so no matter what code calls it wherever,
-# it will always trigger LSAN
+# The JVM does not seem to garbage collect initialized jclasses, jmethodIDs, or jfieldIDs, so no matter what
+# code calls it or wherever, it will always trigger LSAN.
 leak:^jni_GetMethodID
 leak:^jni_GetFieldID
 leak:^jni_GetStaticMethodID
 leak:^jni_GetStaticFieldID
+leak:^jni_FindClass
 
 # These leaks are in the JVM itself, not our code
 leak:^Compiler::
+leak:^InterpreterRuntime::_new
 leak:^GraphBuilder::
 leak:^JNI_CreateJavaVM
-leak:^CompilationPolicy::
 leak:^G1RootProcessor::
 leak:^CompileBroker::
+leak:^CompilationPolicy::
 leak:^Java_java_util_zip_Inflater
 leak:^SharedRuntime::handle_wrong_method_ic_miss
 leak:^SharedRuntime::resolve_virtual_call_C
-leak:^initializeDirectBufferSupport
-leak:^Java_com_sun_management_internal_DiagnosticCommandImpl
-leak:^initInetAddressIDs
 leak:^JLI_Launch
-leak:^JVM_NewInstanceFromConstructor
+leak:^Unsafe_AllocateMemory0
 leak:^JVM_AddModuleExports
 leak:^WatcherThread::run
-leak:^Unsafe_AllocateMemory0
+leak:^JVM_NewInstanceFromConstructor
+leak:^exception_handler_for_pc_helper

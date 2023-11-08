@@ -205,13 +205,6 @@ namespace OddSource::ifaddrs4j
     ClassMethodCache::
     get_class(JNIEnv * env, ::std::string name)
     {
-        return this->get_global_class_ref(env, name);
-    }
-
-    jclass
-    ClassMethodCache::
-    get_global_class_ref(JNIEnv * env, ::std::string name)
-    {
         ::std::unique_lock<::std::recursive_mutex> lock(this->_mutex);
         jclass cls(NULL);
         auto found(this->_class_cache.find(name));
@@ -247,7 +240,7 @@ namespace OddSource::ifaddrs4j
     get_method(JNIEnv * env, ::std::string class_name, ::std::string name)
     {
         ::std::unique_lock<::std::recursive_mutex> lock(this->_mutex);
-        jclass cls(this->get_global_class_ref(env, class_name));
+        jclass cls(this->get_class(env, class_name));
         IF_NULL_RETURN_NULL(cls);
         return this->get_method(env, cls, class_name, name);
     }
