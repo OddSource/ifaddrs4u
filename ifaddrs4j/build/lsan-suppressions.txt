@@ -9,6 +9,7 @@ leak:^jni_FindClass
 # These leaks are in the JVM itself, not our code
 leak:^Compiler::
 leak:^InterpreterRuntime::_new
+leak:^JavaCalls::call_helper
 leak:^GraphBuilder::
 leak:^JNI_CreateJavaVM
 leak:^G1RootProcessor::
