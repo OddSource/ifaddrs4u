@@ -410,13 +410,13 @@ InterfaceBrowser_get_interface(InterfaceBrowser_PyObj * self, PyObject * const *
     return InterfaceBrowser___getitem___mapping(self, args[0]);
 }
 
-#ifndef IS_WINDOWS
+#ifndef ODDSOURCE_IS_WINDOWS
 #ifndef __clang__
 #pragma GCC diagnostic push
 // "cast between incompatible function types from <...> to ‘PyCFunction’"
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif /* __clang__ */
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 static struct PyMemberDef InterfaceBrowser_members [] =
 {
@@ -444,11 +444,11 @@ static PyMappingMethods InterfaceBrowser_mapping =
     NULL, // .mp_ass_subscript
 };
 
-#ifndef IS_WINDOWS
+#ifndef ODDSOURCE_IS_WINDOWS
 #pragma GCC diagnostic push
 // "error: 'tp_print' is deprecated" on Py3.8, but if you remove it, you get compiler errors about missing tp_print
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 static PyTypeObject InterfaceBrowser_PyType =
 {
@@ -512,11 +512,37 @@ static PyTypeObject InterfaceBrowser_PyType =
 #endif /* PY_MINOR_VERSION < 9 */
 };
 
-#ifndef IS_WINDOWS
+#ifndef ODDSOURCE_IS_WINDOWS
 #pragma GCC diagnostic pop
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
-static struct PyMethodDef ifaddrs4py_methods [] =
+static int ifaddrs4py_module_init(PyObject * module_self)
+{
+    using namespace OddSource::ifaddrs4py;
+
+    void * void_state_wrapper(PyType_GetModuleState(module_self));
+    IF_NULL_RETURN_INT(void_state_wrapper)
+    auto state_wrapper(reinterpret_cast<ModuleStateWrapper *>(void_state_wrapper));
+    state_wrapper->state = ::std::make_shared<ModuleState>();
+
+    return 0;
+}
+
+static int ifaddrs4py_module_traverse(PyObject * module_self, visitproc visit, void * arg)
+{
+    using namespace OddSource::ifaddrs4py;
+
+    ModuleState::get_state_of(module_self)->gc_visit(visit, arg);
+}
+
+static void ifaddrs4py_module_free(PyObject * module_self)
+{
+    using namespace OddSource::ifaddrs4py;
+
+    ModuleState::get_state_of(module_self).reset();
+}
+
+static struct PyMethodDef ifaddrs4py_module_methods [] =
 {
     {"get_sample_interface_ipv4_address", extern_get_sample_interface_ipv4_address, METH_NOARGS, NULL},
     {"get_sample_interface_ipv6_address", extern_get_sample_interface_ipv6_address, METH_NOARGS, NULL},
@@ -527,35 +553,34 @@ static struct PyMethodDef ifaddrs4py_methods [] =
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+static PyModuleDef_Slot ifaddrs4py_module_slots [] = {
+    {Py_mod_exec, ifaddrs4py_module_init},
+    {0, NULL}
+};
+
 static struct PyModuleDef ifaddrs4py_module =
 {
     PyModuleDef_HEAD_INIT, // .m_base
     "ifaddrs4py.extern", // .m_name, name of module
-    NULL, // .m_doc, module documentation, may be NULL
-    -1, // .m_size, size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
-    ifaddrs4py_methods, // .m_methods
-    NULL, // .m_slots
-    NULL, // .m_traverse
+    PyDoc_STR(
+        "The native interface between ifaddrs4py and ifaddrs4cpp. You should not use this directly, but "
+        "rather should use the pure Python modules wrapping it."
+    ), // .m_doc, module documentation
+    sizeof(OddSource::ifaddrs4py::ModuleStateWrapper), // .m_size, size of per-interpreter state of the module
+    ifaddrs4py_module_methods, // .m_methods
+    ifaddrs4py_module_slots, // .m_slots
+    ifaddrs4py_module_traverse, // .m_traverse
     NULL, // .m_clear
-    NULL, // .m_free
+    (freefunc) ifaddrs4py_module_free, // .m_free
 };
 
-#ifndef IS_WINDOWS
+#ifndef ODDSOURCE_IS_WINDOWS
 #ifndef __clang__
 #pragma GCC diagnostic pop
 #endif /* __clang__ */
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
-#if PY_MINOR_VERSION < 9
-#ifndef IS_WINDOWS
-// On Python 3.8 and non-Windows only, PyMODINIT_FUNC is missing an export specifier, so do this manually
-extern "C" __attribute((visibility("default"))) PyObject *
-#else
 PyMODINIT_FUNC
-#endif /* IS_WINDOWS */
-#else
-PyMODINIT_FUNC
-#endif /* PY_MINOR_VERSION < 9 */
 PyInit_extern(void)
 {
     if (PyType_Ready(&InterfaceBrowser_PyType) != 0)

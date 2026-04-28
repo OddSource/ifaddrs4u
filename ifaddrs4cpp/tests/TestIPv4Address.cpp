@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-#include "../IpAddress.h"
+#include "../include/oddsource/network/interfaces/IpAddress.h"
 #include "main.h"
 
 #include <cstring>
 
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
 #include <netioapi.h>
-#else /* IS_WINDOWS */
+#else /* ODDSOURCE_IS_WINDOWS */
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 using namespace OddSource::Interfaces;
 

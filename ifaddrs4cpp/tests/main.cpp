@@ -19,13 +19,13 @@
 #include <chrono>
 #include <cstring>
 
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
 #include <io.h>
 #include <stdio.h>
-#else /* IS_WINDOWS */
+#else /* ODDSOURCE_IS_WINDOWS */
 #include <cstdio>
 #include <unistd.h>
-#endif /* !IS_WINDOWS */
+#endif /* !ODDSOURCE_IS_WINDOWS */
 
 #if (defined(__GNUC__) && __GNUC__ >= 3) || defined(__clang__)
 #include <cstdlib>
@@ -99,11 +99,11 @@ registry()
 
 namespace
 {
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
     bool const is_tty(_isatty(_fileno(stdout)));
-#else /* IS_WINDOWS */
+#else /* ODDSOURCE_IS_WINDOWS */
     bool const is_tty(isatty(fileno(stdin)));
-#endif /* !IS_WINDOWS */
+#endif /* !ODDSOURCE_IS_WINDOWS */
     char const * RED = is_tty ? "\033[0;31m" : "";
     char const * ORANGE = is_tty ? "\033[0;33m" : "";
     char const * GREEN = is_tty ? "\033[0;32m" : "";
@@ -203,15 +203,15 @@ run_all_registered_test_cases(::std::vector<::std::string> const & matching)
     }
 
     ::std::chrono::steady_clock::time_point end_time(std::chrono::steady_clock::now());
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
 // no loss of data as indicated by MSVC
 #pragma warning( push )
 #pragma warning( disable : 4244)
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
     long double elapsed_microseconds(std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count());
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
 #pragma warning( pop )
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
     ::std::ostringstream oss;
     oss.precision(5);
     if (elapsed_microseconds > 1'000'000)

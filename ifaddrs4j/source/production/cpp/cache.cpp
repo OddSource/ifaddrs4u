@@ -59,9 +59,9 @@ namespace OddSource::ifaddrs4j
         {"Interface#Interface(...)",
          {"<init>",
           "(ILjava/lang/String;"
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
           "Ljava/lang/String;"
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
           "ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V"}},
     };
 

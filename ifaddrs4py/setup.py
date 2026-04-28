@@ -318,6 +318,7 @@ cpp_extension = Extension(
     language="c++",
     sources=[
         "source/cpp/extern.cpp",
+        "source/cpp/helpers.cpp",
         "source/cpp/interface.cpp",
         "source/cpp/ip_address.cpp",
         "source/cpp/mac_address.cpp",

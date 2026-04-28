@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "../Interface.h"
+#include "../include/oddsource/network/interfaces/Interface.h"
 #include "main.h"
 
 namespace OddSource::Interfaces
@@ -37,16 +37,16 @@ namespace OddSource::Interfaces
         {
             Interface iface(
                     12, "eth1",
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
                     "c9cc6972-a12b-43d6-9f99-fd7ea946ba5a",
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
                     0);
 
             assert_equals(iface.index(), 12u);
             assert_equals(iface.name(), "eth1");
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
             assert_equals(iface.windows_uuid(), "c9cc6972-a12b-43d6-9f99-fd7ea946ba5a");
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
             assert_not_that((bool)iface.mtu());
             assert_not_that(iface.is_up());
@@ -73,17 +73,17 @@ namespace OddSource::Interfaces
         {
             Interface iface(
                     1, "lo0",
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
                     "9a33c41c-3312-495a-a882-1a5420d26d17",
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
                     BroadcastAddressSet | IsLoopback | IsRunning | NoARP | ReceiveAllMulticastPackets,
                     1750);
 
             assert_equals(iface.index(), 1u);
             assert_equals(iface.name(), "lo0");
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
             assert_equals(iface.windows_uuid(), "9a33c41c-3312-495a-a882-1a5420d26d17");
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
             assert_equals(*iface.mtu(), 1750u);
             assert_not_that(iface.is_up());
@@ -110,16 +110,16 @@ namespace OddSource::Interfaces
         {
             Interface iface(
                     3, "en0",
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
                     "b01c844e-0bb5-48fe-bc99-ddac9a284b80",
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
                     DebugEnabled | IsPointToPoint | IsUp | PromiscuousModeEnabled | SupportsMulticast);
 
             assert_equals(iface.index(), 3u);
             assert_equals(iface.name(), "en0");
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
             assert_equals(iface.windows_uuid(), "b01c844e-0bb5-48fe-bc99-ddac9a284b80");
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
             assert_not_that((bool)iface.mtu());
             assert_that(iface.is_up());
@@ -146,9 +146,9 @@ namespace OddSource::Interfaces
         {
             Interface iface(
                     12, "eth1",
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
                     "c9cc6972-a12b-43d6-9f99-fd7ea946ba5a",
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
                     0);
 
             assert_not_that(iface.has_mac_address());
@@ -168,9 +168,9 @@ namespace OddSource::Interfaces
         {
             Interface iface(
                     12, "eth1",
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
                     "c9cc6972-a12b-43d6-9f99-fd7ea946ba5a",
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
                     0);
 
             assert_not_that(iface.has_mac_address());
@@ -196,9 +196,9 @@ namespace OddSource::Interfaces
         {
             Interface iface(
                     12, "eth1",
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
                     "c9cc6972-a12b-43d6-9f99-fd7ea946ba5a",
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
                     0);
 
             assert_not_that(iface.has_mac_address());

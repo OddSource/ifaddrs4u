@@ -8,13 +8,13 @@ details of :code:`getifaddrs`, :code:`GetAdaptersAddresses`, or :code:`ioctl`, e
 Other Languages
 ***************
 
-Native extensions wrapping this C++ library are available for `Java`_, `Python`_, and `Perl`_.
+Native extensions wrapping this C++ library are available for `Java`_, `Python`_, and (TBD) `Perl`_.
 
 System Requirements
 *******************
 
 When used as a static library, there are no runtime system requirements. When used as a shared library, a
-C++17 Standard Runtime library must be available on the library path applicable to your platcform.
+C++17 Standard Runtime library must be available on the library path applicable to your platform.
 
 Build Requirements
 ******************
@@ -29,36 +29,37 @@ Building
 
 The simplest build, which will output both a static library and a shared/dynamic library without debug symbols::
 
-    $ cmake -DCMAKE_BUILD_TYPE=Release -S . -B ./cmake-build
-    $ cmake --build ./cmake-build --config Release -j 14
+    $ cmake -DCMAKE_BUILD_TYPE=Release -S . -B ./cmake-build-release
+    $ cmake --build ./cmake-build-release --config Release -j 14
 
 To build just a static library, without debug symbols::
 
-    $ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_ONLY:BOOL=ON -S . -B ./cmake-build
-    $ cmake --build ./cmake-build --config Release -j 14
+    $ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_ONLY:BOOL=ON -S . -B ./cmake-build-release
+    $ cmake --build ./cmake-build-release --config Release -j 14
 
 To build just a shared/dynamic library, without debug symbols::
 
-    $ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_DYNAMIC_ONLY:BOOL=ON -S . -B ./cmake-build
-    $ cmake --build ./cmake-build --config Release -j 14
+    $ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_DYNAMIC_ONLY:BOOL=ON -S . -B ./cmake-build-release
+    $ cmake --build ./cmake-build-release --config Release -j 14
 
-If you want debug symbols, change :code:`Release` to :code:`Debug` in both commands.
+If you want debug symbols, change :code:`Release` to :code:`Debug` and :code:`release` to :code:`debug` in both
+commands.
 
 To compile the library and tests and run the tests::
 
-    $ cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-build
-    $ cmake --build ./cmake-build --config Debug -j 14
-    $ ctest --test-dir ./cmake-build --build-config Debug --verbose --test-action Test --output-on-failure
+    $ cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-build-test
+    $ cmake --build ./cmake-build-test --config Debug -j 14
+    $ ctest --test-dir ./cmake-build-test --build-config Debug --verbose --test-action Test --output-on-failure
 
 To do the same, but enable Address Sanitizer on macOS and Linux (and Leak Sanitizer on Linux) for analysis
 purposes::
 
-    $ cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -DENABLE_ADDRESS_SANITIZER:BOOL=ON -S . -B ./cmake-build
-    $ cmake --build ./cmake-build --config Debug -j 14
+    $ cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -DENABLE_ADDRESS_SANITIZER:BOOL=ON -S . -B ./cmake-build-test-with-asan
+    $ cmake --build ./cmake-build-test-with-asan --config Debug -j 14
     -- on macOS
-    $ ASAN_OPTIONS=detect_stack_use_after_return=1:verify_asan_link_order=0 ./cmake-build/ifaddrs4cpp_tests
+    $ ASAN_OPTIONS=detect_stack_use_after_return=1:verify_asan_link_order=0 ./cmake-build-test-with-asan/ifaddrs4cpp_tests
     -- on Linux
-    $ ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0 ./cmake-build/ifaddrs4cpp_tests
+    $ ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0 ./cmake-build-test-with-asan/ifaddrs4cpp_tests
 
 Usage
 *****

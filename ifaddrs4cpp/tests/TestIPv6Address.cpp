@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-#include "../IpAddress.h"
+#include "../include/oddsource/network/interfaces/IpAddress.h"
 #include "main.h"
 
 #include <cstring>
 
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
 #include <netioapi.h>
-#else /* IS_WINDOWS */
+#else /* ODDSOURCE_IS_WINDOWS */
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 using namespace OddSource::Interfaces;
 
@@ -505,22 +505,22 @@ public:
             IPv6Address a("::ffff:0:127.0.0.1");
             assert_that(a.is_v4_translated(), "::ffff:0:127.0.0.1 should be v4-translated");
             assert_equals((::std::string)a, "::ffff:0:127.0.0.1");
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
             assert_equals((::std::string)a.normalize(), "::ffff:0:127.0.0.1");
-#else /* IS_WINDOWS */
+#else /* ODDSOURCE_IS_WINDOWS */
             assert_equals((::std::string)a.normalize(), "::ffff:0:7f00:1");
-#endif /* !IS_WINDOWS */
+#endif /* !ODDSOURCE_IS_WINDOWS */
         }
 
         {
             IPv6Address a("::ffff:0:201.53.78.3");
             assert_that(a.is_v4_translated(), "::ffff:0:201.53.78.3 should be v4-translated");
             assert_equals((::std::string)a, "::ffff:0:201.53.78.3");
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
             assert_equals((::std::string)a.normalize(), "::ffff:0:201.53.78.3");
-#else /* IS_WINDOWS */
+#else /* ODDSOURCE_IS_WINDOWS */
             assert_equals((::std::string)a.normalize(), "::ffff:0:c935:4e03");
-#endif /* !IS_WINDOWS */
+#endif /* !ODDSOURCE_IS_WINDOWS */
         }
     }
 

@@ -133,9 +133,9 @@ OddSource::ifaddrs4py::
 convert_to_python(OddSource::Interfaces::Interface const & iface)
 {
     ::std::string name(iface.name());
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
     ::std::string windows_uuid(iface.windows_uuid());
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
     PyObject * index = NULL, * flags = NULL, * mtu = NULL, * mac_address = NULL,
              * ipv4_addresses = NULL, * ipv6_addresses = NULL;
@@ -219,16 +219,16 @@ convert_to_python(OddSource::Interfaces::Interface const & iface)
 
     PyObject * args(PyTuple_New(0));
     PyObject * kwargs(Py_BuildValue(
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
         "{s:O,s:s#,s:s#,s:O,s:O,s:O,s:O,s:O}",
-#else /* IS_WINDOWS */
+#else /* ODDSOURCE_IS_WINDOWS */
         "{s:O,s:s#,s:O,s:O,s:O,s:O,s:O}",
-#endif /* !IS_WINDOWS */
+#endif /* !ODDSOURCE_IS_WINDOWS */
         "index", index,
         "name", name.c_str(), name.length(),
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
         "windows_uuid", windows_uuid.c_str(), windows_uuid.length(),
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
         "flags", flags,
         "mtu", mtu,
         "mac_address", mac_address,

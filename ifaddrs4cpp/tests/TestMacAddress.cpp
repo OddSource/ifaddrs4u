@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "../MacAddress.h"
+#include "../include/oddsource/network/interfaces/MacAddress.h"
 #include "main.h"
 
 #include <cstring>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "../Interface.h"
+#include "../include/oddsource/network/interfaces/Interface.h"
 #include "main.h"
 
 using namespace OddSource::Interfaces;

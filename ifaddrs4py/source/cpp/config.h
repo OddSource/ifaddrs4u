@@ -22,8 +22,8 @@
 #include <stdexcept>
 #include <string>
 
-#if PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 8
-#error "ifaddrs4py requires Python 3.8+"
+#if PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 9
+#error "ifaddrs4py requires Python 3.9+"
 #endif /* PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 8 */
 
 #if PY_MINOR_VERSION < 10

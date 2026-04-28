@@ -43,9 +43,9 @@ jobs:
         java: ["17", "21"]
         include:
           - java: "17"
-            python: "3.9"
-          - java: "21"
             python: "3.11"
+          - java: "21"
+            python: "3.12"
           - os: macos-13
             asan_options: detect_stack_use_after_return=1:verify_asan_link_order=0
           - os: ubuntu-20.04
@@ -53,7 +53,7 @@ jobs:
           - os: ubuntu-22.04
             asan_options: detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0
     runs-on: ${{ matrix.os }}
-    name: "ASAN on ${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
+    name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
       - name: Checkout ifaddrs4u
         uses: actions/checkout@v4

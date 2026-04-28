@@ -96,24 +96,27 @@ if(${ENABLE_ADDRESS_SANITIZER})
 endif()
 
 set(${PROJECT_NAME}_sources
-    Interface.cpp
-    Interfaces.cpp
-    IpAddress.cpp
-    MacAddress.cpp)
+    src/Interface.cpp
+    src/Interfaces.cpp
+    src/IpAddress.cpp
+    src/MacAddress.cpp
+    src/VersionInfo.cpp)
 
 configure_file(version.h.in version.h)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
-file(COPY ${CMAKE_BINARY_DIR}/version.h DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
-file(GLOB PUBLIC_HEADERS_TO_COPY ${CMAKE_SOURCE_DIR}/*.h)
-file(COPY ${PUBLIC_HEADERS_TO_COPY} DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
-file(GLOB PUBLIC_HEADERS_TO_COPY ${CMAKE_SOURCE_DIR}/*.hpp)
-file(COPY ${PUBLIC_HEADERS_TO_COPY} DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
+file(COPY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_BINARY_DIR}/version.h DESTINATION ${CMAKE_BINARY_DIR}/include/oddsource/network/interfaces/detail)
+#file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
+#file(COPY ${CMAKE_BINARY_DIR}/version.h DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
+#file(GLOB PUBLIC_HEADERS_TO_COPY ${CMAKE_SOURCE_DIR}/*.h)
+#file(COPY ${PUBLIC_HEADERS_TO_COPY} DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
+#file(GLOB PUBLIC_HEADERS_TO_COPY ${CMAKE_SOURCE_DIR}/*.hpp)
+#file(COPY ${PUBLIC_HEADERS_TO_COPY} DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
 
 add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE cxx_std_17)
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
-                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3;-wd4275;-wd4251;-wd4455>>")
+                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3;-WX;-wd4275;-wd4251;-wd4455>>") # -W4? -Wall?
 target_compile_definitions(${PROJECT_NAME}_compiler_flags INTERFACE ODDSOURCE_BUILDING_LIBRARY=1)
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
@@ -128,7 +131,7 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
 if(NOT ${BUILD_STATIC_ONLY})
     add_library(${PROJECT_NAME}-shared SHARED ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-shared PUBLIC ${PROJECT_NAME}_compiler_flags)
-    target_include_directories(${PROJECT_NAME}-shared PUBLIC "${PROJECT_BINARY_DIR}")
+    target_include_directories(${PROJECT_NAME}-shared PUBLIC "${PROJECT_BINARY_DIR}/include")
     set_target_properties(${PROJECT_NAME}-shared PROPERTIES
                           CXX_VISIBILITY_PRESET hidden)
 endif()
@@ -136,7 +139,7 @@ endif()
 if(NOT ${BUILD_DYNAMIC_ONLY})
     add_library(${PROJECT_NAME}-static STATIC ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-static PUBLIC ${PROJECT_NAME}_compiler_flags)
-    target_include_directories(${PROJECT_NAME}-static PUBLIC "${PROJECT_BINARY_DIR}")
+    target_include_directories(${PROJECT_NAME}-static PUBLIC "${PROJECT_BINARY_DIR}/include")
     set_target_properties(${PROJECT_NAME}-static PROPERTIES
                           POSITION_INDEPENDENT_CODE ON
                           CXX_VISIBILITY_PRESET hidden)

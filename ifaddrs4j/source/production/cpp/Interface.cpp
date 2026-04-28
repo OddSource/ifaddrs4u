@@ -149,10 +149,10 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & iface)
     jstring name(env->NewStringUTF(iface.name().c_str()));
     IF_NULL_RETURN_NULL(name)
 
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
     jstring windows_uuid(env->NewStringUTF(iface.windows_uuid().c_str()));
     IF_NULL_RETURN_NULL(windows_uuid)
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
     jint flags(iface.flags());
 
@@ -202,8 +202,8 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & iface)
         JInterface,
         constructor,
         index, name,
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
         windows_uuid,
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
         flags, mtu, mac_address, ipv4_addresses.unwrap(), ipv6_addresses.unwrap());
 }

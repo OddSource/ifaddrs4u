@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "../VersionInfo.h"
+#include "../include/oddsource/network/interfaces/VersionInfo.h"
 #include "main.h"
 
 #include <cstring>

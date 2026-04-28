@@ -16,28 +16,30 @@
 
 #pragma once
 
-#include "config.h"
+#ifndef ODDSOURCE_NETWORK_INTERFACES_IPADDRESS_HPP
+#define ODDSOURCE_NETWORK_INTERFACES_IPADDRESS_HPP
 
-#ifdef IS_WINDOWS
-#include "winsock_includes.h"
-#else /* IS_WINDOWS */
+#include "detail/config.h"
+#include "detail/winsock_includes.h"
+
+#ifndef ODDSOURCE_IS_WINDOWS
 #include <netinet/in.h>
-#endif /* IS_WINDOWS */
+#endif /* !ODDSOURCE_IS_WINDOWS */
 
-#include <iostream>
 #include <memory>
 #include <optional>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 
 namespace OddSource::Interfaces
 {
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
     typedef USHORT AddressFamily;
-#else /* IS_WINDOWS */
+#else /* ODDSOURCE_IS_WINDOWS */
     typedef sa_family_t AddressFamily;
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
     class OddSource_Export InvalidIPAddress : public ::std::invalid_argument
     {
@@ -47,13 +49,18 @@ namespace OddSource::Interfaces
         InvalidIPAddress(InvalidIPAddress const & other) noexcept = default;
     };
 
-    enum OddSource_Export IPAddressVersion : uint8_t
+    enum class OddSource_Export IPAddressVersion : ::std::uint8_t
     {
         IPv4 = 4,
         IPv6 = 6
     };
 
-    enum OddSource_Export MulticastScope : uint16_t
+    OddSource_Export
+    ::std::string
+    toString(
+        IPAddressVersion const & version );
+
+    enum class OddSource_Export MulticastScope : ::std::uint16_t
     {
         Reserved, // v6 only
         InterfaceLocal, // v6 only
@@ -66,7 +73,7 @@ namespace OddSource::Interfaces
         Unassigned
     };
 
-    enum OddSource_Export MulticastV6Flag : uint8_t
+    enum class OddSource_Export MulticastV6Flag : ::std::uint8_t
     {
         DynamicallyAssigned = 0b0001,
         PrefixBased = 0b0010,
@@ -74,10 +81,36 @@ namespace OddSource::Interfaces
         ReservedFlag = 0b1000 // unused, here for clarity and unit testing
     };
 
+    OddSource_Export
+    ::std::underlying_type_t< MulticastV6Flag >
+    operator&(
+        ::std::underlying_type_t< MulticastV6Flag > lhs,
+        MulticastV6Flag const & rhs );
+
+    OddSource_Export
+    ::std::underlying_type_t< MulticastV6Flag >
+    operator|(
+        MulticastV6Flag const & lhs,
+        MulticastV6Flag const & rhs );
+
+    OddSource_Export
+    ::std::underlying_type_t< MulticastV6Flag >
+    operator|(
+        ::std::underlying_type_t< MulticastV6Flag > lhs,
+        MulticastV6Flag const & rhs );
+
+    OddSource_Export
+    bool
+    operator==(
+        ::std::underlying_type_t< MulticastV6Flag > lhs,
+        MulticastV6Flag const & rhs );
+
     class OddSource_Export IPAddress
     {
     public:
-        virtual ~IPAddress();
+        virtual
+        OddSource_Inline
+        ~IPAddress() noexcept;
 
         /**
          * Converts the IP address to a C++ string.
@@ -85,7 +118,10 @@ namespace OddSource::Interfaces
          * @return a string.
          */
         [[nodiscard]]
-        virtual inline operator ::std::string() const; // NOLINT(*-explicit-constructor)
+        virtual
+        OddSource_Inline
+        explicit
+        operator ::std::string() const;
 
         /**
          * Converts the IP address to a C string.
@@ -93,7 +129,10 @@ namespace OddSource::Interfaces
          * @return a string.
          */
         [[nodiscard]]
-        virtual inline explicit operator char const *() const;
+        virtual
+        OddSource_Inline
+        explicit
+        operator char const *() const;
 
         /**
          * Indicates whether this address represents the unspecified address
@@ -102,7 +141,9 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        inline bool is_unspecified() const;
+        OddSource_Inline
+        bool
+        is_unspecified() const;
 
         /**
          * Indicates whether this address represents the loopback address
@@ -111,7 +152,9 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        inline bool is_loopback() const;
+        OddSource_Inline
+        bool
+        is_loopback() const;
 
         /**
          * Indicates whether this address represents a link-local address
@@ -120,7 +163,9 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        inline bool is_link_local() const;
+        OddSource_Inline
+        bool
+        is_link_local() const;
 
         /**
          * Indicates whether this address represents a "private" address,
@@ -134,7 +179,9 @@ namespace OddSource::Interfaces
          * @return
          */
         [[nodiscard]]
-        inline bool is_private() const;
+        OddSource_Inline
+        bool
+        is_private() const;
 
         /**
          * Indicates whether this address represents a multicast address
@@ -143,7 +190,9 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        inline bool is_multicast() const;
+        OddSource_Inline
+        bool
+        is_multicast() const;
 
         /**
          * Indicates whether this address represents any IANA-reserved
@@ -158,28 +207,45 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        inline bool is_reserved() const;
+        OddSource_Inline
+        bool
+        is_reserved() const;
 
         [[nodiscard]]
-        inline ::std::optional<MulticastScope> const & multicast_scope() const;
+        OddSource_Inline
+        ::std::optional<MulticastScope> const &
+        multicast_scope() const;
 
         [[nodiscard]]
-        virtual inline IPAddressVersion version() const = 0;
+        virtual
+        IPAddressVersion
+        version() const = 0;
 
         [[nodiscard]]
-        virtual inline uint8_t maximum_prefix_length() const = 0;
+        virtual
+        ::std::uint8_t
+        maximum_prefix_length() const = 0;
 
     protected:
-        IPAddress(::std::string_view const &); // NOLINT(*-explicit-constructor)
+        OddSource_Inline
+        explicit
+        IPAddress(
+            ::std::string_view const & repr );
 
         // copy constructor
-        IPAddress(IPAddress const &);
+        OddSource_Inline
+        IPAddress(
+            IPAddress const & other );
 
         // move constructor
-        IPAddress(IPAddress &&) noexcept;
+        OddSource_Inline
+        IPAddress(
+            IPAddress && other ) noexcept;
 
         [[nodiscard]]
-        inline virtual size_t data_length() const = 0;
+        virtual
+        size_t
+        data_length() const = 0;
 
         ::std::string const _representation;
         bool _is_unspecified = false;
@@ -188,90 +254,138 @@ namespace OddSource::Interfaces
         bool _is_private = false;
         bool _is_multicast = false;
         bool _is_reserved = false;
-        ::std::optional<MulticastScope> _multicast_scope;
+        ::std::optional< MulticastScope > _multicast_scope;
     };
-
-    struct IPv4TempDataHolder;
 
     class OddSource_Export IPv4Address : public IPAddress
     {
     public:
         IPv4Address() = delete;
 
+        // conversion constructor
+        OddSource_Inline
+        explicit
+        IPv4Address(
+            ::std::string_view const & );
+
+        // conversion constructor
+        OddSource_Inline
+        explicit
+        IPv4Address(
+        in_addr const *);
+
         // copy constructor
-        IPv4Address(IPv4Address const &);
+        OddSource_Inline
+        IPv4Address(
+            IPv4Address const & );
 
         // move constructor
-        IPv4Address(IPv4Address &&) noexcept = default;
+        OddSource_Inline
+        IPv4Address(
+            IPv4Address && ) noexcept;
 
-        // conversion constructor
-        IPv4Address(::std::string_view const &); // NOLINT(*-explicit-constructor)
-
-        // conversion constructor
-        IPv4Address(in_addr const *); // NOLINT(*-explicit-constructor)
-
-        ~IPv4Address() override = default;
+        virtual
+        OddSource_Inline
+        ~IPv4Address() noexcept;
 
         [[nodiscard]]
-        inline operator in_addr const *() const; // NOLINT(*-explicit-constructor)
+        OddSource_Inline
+        explicit
+        operator in_addr const *() const;
 
         [[nodiscard]]
-        inline IPAddressVersion version() const final;
+        OddSource_Inline
+        IPAddressVersion
+        version() const final;
 
         [[nodiscard]]
-        inline uint8_t maximum_prefix_length() const final;
+        OddSource_Inline
+        ::std::uint8_t
+        maximum_prefix_length() const final;
 
         [[nodiscard]]
-        inline bool operator==(IPv4Address const &) const;
+        OddSource_Inline
+        bool
+        operator==(
+            IPv4Address const & ) const;
 
         [[nodiscard]]
-        inline bool operator!=(IPv4Address const &) const;
+        OddSource_Inline
+        bool
+        operator!=(
+            IPv4Address const & ) const;
 
     protected:
         [[nodiscard]]
-        inline size_t data_length() const final;
+        OddSource_Inline
+        size_t
+        data_length() const final;
 
     private:
-        explicit IPv4Address(IPv4TempDataHolder const &);
+        OddSource_Inline
+        explicit
+        IPv4Address(
+            ::std::unique_ptr< in_addr const > && );
 
-        ::std::unique_ptr<in_addr const> _data;
+        ::std::unique_ptr< in_addr const > _data;
     };
 
     struct OddSource_Export v6Scope
     {
-        ::std::optional<uint32_t> scope_id = ::std::nullopt;
-        ::std::optional<::std::string> scope_name = ::std::nullopt;
+        ::std::optional< ::std::uint32_t > scope_id = ::std::nullopt;
+        ::std::optional< ::std::string > scope_name = ::std::nullopt;
     };
-
-    struct IPv6TempDataHolder;
 
     class OddSource_Export IPv6Address : public IPAddress
     {
     public:
         IPv6Address() = delete;
 
+        // conversion constructor
+        OddSource_Inline
+        explicit
+        IPv6Address(
+            ::std::string_view const & repr );
+
+        // conversion constructor
+        OddSource_Inline
+        explicit
+        IPv6Address(
+            in6_addr const * data );
+
+        OddSource_Inline
+        IPv6Address(
+            in6_addr const * data,
+            ::std::uint32_t scopeId );
+
+        OddSource_Inline
+        IPv6Address(
+            in6_addr const * data,
+            ::std::string_view const & scopeName );
+
+        OddSource_Inline
+        IPv6Address(
+            in6_addr const * data,
+            v6Scope const & scope );
+
         // copy constructor
-        IPv6Address(IPv6Address const &);
+        OddSource_Inline
+        IPv6Address(
+            IPv6Address const & other );
 
         // move constructor
-        IPv6Address(IPv6Address &&) noexcept = default;
+        OddSource_Inline
+        IPv6Address(
+            IPv6Address && other ) noexcept;
 
-        // conversion constructor
-        IPv6Address(::std::string_view const &); // NOLINT(*-explicit-constructor)
-
-        // conversion constructor
-        IPv6Address(in6_addr const *); // NOLINT(*-explicit-constructor)
-
-        IPv6Address(in6_addr const *, uint32_t);
-
-        IPv6Address(in6_addr const *, ::std::string_view const &);
-
-        IPv6Address(in6_addr const *, v6Scope const & scope);
-
-        ~IPv6Address() override = default;
+        virtual
+        OddSource_Inline
+        ~IPv6Address() noexcept;
 
         [[nodiscard]]
-        inline operator in6_addr const *() const; // NOLINT(*-explicit-constructor)
+        OddSource_Inline
+        explicit
+        operator in6_addr const *() const;
 
         /**
          * Returns a copy of this address with a normalized string representation.
@@ -285,7 +399,9 @@ namespace OddSource::Interfaces
          * @return a normalized copy of this address.
          */
         [[nodiscard]]
-        IPv6Address normalize() const;
+        OddSource_Inline
+        IPv6Address
+        normalize() const;
 
         /**
          * Indicates whether this address represents a unique-local address,
@@ -294,7 +410,9 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        inline bool is_unique_local() const;
+        OddSource_Inline
+        bool
+        is_unique_local() const;
 
         /**
          * Indicates whether this address represents a deprecated site-local
@@ -303,7 +421,9 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        inline bool is_site_local() const;
+        OddSource_Inline
+        bool
+        is_site_local() const;
 
         /**
          * Indicates whether this address represents an IPv4-mapped address
@@ -312,7 +432,9 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        inline bool is_v4_mapped() const;
+        OddSource_Inline
+        bool
+        is_v4_mapped() const;
 
         /**
          * Indicates whether this address represents an IPv4-translated address
@@ -321,7 +443,9 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        inline bool is_v4_translated() const;
+        OddSource_Inline
+        bool
+        is_v4_translated() const;
 
         /**
          * Indicates whether this address represents a deprecated IPv4-compatible
@@ -332,7 +456,9 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        inline bool is_v4_compatible() const;
+        OddSource_Inline
+        bool
+        is_v4_compatible() const;
 
         /**
          * Indicates whether this address represents a deprecated 6to4 address
@@ -341,56 +467,85 @@ namespace OddSource::Interfaces
          * @return true or false;
          */
         [[nodiscard]]
-        inline bool is_6to4() const;
+        OddSource_Inline
+        bool
+        is_6to4() const;
 
         [[nodiscard]]
-        inline bool has_scope_id() const;
+        OddSource_Inline
+        bool
+        has_scope_id() const;
 
         [[nodiscard]]
-        inline ::std::string without_scope_id() const;
+        OddSource_Inline
+        ::std::string
+        without_scope_id() const;
 
         [[nodiscard]]
-        inline ::std::optional<uint32_t> const & scope_id() const;
+        OddSource_Inline
+        ::std::optional<::std::uint32_t> const &
+        scope_id() const;
 
         [[nodiscard]]
-        inline ::std::optional<::std::string> const & scope_name() const;
+        OddSource_Inline
+        ::std::optional<::std::string> const &
+        scope_name() const;
 
         [[nodiscard]]
-        inline ::std::optional<::std::string> scope_name_or_id() const;
+        OddSource_Inline
+        ::std::optional<::std::string>
+        scope_name_or_id() const;
 
         [[nodiscard]]
-        inline ::std::optional<::std::string> scope_id_or_name() const;
+        OddSource_Inline
+        ::std::optional<::std::string>
+        scope_id_or_name() const;
 
         [[nodiscard]]
-        inline bool is_multicast_flag_enabled(MulticastV6Flag flag) const;
+        OddSource_Inline
+        bool
+        is_multicast_flag_enabled(
+            MulticastV6Flag const & flag ) const;
 
         [[nodiscard]]
-        inline IPAddressVersion version() const final;
+        OddSource_Inline
+        IPAddressVersion
+        version() const final;
 
         [[nodiscard]]
-        inline uint8_t maximum_prefix_length() const final;
+        OddSource_Inline
+        ::std::uint8_t
+        maximum_prefix_length() const final;
 
         [[nodiscard]]
-        inline bool operator==(IPv6Address const &) const;
+        OddSource_Inline
+        bool
+        operator==(
+            IPv6Address const & ) const;
 
         [[nodiscard]]
-        inline bool operator!=(IPv6Address const &) const;
+        OddSource_Inline
+        bool
+        operator!=(
+            IPv6Address const & ) const;
 
     protected:
         [[nodiscard]]
-        inline size_t data_length() const final;
+        OddSource_Inline
+        size_t
+        data_length() const final;
 
     private:
-        IPv6Address(::std::string const &, IPv6TempDataHolder const &);
+        OddSource_Inline
+        IPv6Address(
+            ::std::string_view const & reprWithScope,
+            ::std::string_view const & reprWithoutScope );
 
-        [[nodiscard]]
-        static ::std::string_view strip_scope(::std::string_view const &);
-
-        [[nodiscard]]
-        static ::std::optional<v6Scope> extract_scope(::std::string_view const &);
-
-        [[nodiscard]]
-        static ::std::string add_scope(::std::string const &, ::std::optional<v6Scope> const &);
+        OddSource_Inline
+        IPv6Address(
+            ::std::string && reprWithoutScope,
+            ::std::unique_ptr< in6_addr const > && data,
+            ::std::optional< v6Scope > && scope );
 
         ::std::unique_ptr<in6_addr const> _data;
         ::std::optional<v6Scope> const _scope;
@@ -401,10 +556,18 @@ namespace OddSource::Interfaces
         bool _is_v4_compatible = false;
         bool _is_v4_translated = false;
         bool _is_6to4 = false;
-        ::std::optional<uint8_t> _multicast_flags;
+        ::std::optional<::std::uint8_t> _multicast_flags;
     };
 
-    inline ::std::ostream & operator<<(::std::ostream &, IPAddress const &);
+    OddSource_Export
+    ::std::ostream &
+    operator<<(
+        ::std::ostream & os,
+        IPAddress const & address );
 }
 
-#include "IpAddress.hpp"
+#ifdef IFADDRS4CPP_INLINE_SOURCE
+#include "impl/IpAddress.ipp"
+#endif /* IFADDRS4CPP_INLINE_SOURCE */
+
+#endif /* ODDSOURCE_NETWORK_INTERFACES_IPADDRESS_HPP */

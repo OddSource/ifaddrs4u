@@ -19,11 +19,11 @@
 #include <optional>
 #include <sstream>
 
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
 #include "../winsock_includes.h"
 #include <errhandlingapi.h>
 #include <crtdbg.h>
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 namespace
 {
@@ -33,7 +33,7 @@ namespace
         PopupDisabler()
             : disabled(false)
         {
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
             /*
              * Windows applications compiled debug will open a GUI popup alert window
              * when assertion failures and other serious issues occur. This can cause
@@ -53,7 +53,7 @@ namespace
                     SEM_NOALIGNMENTFAULTEXCEPT |
                     SEM_NOGPFAULTERRORBOX | // if you're experiencing a crash and need a crash report, comment this line
                     SEM_NOOPENFILEERRORBOX);
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
             disabled = true;
         }
 

@@ -22,7 +22,7 @@
 #include <optional>
 #include <vector>
 
-#include "../os.h"
+#include "../include/oddsource/network/interfaces/detail/os.h"
 #include "../s.h"
 
 #ifndef UNUSED

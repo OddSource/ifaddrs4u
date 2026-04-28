@@ -138,15 +138,15 @@ jstring JNICALL Java_io_oddsource_java_net_ifaddrs4j_MacAddress_getReprFromData(
 
     try
     {
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
 // no loss of data as indicated by MSVC
 #pragma warning( push )
 #pragma warning( disable : 4244)
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
         OddSource::Interfaces::MacAddress address(reinterpret_cast<uint8_t const *>(bytes), length);
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
 #pragma warning( pop )
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
         jstring repr(env->NewStringUTF(::std::string(address).c_str()));
         return repr;
     }

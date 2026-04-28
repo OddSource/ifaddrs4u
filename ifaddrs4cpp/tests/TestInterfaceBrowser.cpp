@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "../Interfaces.h"
+#include "../include/oddsource/network/interfaces/Interfaces.h"
 #include "main.h"
 
 using namespace OddSource::Interfaces;
@@ -39,9 +39,9 @@ public:
             ::std::cout << iface << ::std::endl;
             assert_that(iface.index() > 0);
             assert_that(iface.name().length() > 0);
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
             assert_that(iface.windows_uuid().length() > 0);
-#endif /* IS_WINDOWS */
+#endif /* ODDSOURCE_IS_WINDOWS */
             return true;
         };
         ::std::cout << "Interface browser output below: " << ::std::endl;
@@ -50,9 +50,9 @@ public:
 
     void test_get_by_name()
     {
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
         // TODO dunno yet
-#elif IS_MACOS /* IS_WINDOWS */
+#elif ODDSOURCE_IS_MACOS /* ODDSOURCE_IS_WINDOWS */
         Interface lo(this->_browser.get_interface("lo0"));
         assert_equals(lo.name(), "lo0");
         assert_that(lo.index() > 0);
@@ -60,18 +60,18 @@ public:
         Interface en(this->_browser.get_interface("en0"));
         assert_equals(en.name(), "en0");
         assert_that(en.index() > 0);
-#else /* !IS_WINDOWS && !IS_MACOS */
+#else /* !ODDSOURCE_IS_WINDOWS && !ODDSOURCE_IS_MACOS */
         // TODO dunno yet
-#endif /* !IS_WINDOWS && !IS_MACOS */
+#endif /* !ODDSOURCE_IS_WINDOWS && !ODDSOURCE_IS_MACOS */
 
         assert_throws(this->_browser.get_interface("fooBar42"), ::std::invalid_argument);
     }
 
     void test_get_by_index()
     {
-#ifdef IS_WINDOWS
+#ifdef ODDSOURCE_IS_WINDOWS
         // TODO dunno yet
-#elif IS_MACOS /* IS_WINDOWS */
+#elif ODDSOURCE_IS_MACOS /* ODDSOURCE_IS_WINDOWS */
         Interface if0(this->_browser.get_interface(1));
         assert_not_that(if0.name().empty());
         assert_equals(if0.index(), 1u);
@@ -79,9 +79,9 @@ public:
         Interface if1(this->_browser.get_interface(2));
         assert_not_that(if1.name().empty());
         assert_equals(if1.index(), 2u);
-#else /* !IS_WINDOWS && !IS_MACOS */
+#else /* !ODDSOURCE_IS_WINDOWS && !ODDSOURCE_IS_MACOS */
         // TODO dunno yet
-#endif /* !IS_WINDOWS && !IS_MACOS */
+#endif /* !ODDSOURCE_IS_WINDOWS && !ODDSOURCE_IS_MACOS */
 
         assert_throws(this->_browser.get_interface(4'294'967'294), ::std::invalid_argument);
     }

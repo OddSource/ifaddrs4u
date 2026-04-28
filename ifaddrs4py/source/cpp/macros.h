@@ -16,6 +16,18 @@
 
 #pragma once
 
+#define IF_NULL_STMT(thing, stmt) if (thing == NULL) \
+    { \
+        stmt; \
+    }
+
+#define IF_NULL_RETURN(thing, ret) IF_NULL_STMT(thing, return ret)
+#define IF_NULL_RETURN_INT(thing) IF_NULL_RETURN(thing, -1)
+#define IF_NULL_RETURN_NULL(thing) IF_NULL_RETURN(thing, NULL)
+#define IF_NULL_RETURN_FALSE(thing) IF_NULL_RETURN(thing, false)
+#define IF_NULL_RETURN_VOID(thing) IF_NULL_RETURN(thing, )
+#define IF_NULL_RETURN_ERR(thing) IF_NULL_RETURN(thing, JNI_ERR)
+
 #define CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(err, ret) catch (::std::exception const & e) \
     { \
         if (PyErr_Occurred() == NULL) \

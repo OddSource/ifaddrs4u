@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,17 @@
 
 #pragma once
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
-#define IS_WINDOWS 1
-#endif
+#ifndef ODDSOURCE_NETWORK_INTERFACES_DETAIL_CONFIG_H
+#define ODDSOURCE_NETWORK_INTERFACES_DETAIL_CONFIG_H
 
-#ifdef __APPLE__
-#define IS_MACOS 1
-#endif
+#include "os.h"
+#include "version.h"
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__DragonFly__)
-#define IS_BSD 1
-#endif
+#include "export.h"
 
-#include <cstdint>
+#if defined(ODDSOURCE_IS_WINDOWS) && defined(ODDSOURCE_BUILDING_LIBRARY)
+#pragma comment(lib, "IPHLPAPI.lib")
+#pragma comment(lib, "ws2_32.lib")
+#endif /* defined(ODDSOURCE_IS_WINDOWS) && defined(ODDSOURCE_BUILDING_LIBRARY) */
 
-using std::uint8_t;
-using std::uint16_t;
-using std::uint32_t;
-using std::uint64_t;
-using std::int8_t;
-using std::int16_t;
-using std::int32_t;
-using std::int64_t;
+#endif /* ODDSOURCE_NETWORK_INTERFACES_DETAIL_CONFIG_H */
