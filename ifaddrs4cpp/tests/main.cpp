@@ -36,73 +36,79 @@ namespace
 {
     struct handle
     {
-        char *p;
+        char * p;
 
-        explicit handle(char *ptr)
-                : p(ptr)
+        explicit
+        handle(
+            char * ptr )
+            : p( ptr )
         {
         }
 
         ~handle()
         {
-            std::free(p);
+            ::std::free( p );
         }
     };
 }
 
 ::std::string
 OddSource::Interfaces::Tests::
-demangle(char const * name)
+demangle(
+    char const * name )
 {
     int status = -4; // some arbitrary value to eliminate the compiler warning
-    handle result(abi::__cxa_demangle(name, nullptr, nullptr, &status));
-    return (status == 0) ? result.p : name;
+    handle result( abi::__cxa_demangle( name, nullptr, nullptr, &status ) );
+    return ( status == 0 ) ? result.p : name;
 }
 #else
 ::std::string
 OddSource::Interfaces::Tests::
-demangle(char const * name)
+demangle(
+    char const * name )
 {
     return name;
 }
 #endif
 
-OddSource::Interfaces::Tests::Test::
+OddSource::Interfaces::Tests::
+Test::
 Test()
-    : _tests(),
-      _assertion_count(0),
-      _test_count(0),
-      _pass_test_count(0),
-      _fail_test_count(0),
-      _error_test_count(0),
-      _failures(),
-      _errors()
+    : _assertion_count( 0 ),
+      _test_count( 0 ),
+      _pass_test_count( 0 ),
+      _fail_test_count( 0 ),
+      _error_test_count( 0 )
 {
-    this->_failures.reserve(50);
-    this->_errors.reserve(50);
+    this->_failures.reserve( 50 );
+    this->_errors.reserve( 50 );
 }
 
 void
-OddSource::Interfaces::Tests::Test::
-registrate(::std::string const & name, create_function * function)
+OddSource::Interfaces::Tests::
+Test::
+registrate(
+    ::std::string const & name,
+    create_function * function )
 {
-    OddSource::Interfaces::Tests::Test::registry()[name] = function;
+    Test::registry()[ name ] = function;
 }
 
-::std::map<::std::string const, OddSource::Interfaces::Tests::Test::create_function *> &
-OddSource::Interfaces::Tests::Test::
+::std::map< ::std::string const, OddSource::Interfaces::Tests::Test::create_function * > &
+OddSource::Interfaces::Tests::
+Test::
 registry()
 {
-    static ::std::map<::std::string const, OddSource::Interfaces::Tests::Test::create_function *> impl;
+    static ::std::map< ::std::string const, Test::create_function * > impl;
     return impl;
 }
 
 namespace
 {
 #ifdef ODDSOURCE_IS_WINDOWS
-    bool const is_tty(_isatty(_fileno(stdout)));
+    bool const is_tty( _isatty( _fileno( stdout ) ) );
 #else /* ODDSOURCE_IS_WINDOWS */
-    bool const is_tty(isatty(fileno(stdin)));
+    bool const is_tty( isatty( fileno( stdin ) ) );
 #endif /* !ODDSOURCE_IS_WINDOWS */
     char const * RED = is_tty ? "\033[0;31m" : "";
     char const * ORANGE = is_tty ? "\033[0;33m" : "";
@@ -114,34 +120,36 @@ namespace
 }
 
 void
-OddSource::Interfaces::Tests::Test::
+OddSource::Interfaces::Tests::
+Test::
 run()
 {
-    for (auto const & [name, test_function] : this->_tests)
+    using namespace std::string_literals;
+    for ( auto const & [name, test_function] : this->_tests )
     {
         ::std::cout << "  ::" << name << " ... " << ::std::flush;
-        size_t failure_count(this->_failures.size());
-        size_t error_count(this->_errors.size());
+        size_t failure_count{ this->_failures.size() };
+        size_t error_count{ this->_errors.size() };
         this->_test_count++;
         try
         {
             test_function();
         }
-        catch (TestAssertFailureAbort const &)
+        catch ( TestAssertFailureAbort const & )
         {
             // do nothing, this was just to cause test_function() to return
         }
-        catch (::std::exception const & e)
+        catch ( ::std::exception const & e )
         {
-            this->error("Exception '"s + type_id_string(e) + "' occurred: "s + e.what());
+            this->error( "Exception '"s + type_id_string( e ) + "' occurred: "s + e.what() );
         }
 
-        if (error_count != this->_errors.size())
+        if ( error_count != this->_errors.size() )
         {
             this->_error_test_count++;
             ::std::cout << ERR << ::std::endl;
         }
-        else if (failure_count != this->_failures.size())
+        else if ( failure_count != this->_failures.size() )
         {
             this->_fail_test_count++;
             ::std::cout << FAIL << ::std::endl;
@@ -152,45 +160,47 @@ run()
             ::std::cout << PASS << ::std::endl;
         }
 
-        for(; error_count < this->_errors.size(); error_count++)
+        for( ; error_count < this->_errors.size(); error_count++ )
         {
-            ::std::cerr << RED << "    ERROR: " << this->_errors[error_count] << RESET << ::std::endl;
+            ::std::cerr << RED << "    ERROR: " << this->_errors[ error_count ] << RESET << ::std::endl;
         }
-        for(; failure_count < this->_failures.size(); failure_count++)
+        for( ; failure_count < this->_failures.size(); failure_count++ )
         {
-            ::std::cerr << ORANGE << "    ASSERTION: " << this->_failures[failure_count] << RESET << ::std::endl;
+            ::std::cerr << ORANGE << "    ASSERTION: " << this->_failures[ failure_count ] << RESET << ::std::endl;
         }
     }
 }
 
 int
-OddSource::Interfaces::Tests::Test::
-run_all_registered_test_cases(::std::vector<::std::string> const & matching)
+OddSource::Interfaces::Tests::
+Test::
+run_all_registered_test_cases(
+    ::std::vector< ::std::string > const & matching )
 {
-    uint32_t total_test_count(0);
-    uint32_t total_pass_count(0);
-    uint32_t total_fail_count(0);
-    uint32_t total_error_count(0);
-    uint64_t total_assertion_count(0);
-    ::std::chrono::steady_clock::time_point start_time(::std::chrono::steady_clock::now());
-    auto end = matching.end();
-    int ret = 0;
-    for (auto const & [name, create_function] : OddSource::Interfaces::Tests::Test::registry())
+    uint32_t total_test_count{ 0 };
+    uint32_t total_pass_count{ 0 };
+    uint32_t total_fail_count{ 0 };
+    uint32_t total_error_count{ 0 };
+    uint64_t total_assertion_count{ 0 };
+    ::std::chrono::steady_clock::time_point const start_time( ::std::chrono::steady_clock::now() );
+    auto end( matching.end() );
+    int ret{ 0 };
+    for ( auto const & [name, create_function] : Test::registry() )
     {
-        if (!matching.empty() && ::std::find(matching.begin(), end, name) == end)
+        if ( !matching.empty() && ::std::find( matching.begin(), end, name ) == end )
         {
             continue;
         }
         ::std::cout << "Running test case " << name << "..." << ::std::endl;
-        auto test = create_function();
+        auto test( create_function() );
         test->run();
-        if (!test->_failures.empty() || !test->_errors.empty())
+        if ( !test->_failures.empty() || !test->_errors.empty() )
         {
             ::std::cerr << "  Case failed with " << test->_failures.size() << " assertion failures and "
                         << test->_errors.size() << " errors." << ::std::endl;
             ret = 1;
         }
-        if (test->_test_count != test->_tests.size())
+        if ( test->_test_count != test->_tests.size() )
         {
             ::std::cerr << "  NOTE: Not all tests in test case ran." << std::endl;
             ret = 1;
@@ -202,60 +212,53 @@ run_all_registered_test_cases(::std::vector<::std::string> const & matching)
         total_assertion_count += test->_assertion_count;
     }
 
-    ::std::chrono::steady_clock::time_point end_time(std::chrono::steady_clock::now());
-#ifdef ODDSOURCE_IS_WINDOWS
-// no loss of data as indicated by MSVC
-#pragma warning( push )
-#pragma warning( disable : 4244)
-#endif /* ODDSOURCE_IS_WINDOWS */
-    long double elapsed_microseconds(std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count());
-#ifdef ODDSOURCE_IS_WINDOWS
-#pragma warning( pop )
-#endif /* ODDSOURCE_IS_WINDOWS */
+    ::std::chrono::steady_clock::time_point const end_time( std::chrono::steady_clock::now() );
     ::std::ostringstream oss;
-    oss.precision(5);
-    if (elapsed_microseconds > 1'000'000)
+    //oss.precision(5);
+    if ( auto const elapsed( ::std::chrono::duration_cast< std::chrono::microseconds >( end_time - start_time ) );
+         elapsed >= ::std::chrono::seconds{ 1 } )
     {
-        oss.precision(9);
-        auto elapsed_seconds(elapsed_microseconds / 1'000'000.0);
-        oss << elapsed_seconds << "s";
+        oss.precision( 4 );
+        oss << ( static_cast< long double >( elapsed.count() ) / 1'000'000.0 ) << "s";
     }
-    else if (elapsed_microseconds > 1'000)
+    else if ( elapsed >= ::std::chrono::milliseconds{ 1 } )
     {
-        auto elapsed_milliseconds(elapsed_microseconds / 1'000.0);
-        oss << elapsed_milliseconds << "ms";
+        oss << ::std::chrono::round< ::std::chrono::milliseconds >( elapsed ).count() << "ms";
     }
     else
     {
-        oss << elapsed_microseconds << "µs";
+        oss << elapsed.count() << "µs";
     }
-    ::std::string elapsed(oss.str());
+    ::std::string const elapsedStr( oss.str() );
     ::std::cout << "Ran " << total_test_count << " tests (" << total_assertion_count
-                << " assertions) in " << elapsed << "." << ::std::endl;
+                << " assertions) in " << elapsedStr << "." << ::std::endl;
 
-    if (total_pass_count > 0)
+    if ( total_pass_count > 0 )
     {
         ::std::cout << GREEN;
     }
     ::std::cout << "  " << total_pass_count << " tests passed" << RESET << ::std::endl
-                << "  " << (total_fail_count > 0 ? ORANGE : GREEN) << total_fail_count
+                << "  " << ( total_fail_count > 0 ? ORANGE : GREEN ) << total_fail_count
                         << " tests failed" << RESET << ::std::endl
-                << "  " << (total_error_count > 0 ? RED : GREEN) << total_error_count
+                << "  " << ( total_error_count > 0 ? RED : GREEN ) << total_error_count
                         << " tests experienced errors" << RESET << ::std::endl;
 
     return ret;
 }
 
-int main(int argc, char * argv [])
+int
+main(
+    int argc,
+    char * argv [] )
 {
-    ::std::vector<::std::string> matching;
-    matching.reserve(argc - 1);
-    for (int i = 1; i < argc; i++)
+    ::std::vector< ::std::string > matching;
+    matching.reserve( argc - 1 );
+    for ( int i{ 1 }; i < argc; ++i )
     {
-        if (::std::strlen(argv[i]) > 0)
+        if ( ::std::strlen( argv[ i ] ) > 0 )
         {
-            matching.emplace_back(argv[i]);
+            matching.emplace_back( argv[ i ] );
         }
     }
-    return OddSource::Interfaces::Tests::Test::run_all_registered_test_cases(matching);
+    return OddSource::Interfaces::Tests::Test::run_all_registered_test_cases( matching );
 }

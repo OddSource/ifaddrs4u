@@ -20,6 +20,7 @@
 #define ODDSOURCE_NETWORK_INTERFACES_IPADDRESS_HPP
 
 #include "detail/config.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "detail/winsock_includes.h"
 
 #ifndef ODDSOURCE_IS_WINDOWS
@@ -32,6 +33,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 
 namespace OddSource::Interfaces
 {
@@ -44,9 +46,18 @@ namespace OddSource::Interfaces
     class OddSource_Export InvalidIPAddress : public ::std::invalid_argument
     {
     public:
-        explicit InvalidIPAddress(::std::string_view const & what)
-            : ::std::invalid_argument(::std::string(what)) {}
-        InvalidIPAddress(InvalidIPAddress const & other) noexcept = default;
+        OddSource_Inline
+        explicit
+        InvalidIPAddress(
+            ::std::string_view const & what );
+
+        OddSource_Inline
+        InvalidIPAddress(
+            InvalidIPAddress const & other );
+
+        OddSource_Inline
+        virtual
+        ~InvalidIPAddress() noexcept; // NOLINT(*-use-override)
     };
 
     enum class OddSource_Export IPAddressVersion : ::std::uint8_t
@@ -58,6 +69,12 @@ namespace OddSource::Interfaces
     OddSource_Export
     ::std::string
     toString(
+        IPAddressVersion const & version );
+
+    OddSource_Export
+    ::std::ostream &
+    operator<<(
+        ::std::ostream & os,
         IPAddressVersion const & version );
 
     enum class OddSource_Export MulticastScope : ::std::uint16_t
@@ -72,6 +89,25 @@ namespace OddSource::Interfaces
         Global,
         Unassigned
     };
+
+    OddSource_Extern OddSource_Export
+    ::std::unordered_map< ::std::string, MulticastScope const > const
+    MulticastScope_Values;
+
+    OddSource_Extern OddSource_Export
+    ::std::unordered_map< MulticastScope, ::std::string const > const
+    MulticastScope_Names;
+
+    OddSource_Export
+    ::std::string
+    toString(
+        MulticastScope const & scope );
+
+    OddSource_Export
+    ::std::ostream &
+    operator<<(
+        ::std::ostream & os,
+        MulticastScope const & scope );
 
     enum class OddSource_Export MulticastV6Flag : ::std::uint8_t
     {
@@ -247,7 +283,7 @@ namespace OddSource::Interfaces
         size_t
         data_length() const = 0;
 
-        ::std::string const _representation;
+        ::std::string _representation;
         bool _is_unspecified = false;
         bool _is_loopback = false;
         bool _is_link_local = false;
@@ -286,7 +322,7 @@ namespace OddSource::Interfaces
 
         virtual
         OddSource_Inline
-        ~IPv4Address() noexcept;
+        ~IPv4Address() noexcept; // NOLINT(*-use-override)
 
         [[nodiscard]]
         OddSource_Inline
@@ -380,7 +416,7 @@ namespace OddSource::Interfaces
 
         virtual
         OddSource_Inline
-        ~IPv6Address() noexcept;
+        ~IPv6Address() noexcept; // NOLINT(*-use-override)
 
         [[nodiscard]]
         OddSource_Inline
@@ -558,6 +594,11 @@ namespace OddSource::Interfaces
         bool _is_6to4 = false;
         ::std::optional<::std::uint8_t> _multicast_flags;
     };
+
+    OddSource_Export
+    ::std::string
+    toString(
+        IPAddress const & address );
 
     OddSource_Export
     ::std::ostream &

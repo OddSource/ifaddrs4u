@@ -20,7 +20,9 @@
 #include "../MacAddress.hpp"
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include <cctype>
+// ReSharper disable once CppUnusedIncludeDirective
 #include <cstdio>
 #include <cstring>
 #include <iostream>
@@ -309,6 +311,14 @@ namespace OddSource::Interfaces
         MacAddress const & other ) const
     {
         return !this->operator==(other);
+    }
+
+    OddSource_Inline
+    ::std::string
+    toString(
+        MacAddress const & address )
+    {
+        return address.operator::std::string();
     }
 
     OddSource_Inline

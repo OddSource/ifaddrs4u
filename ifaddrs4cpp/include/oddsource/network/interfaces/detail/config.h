@@ -20,7 +20,7 @@
 #define ODDSOURCE_NETWORK_INTERFACES_DETAIL_CONFIG_H
 
 #include "os.h"
-#include "version.h"
+#include <oddsource/network/interfaces/detail/version.h>
 
 #include "export.h"
 

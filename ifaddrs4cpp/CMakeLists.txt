@@ -103,7 +103,7 @@ set(${PROJECT_NAME}_sources
     src/VersionInfo.cpp)
 
 configure_file(version.h.in version.h)
-file(COPY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_BINARY_DIR})
+#file(COPY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CMAKE_BINARY_DIR}/version.h DESTINATION ${CMAKE_BINARY_DIR}/include/oddsource/network/interfaces/detail)
 #file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
 #file(COPY ${CMAKE_BINARY_DIR}/version.h DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
@@ -131,6 +131,7 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
 if(NOT ${BUILD_STATIC_ONLY})
     add_library(${PROJECT_NAME}-shared SHARED ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-shared PUBLIC ${PROJECT_NAME}_compiler_flags)
+    target_include_directories(${PROJECT_NAME}-shared PUBLIC "${CMAKE_SOURCE_DIR}/include")
     target_include_directories(${PROJECT_NAME}-shared PUBLIC "${PROJECT_BINARY_DIR}/include")
     set_target_properties(${PROJECT_NAME}-shared PROPERTIES
                           CXX_VISIBILITY_PRESET hidden)
@@ -139,6 +140,7 @@ endif()
 if(NOT ${BUILD_DYNAMIC_ONLY})
     add_library(${PROJECT_NAME}-static STATIC ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-static PUBLIC ${PROJECT_NAME}_compiler_flags)
+    target_include_directories(${PROJECT_NAME}-static PUBLIC "${CMAKE_SOURCE_DIR}/include")
     target_include_directories(${PROJECT_NAME}-static PUBLIC "${PROJECT_BINARY_DIR}/include")
     set_target_properties(${PROJECT_NAME}-static PROPERTIES
                           POSITION_INDEPENDENT_CODE ON
@@ -157,7 +159,8 @@ if (${ENABLE_TESTS})
                    tests/TestInterfaceBrowser.cpp)
     target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}_compiler_flags)
     target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}-static)
-    target_include_directories(${PROJECT_NAME}_tests PUBLIC "${PROJECT_BINARY_DIR}")
+    target_include_directories(${PROJECT_NAME}_tests PUBLIC "${CMAKE_SOURCE_DIR}/include")
+    target_include_directories(${PROJECT_NAME}_tests PUBLIC "${PROJECT_BINARY_DIR}/include")
     set_target_properties(${PROJECT_NAME}_tests PROPERTIES
                           CXX_VISIBILITY_PRESET hidden)
 

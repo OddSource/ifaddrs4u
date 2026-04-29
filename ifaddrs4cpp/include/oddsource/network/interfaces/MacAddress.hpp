@@ -48,9 +48,9 @@ namespace OddSource::Interfaces
         InvalidMacAddress(
             InvalidMacAddress const & other );
 
-        virtual
         OddSource_Inline
-        ~InvalidMacAddress() noexcept;
+        virtual
+        ~InvalidMacAddress() noexcept; // NOLINT(*-use-override)
     };
 
     class OddSource_Export MacAddress
@@ -123,6 +123,11 @@ namespace OddSource::Interfaces
         ::std::unique_ptr< ::std::uint8_t const[] > _data;
         ::std::uint8_t const _data_length;
     };
+
+    OddSource_Export
+    ::std::string
+    toString(
+        MacAddress const & address );
 
     OddSource_Export
     ::std::ostream &

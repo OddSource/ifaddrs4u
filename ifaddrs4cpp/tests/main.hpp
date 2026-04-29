@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#pragma once
+
 #include <cassert>
 #include <iostream>
 #include <optional>
@@ -25,6 +27,7 @@
 #include <crtdbg.h>
 #endif /* ODDSOURCE_IS_WINDOWS */
 
+// ReSharper disable once CppUnnamedNamespaceInHeaderFile
 namespace
 {
     class PopupDisabler
@@ -40,19 +43,19 @@ namespace
              * GitHub Actions and other headless runners to block indefinitely with no
              * indication of the underlying issue. So we need to disable that behavior.
              */
-            _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
-            _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
-            _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
-            _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-            _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
-            _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+            _CrtSetReportMode( _CRT_ASSERT, _CRTDBG_MODE_FILE );
+            _CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDERR );
+            _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
+            _CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDERR );
+            _CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
+            _CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDERR );
 
             // prevent popups when terminate or abort is called
             SetErrorMode(
                     SEM_FAILCRITICALERRORS |
                     SEM_NOALIGNMENTFAULTEXCEPT |
                     SEM_NOGPFAULTERRORBOX | // if you're experiencing a crash and need a crash report, comment this line
-                    SEM_NOOPENFILEERRORBOX);
+                    SEM_NOOPENFILEERRORBOX );
 #endif /* ODDSOURCE_IS_WINDOWS */
             disabled = true;
         }
@@ -63,175 +66,214 @@ namespace
     PopupDisabler disabler;
 }
 
-template<typename T>
+template< typename T >
 ::std::string
 OddSource::Interfaces::Tests::
-type_id_string(T const & t)
+type_id_string(
+    T const & )
 {
-    return demangle(typeid(t).name());
+    return demangle( typeid( T ).name() );
 }
 
-template<typename T>
-OddSource::Interfaces::Tests::Test::Registrar<T>::
-Registrar(::std::string const & name)
+template< typename T >
+OddSource::Interfaces::Tests::
+Test::Registrar< T >::
+Registrar(
+    ::std::string const & name )
 {
-    assert(disabler.disabled);
-    OddSource::Interfaces::Tests::Test::registrate(name, &T::create);
+    assert( disabler.disabled );
+    Test::registrate( name, &T::create );
 }
 
-template<typename V1, typename V2>
-inline void
-OddSource::Interfaces::Tests::Test::
+template< typename V1, typename V2 >
+void
+OddSource::Interfaces::Tests::
+Test::
 assert_equal(
-    V1 const & v1, V2 const & v2,
-    ::std::optional<::std::string const> message,
-    char const * file, int line)
-{
-    this->_assertion_count++;
-    if (v1 != v2)
-    {
-        ::std::ostringstream oss;
-        oss << "v1 [" << type_id_string(v1) << "(" << v1 << ")] != v2 ["
-                      << type_id_string(v2) << "(" << v2 << ")], but they should be equal.";
-        if (message)
-        {
-            oss << " " << *message;
-        }
-
-        this->failure(oss.str(), file, line);
-        throw TestAssertFailureAbort();
-    }
-}
-
-template<typename V1, typename V2>
-inline void
-OddSource::Interfaces::Tests::Test::
-assert_not_equal(
-    V1 const & v1, V2 const & v2,
-    ::std::optional<::std::string const> message,
-    char const * file, int line)
-{
-    this->_assertion_count++;
-    if (v1 == v2)
-    {
-        ::std::ostringstream oss;
-        oss << "v1 [" << type_id_string(v1) << "(" << v1 << ")] == v2 ["
-                      << type_id_string(v2) << "(" << v2 << ")], but they should not be equal";
-        if (message)
-        {
-            oss << " " << *message;
-        }
-
-        this->failure(oss.str(), file, line);
-        throw TestAssertFailureAbort();
-    }
-}
-
-inline void
-OddSource::Interfaces::Tests::Test::
-assert_true(bool test, ::std::optional<::std::string const> message, char const * file, int line)
-{
-    this->_assertion_count++;
-    if (!test)
-    {
-        if (!message)
-        {
-            message.emplace("The boolean condition was unexpectedly false");
-        }
-        this->failure(*message, file, line);
-        throw TestAssertFailureAbort();
-    }
-}
-
-inline void
-OddSource::Interfaces::Tests::Test::
-assert_true(
-    ::std::function<bool()> const & test,
-    ::std::optional<::std::string const> message,
-    char const * file, int line)
-{
-    this->_assertion_count++;
-    if (!test())
-    {
-        if (!message)
-        {
-            message.emplace("The predicate unexpectedly returned false");
-        }
-        this->failure(*message, file, line);
-        throw TestAssertFailureAbort();
-    }
-}
-
-inline void
-OddSource::Interfaces::Tests::Test::
-assert_false(bool test, ::std::optional<::std::string const> message, char const * file, int line)
-{
-    this->_assertion_count++;
-    if (test)
-    {
-        if (!message)
-        {
-            message.emplace("The boolean condition was unexpectedly true");
-        }
-        this->failure(*message, file, line);
-        throw TestAssertFailureAbort();
-    }
-}
-
-inline void
-OddSource::Interfaces::Tests::Test::
-assert_false(
-    ::std::function<bool()> const & test,
-    ::std::optional<::std::string const> message,
-    char const * file, int line)
-{
-    this->_assertion_count++;
-    if (test())
-    {
-        if (!message)
-        {
-            message.emplace("The predicate unexpectedly returned true");
-        }
-        this->failure(*message, file, line);
-        throw TestAssertFailureAbort();
-    }
-}
-
-template<class E>
-inline void
-OddSource::Interfaces::Tests::Test::
-assert_except(
-    ::std::function<void()> const & predicate,
-    ::std::optional<::std::string const> message,
+    V1 const & v1,
+    V2 const & v2,
+    ::std::optional< ::std::string const > message,
     char const * file,
-    int line)
+    int line )
 {
+    this->_assertion_count++;
+    if ( v1 != v2 )
+    {
+        ::std::ostringstream oss;
+        oss << "v1 [" << type_id_string( v1 ) << "(" << v1 << ")] != v2 ["
+                      << type_id_string( v2 ) << "(" << v2 << ")], but they should be equal.";
+        if ( message )
+        {
+            oss << " " << *message;
+        }
+
+        this->failure( oss.str(), file, line );
+        throw TestAssertFailureAbort();
+    }
+}
+
+template< typename V1, typename V2 >
+void
+OddSource::Interfaces::Tests::
+Test::
+assert_not_equal(
+    V1 const & v1,
+    V2 const & v2,
+    ::std::optional< ::std::string const > message,
+    char const * file,
+    int line )
+{
+    this->_assertion_count++;
+    if ( v1 == v2 )
+    {
+        ::std::ostringstream oss;
+        oss << "v1 [" << type_id_string( v1 ) << "(" << v1 << ")] == v2 ["
+                      << type_id_string( v2 ) << "(" << v2 << ")], but they should not be equal";
+        if ( message )
+        {
+            oss << " " << *message;
+        }
+
+        this->failure( oss.str(), file, line );
+        throw TestAssertFailureAbort();
+    }
+}
+
+inline
+void
+OddSource::Interfaces::Tests::
+Test::
+assert_true(
+    bool test,
+    ::std::optional< ::std::string const > message,
+    char const * file,
+    int line )
+{
+    this->_assertion_count++;
+    if ( !test )
+    {
+        if ( !message )
+        {
+            message.emplace( "The boolean condition was unexpectedly false" );
+        }
+        this->failure( *message, file, line );
+        throw TestAssertFailureAbort();
+    }
+}
+
+inline
+void
+OddSource::Interfaces::Tests::
+Test::
+assert_true(
+    ::std::function< bool() > const & test,
+    ::std::optional< ::std::string const > message,
+    char const * file,
+    int line )
+{
+    this->_assertion_count++;
+    if ( !test() )
+    {
+        if ( !message )
+        {
+            message.emplace( "The predicate unexpectedly returned false" );
+        }
+        this->failure( *message, file, line );
+        throw TestAssertFailureAbort();
+    }
+}
+
+inline
+void
+OddSource::Interfaces::Tests::
+Test::
+assert_false(
+    bool test,
+    ::std::optional< ::std::string const > message,
+    char const * file,
+    int line )
+{
+    this->_assertion_count++;
+    if ( test )
+    {
+        if ( !message )
+        {
+            message.emplace( "The boolean condition was unexpectedly true" );
+        }
+        this->failure( *message, file, line );
+        throw TestAssertFailureAbort();
+    }
+}
+
+inline
+void
+OddSource::Interfaces::Tests::
+Test::
+assert_false(
+    ::std::function< bool() > const & test,
+    ::std::optional< ::std::string const > message,
+    char const * file,
+    int line
+    )
+{
+    this->_assertion_count++;
+    if ( test() )
+    {
+        if ( !message )
+        {
+            message.emplace( "The predicate unexpectedly returned true" );
+        }
+        this->failure( *message, file, line );
+        throw TestAssertFailureAbort();
+    }
+}
+
+template< class E >
+void
+OddSource::Interfaces::Tests::
+Test::
+assert_except(
+    ::std::function< void() > const & predicate,
+    ::std::optional< ::std::string const > message,
+    char const * file,
+    int line )
+{
+    using namespace std::string_literals;
     try
     {
         predicate();
-        if (!message)
+        if ( !message )
         {
             message.emplace(
-                "Expected exception of type "s + demangle(typeid(E).name()) + ", but no exception thrown."s);
+                "Expected exception of type "s + demangle( typeid( E ).name() ) + ", but no exception thrown."s );
         }
-        this->failure(*message, file, line);
+        this->failure( *message, file, line );
     }
-    catch(E const &)
+    catch( E const & )
     {
         // expected
     }
 }
 
-inline void
-OddSource::Interfaces::Tests::Test::
-failure(::std::string const & message, char const * file, int line)
+inline
+void
+OddSource::Interfaces::Tests::
+Test::
+failure(
+    ::std::string const & message,
+    char const * file,
+    int line )
 {
-    this->_failures.emplace_back(file + ":"s + ::std::to_string(line) + " - "s + message);
+    using namespace std::string_literals;
+    this->_failures.emplace_back( file + ":"s + ::std::to_string( line ) + " - "s + message );
 }
 
-inline void
-OddSource::Interfaces::Tests::Test::
-error(::std::string const & message)
+inline
+void
+OddSource::Interfaces::Tests::
+Test::
+error(
+    ::std::string const & message )
 {
-    this->_errors.emplace_back(message);
+    this->_errors.emplace_back( message );
 }

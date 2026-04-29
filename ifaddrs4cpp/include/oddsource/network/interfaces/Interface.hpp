@@ -20,13 +20,16 @@
 #define ODDSOURCE_NETWORK_INTERFACES_INTERFACE_HPP
 
 #include "detail/config.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "detail/winsock_includes.h"
 #include "IpAddress.hpp"
 #include "MacAddress.hpp"
 
 #ifndef ODDSOURCE_IS_WINDOWS
 #include <net/if.h>
+// ReSharper disable once CppUnusedIncludeDirective
 #include <netinet/in.h>
+// ReSharper disable once CppUnusedIncludeDirective
 #include <sys/types.h>
 #if __has_include(<net/route.h>)
 #include <net/route.h>
@@ -138,6 +141,17 @@ namespace OddSource::Interfaces
     ::std::unordered_map< InterfaceIPAddressFlag, ::std::string const > const
     InterfaceIPAddressFlag_Names;
 
+    OddSource_Export
+    ::std::string
+    toString(
+        InterfaceIPAddressFlag const & flag );
+
+    OddSource_Export
+    ::std::ostream &
+    operator<<(
+        ::std::ostream & os,
+        InterfaceIPAddressFlag const & flag );
+
     enum class OddSource_Export InterfaceFlag : ::std::uint16_t
     {
 #ifdef ODDSOURCE_IS_WINDOWS
@@ -213,6 +227,17 @@ namespace OddSource::Interfaces
     OddSource_Extern OddSource_Export
     ::std::unordered_map< InterfaceFlag, ::std::string const > const
     InterfaceFlag_Names;
+
+    OddSource_Export
+    ::std::string
+    toString(
+        InterfaceFlag const & version );
+
+    OddSource_Export
+    ::std::ostream &
+    operator<<(
+        ::std::ostream & os,
+        InterfaceFlag const & flag );
 
     struct Broadcast_t {};
     OddSource_Extern OddSource_Export
@@ -314,10 +339,16 @@ namespace OddSource::Interfaces
 
     template< class IPAddressT >
     OddSource_Export
+    ::std::string
+    toString(
+        InterfaceIPAddress< IPAddressT > const & address );
+
+    template< class IPAddressT >
+    OddSource_Export
     ::std::ostream &
     operator<<(
         ::std::ostream &,
-        InterfaceIPAddress< IPAddressT > const & );
+        InterfaceIPAddress< IPAddressT > const & address );
 
     class OddSource_Export Interface
     {
@@ -422,22 +453,27 @@ namespace OddSource::Interfaces
         ::std::ostream &
         operator<<(
             ::std::ostream & os,
-            Interface const & interface );
+            Interface const & rInterface );
 
         friend class InterfaceBrowser;
 
         friend class TestInterface;
 
-        ::std::uint32_t const _index; // DWORD on Windows
-        ::std::string const _name;
-        ::std::string const _friendlyName;
-        ::std::string const _description;
+        ::std::uint32_t _index; // DWORD on Windows
+        ::std::string _name;
+        ::std::string _friendlyName;
+        ::std::string _description;
         ::std::uint32_t _flags;
         ::std::optional< ::std::uint64_t const > _mtu;
         ::std::optional< MacAddress const > _macAddress;
         ::std::vector< InterfaceIPv4Address > _ipv4Addresses;
         ::std::vector< InterfaceIPv6Address > _ipv6Addresses;
     };
+
+    OddSource_Export
+    ::std::string
+    toString(
+        Interface const & rInterface );
 }
 
 #include "detail/Interface.hpp"

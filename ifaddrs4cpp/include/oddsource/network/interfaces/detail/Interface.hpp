@@ -115,7 +115,7 @@ namespace OddSource::Interfaces
     InterfaceIPAddress(
         InterfaceIPAddress && other ) noexcept
         : _address( ::std::move( other._address ) ),
-          _prefixLength( ::std::move( other._prefixLength ) ),
+          _prefixLength( ::std::move( other._prefixLength ) ), // NOLINT(*-move-const-arg)
           _broadcast( ::std::move( other._broadcast ) ),
           _pointToPointDestination( ::std::move( other._pointToPointDestination ) ),
           _flags( other._flags )
@@ -124,7 +124,7 @@ namespace OddSource::Interfaces
 
     template< class IPAddressT >
     InterfaceIPAddress< IPAddressT >::
-    ~InterfaceIPAddress() noexcept
+    ~InterfaceIPAddress() noexcept // NOLINT(*-use-equals-default)
     {
     }
 
@@ -216,6 +216,28 @@ namespace OddSource::Interfaces
     }
 
     template< class IPAddressT >
+    ::std::string
+    toString(
+        InterfaceIPAddress< IPAddressT > const & address )
+    {
+        ::std::ostringstream oss;
+        oss << address;
+        return oss.str();
+    }
+
+    template
+    OddSource_Export
+    ::std::string
+    toString< IPv4Address >(
+        InterfaceIPAddress< IPv4Address > const & address );
+
+    template
+    OddSource_Export
+    ::std::string
+    toString< IPv6Address >(
+        InterfaceIPAddress< IPv6Address > const & address );
+
+    template< class IPAddressT >
     ::std::ostream &
     operator<<(
         ::std::ostream & os,
@@ -288,14 +310,14 @@ namespace OddSource::Interfaces
     template
     OddSource_Export
     ::std::ostream &
-    operator<< < IPv4Address >(
+    operator<<< IPv4Address >(
         ::std::ostream &,
         InterfaceIPAddress< IPv4Address > const & );
 
     template
     OddSource_Export
     ::std::ostream &
-    operator<< < IPv6Address >(
+    operator<<< IPv6Address >(
         ::std::ostream &,
         InterfaceIPAddress< IPv6Address > const & );
 }

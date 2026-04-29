@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "../include/oddsource/network/interfaces/Interface.h"
+#include <oddsource/network/interfaces/Interface.hpp>
 #include "main.h"
 
 using namespace OddSource::Interfaces;
@@ -23,112 +23,137 @@ class TestInterfaceIPAddress : public Tests::Test
 {
 public:
     TestInterfaceIPAddress()
-        : Test()
     {
-        add_test(test_simple_v4);
-        add_test(test_v4_with_broadcast);
-        add_test(test_v4_with_p2p);
-        add_test(test_simple_v6);
+        add_test( test_simple_v4 );
+        add_test( test_v4_with_broadcast );
+        add_test( test_v4_with_p2p );
+        add_test( test_simple_v6 );
     }
 
-    void test_simple_v4()
+    void
+    test_simple_v4()
     {
-        InterfaceIPAddress<IPv4Address> address(IPv4Address("201.17.159.33"), 0, 24);
-        assert_equals(address.address(), IPv4Address("201.17.159.33"));
-        assert_equals(*address.prefix_length(), 24);
-        assert_not_that((bool)address.broadcast_address(), "There should be no broadcast address.");
-        assert_not_that((bool)address.point_to_point_destination(), "There should be no P2P destination.");
+        InterfaceIPAddress const address( IPv4Address( "201.17.159.33" ), 0, 24 );
+        assert_equals( address.address(), IPv4Address( "201.17.159.33" ) );
+        assert_equals( *address.prefix_length(), 24 );
+        assert_not_that(
+            static_cast< bool >( address.broadcast_address() ),
+            "There should be no broadcast address." );
+        assert_not_that(
+            static_cast< bool >( address.point_to_point_destination() ),
+            "There should be no P2P destination." );
 
-        assert_not_that(address.is_flag_enabled(Anycast));
-        assert_not_that(address.is_flag_enabled(AutoConfigured));
-        assert_not_that(address.is_flag_enabled(Deprecated));
-        assert_not_that(address.is_flag_enabled(Detached));
-        assert_not_that(address.is_flag_enabled(Duplicated));
-        assert_not_that(address.is_flag_enabled(Dynamic));
-        assert_not_that(address.is_flag_enabled(NoDad));
-        assert_not_that(address.is_flag_enabled(Optimistic));
-        assert_not_that(address.is_flag_enabled(Secured));
-        assert_not_that(address.is_flag_enabled(Temporary));
-        assert_not_that(address.is_flag_enabled(Tentative));
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Anycast ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::AutoConfigured ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Deprecated ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Detached ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Duplicated ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Dynamic ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::NoDad ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Optimistic ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Secured ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Temporary ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Tentative ) );
     }
 
-    void test_v4_with_broadcast()
+    void
+    test_v4_with_broadcast()
     {
-        InterfaceIPAddress<IPv4Address> address(
-                IPv4Address("209.53.101.102"), Dynamic | Secured, 16, IPv4Address("209.53.255.254"));
-        assert_equals(address.address(), IPv4Address("209.53.101.102"));
-        assert_equals(*address.prefix_length(), 16);
-        assert_equals(*address.broadcast_address(), IPv4Address("209.53.255.254"));
-        assert_not_that((bool)address.point_to_point_destination(), "There should be no P2P destination.");
+        InterfaceIPAddress const address(
+                IPv4Address( "209.53.101.102" ),
+                InterfaceIPAddressFlag::Dynamic | InterfaceIPAddressFlag::Secured,
+                16,
+                Broadcast,
+                IPv4Address( "209.53.255.254" ) );
+        assert_equals( address.address(), IPv4Address( "209.53.101.102" ) );
+        assert_equals( *address.prefix_length(), 16 );
+        assert_equals( *address.broadcast_address(), IPv4Address( "209.53.255.254" ) );
+        assert_not_that(
+            static_cast< bool >( address.point_to_point_destination() ),
+            "There should be no P2P destination." );
 
-        assert_not_that(address.is_flag_enabled(Anycast));
-        assert_not_that(address.is_flag_enabled(AutoConfigured));
-        assert_not_that(address.is_flag_enabled(Deprecated));
-        assert_not_that(address.is_flag_enabled(Detached));
-        assert_not_that(address.is_flag_enabled(Duplicated));
-        assert_that(address.is_flag_enabled(Dynamic));
-        assert_not_that(address.is_flag_enabled(NoDad));
-        assert_not_that(address.is_flag_enabled(Optimistic));
-        assert_that(address.is_flag_enabled(Secured));
-        assert_not_that(address.is_flag_enabled(Temporary));
-        assert_not_that(address.is_flag_enabled(Tentative));
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Anycast ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::AutoConfigured ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Deprecated ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Detached ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Duplicated ) );
+        assert_that( address.is_flag_enabled( InterfaceIPAddressFlag::Dynamic ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::NoDad ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Optimistic ) );
+        assert_that( address.is_flag_enabled( InterfaceIPAddressFlag::Secured ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Temporary ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Tentative ) );
     }
 
-    void test_v4_with_p2p()
+    void
+    test_v4_with_p2p()
     {
-        InterfaceIPAddress<IPv4Address> address(
-                IPv4Address("209.53.101.102"),
-                AutoConfigured | NoDad | Optimistic,
+        InterfaceIPAddress const address(
+                IPv4Address( "209.53.101.102" ),
+                InterfaceIPAddressFlag::AutoConfigured | InterfaceIPAddressFlag::NoDad |
+                    InterfaceIPAddressFlag::Optimistic,
                 0,
-                IPv4Address("209.53.255.1"),
-                true);
-        assert_equals(address.address(), IPv4Address("209.53.101.102"));
-        assert_not_that((bool)address.prefix_length(), "There should be no prefix length.");
-        assert_not_that((bool)address.broadcast_address(), "There should be no broadcast address.");
-        assert_equals(*address.point_to_point_destination(), IPv4Address("209.53.255.1"));
+                PointToPoint,
+                IPv4Address( "209.53.255.1" ) );
+        assert_equals( address.address(), IPv4Address( "209.53.101.102" ) );
+        assert_not_that(
+            static_cast< bool >( address.prefix_length() ),
+            "There should be no prefix length." );
+        assert_not_that(
+            static_cast< bool >( address.broadcast_address() ),
+            "There should be no broadcast address." );
+        assert_equals( *address.point_to_point_destination(), IPv4Address( "209.53.255.1" ) );
 
-        assert_not_that(address.is_flag_enabled(Anycast));
-        assert_that(address.is_flag_enabled(AutoConfigured));
-        assert_not_that(address.is_flag_enabled(Deprecated));
-        assert_not_that(address.is_flag_enabled(Detached));
-        assert_not_that(address.is_flag_enabled(Duplicated));
-        assert_not_that(address.is_flag_enabled(Dynamic));
-        assert_that(address.is_flag_enabled(NoDad));
-        assert_that(address.is_flag_enabled(Optimistic));
-        assert_not_that(address.is_flag_enabled(Secured));
-        assert_not_that(address.is_flag_enabled(Temporary));
-        assert_not_that(address.is_flag_enabled(Tentative));
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Anycast ) );
+        assert_that( address.is_flag_enabled( InterfaceIPAddressFlag::AutoConfigured ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Deprecated ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Detached ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Duplicated ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Dynamic ) );
+        assert_that( address.is_flag_enabled( InterfaceIPAddressFlag::NoDad ) );
+        assert_that( address.is_flag_enabled( InterfaceIPAddressFlag::Optimistic ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Secured ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Temporary ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Tentative ) );
     }
 
-    void test_simple_v6()
+    void
+    test_simple_v6()
     {
-        InterfaceIPAddress<IPv6Address> address(IPv6Address("2001::dead:beef"), 0, 64);
-        assert_equals(address.address(), IPv6Address("2001::dead:beef"));
-        assert_equals(*address.prefix_length(), 64);
-        assert_not_that((bool)address.broadcast_address(), "There should be no broadcast address.");
-        assert_not_that((bool)address.point_to_point_destination(), "There should be no P2P destination.");
+        InterfaceIPAddress address( IPv6Address( "2001::dead:beef" ), 0, 64 );
+        assert_equals( address.address(), IPv6Address( "2001::dead:beef" ) );
+        assert_equals( *address.prefix_length(), 64 );
+        assert_not_that(
+            static_cast< bool >( address.broadcast_address() ),
+            "There should be no broadcast address." );
+        assert_not_that(
+            static_cast< bool >( address.point_to_point_destination() ),
+            "There should be no P2P destination." );
 
-        assert_not_that(address.is_flag_enabled(Anycast));
-        assert_not_that(address.is_flag_enabled(AutoConfigured));
-        assert_not_that(address.is_flag_enabled(Deprecated));
-        assert_not_that(address.is_flag_enabled(Detached));
-        assert_not_that(address.is_flag_enabled(Duplicated));
-        assert_not_that(address.is_flag_enabled(Dynamic));
-        assert_not_that(address.is_flag_enabled(NoDad));
-        assert_not_that(address.is_flag_enabled(Optimistic));
-        assert_not_that(address.is_flag_enabled(Secured));
-        assert_not_that(address.is_flag_enabled(Temporary));
-        assert_not_that(address.is_flag_enabled(Tentative));
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Anycast ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::AutoConfigured ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Deprecated ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Detached ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Duplicated ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Dynamic ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::NoDad ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Optimistic ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Secured ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Temporary ) );
+        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Tentative ) );
     }
 
-    static std::unique_ptr<Test> create()
+    [[maybe_unused]]
+    static
+    std::unique_ptr<Test>
+    create()
     {
-        return std::make_unique<TestInterfaceIPAddress>();
+        return std::make_unique< TestInterfaceIPAddress >();
     }
 };
 
 namespace
 {
     [[maybe_unused]]
-    Tests::Test::Registrar<TestInterfaceIPAddress> registrar("TestInterfaceIPAddress");
+    Tests::Test::Registrar< TestInterfaceIPAddress > registrar( "TestInterfaceIPAddress" );
 }

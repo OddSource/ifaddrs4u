@@ -20,6 +20,8 @@
 #include "../IpAddress.hpp"
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
+#include "../detail/flip.hpp"
+
 #ifdef ODDSOURCE_IS_WINDOWS
 #include "winsock_includes.h"
 #else /* ODDSOURCE_IS_WINDOWS */
@@ -56,7 +58,7 @@ namespace
         ::std::string_view const & repr )
     {
         using namespace ::std::string_literals;
-        if (repr.length() == 0)
+        if ( repr.empty() )
         {
             throw InvalidIPAddress("Invalid empty IP address string.");
         }
@@ -140,7 +142,7 @@ namespace
             family = AF_INET;
         }
 
-        static const size_t host_length(100);
+        static constexpr size_t host_length(100);
         char host_chars[host_length];
         auto ptr = ::inet_ntop(family, data, host_chars, host_length);
         if (ptr == nullptr)
@@ -294,11 +296,76 @@ namespace
 namespace OddSource::Interfaces
 {
     OddSource_Inline
+    InvalidIPAddress::
+    InvalidIPAddress(
+        ::std::string_view const & what )
+        : ::std::invalid_argument( ::std::string( what ) )
+    {
+    }
+
+    OddSource_Inline
+    InvalidIPAddress::
+    InvalidIPAddress( // NOLINT(*-use-equals-default)
+        InvalidIPAddress const & other )
+        : ::std::invalid_argument( other )
+    {
+    }
+
+    OddSource_Inline
+    InvalidIPAddress::
+    ~InvalidIPAddress() noexcept  // NOLINT(*-use-equals-default)
+    {
+    }
+
+    OddSource_Inline
     ::std::string
     toString(
         IPAddressVersion const & version )
     {
         return ::std::to_string( static_cast< ::std::uint16_t >( version ) );
+    }
+
+    OddSource_Inline
+    ::std::ostream &
+    operator<<(
+        ::std::ostream & os,
+        IPAddressVersion const & version )
+    {
+        return os << toString( version );
+    }
+
+    ::std::unordered_map< ::std::string, MulticastScope const > const
+    MulticastScope_Values
+    {
+        { "Reserved", MulticastScope::Reserved },
+        { "InterfaceLocal", MulticastScope::InterfaceLocal },
+        { "LinkLocal", MulticastScope::LinkLocal },
+        { "RealmLocal", MulticastScope::RealmLocal },
+        { "AdminLocal", MulticastScope::AdminLocal },
+        { "SiteLocal", MulticastScope::SiteLocal },
+        { "OrganizationLocal", MulticastScope::OrganizationLocal },
+        { "Global", MulticastScope::Global },
+        { "Unassigned", MulticastScope::Unassigned },
+    };
+
+    ::std::unordered_map< MulticastScope, ::std::string const > const
+    MulticastScope_Names = detail::flip( MulticastScope_Values );
+
+    OddSource_Inline
+    ::std::string
+    toString(
+        MulticastScope const & scope )
+    {
+        return MulticastScope_Names.at( scope );
+    }
+
+    OddSource_Inline
+    ::std::ostream &
+    operator<<(
+        ::std::ostream & os,
+        MulticastScope const & scope )
+    {
+        return os << toString( scope );
     }
 
     OddSource_Inline
@@ -348,7 +415,7 @@ namespace OddSource::Interfaces
 
     OddSource_Inline
     IPAddress::
-    IPAddress(
+    IPAddress( // NOLINT(*-use-equals-default)
         IPAddress const & other )
         : _representation( other._representation ),
           _is_unspecified( other._is_unspecified ),
@@ -372,7 +439,7 @@ namespace OddSource::Interfaces
           _is_private(other._is_private),
           _is_multicast(other._is_multicast),
           _is_reserved(other._is_reserved),
-          _multicast_scope( std::move( other._multicast_scope ) )
+          _multicast_scope( ::std::move( other._multicast_scope ) ) // NOLINT(*-move-const-arg)
     {
         other._is_unspecified = false;
         other._is_loopback = false;
@@ -384,7 +451,7 @@ namespace OddSource::Interfaces
 
     OddSource_Inline
     IPAddress::
-    ~IPAddress() noexcept
+    ~IPAddress() noexcept // NOLINT(*-use-equals-default)
     {
     }
 
@@ -572,7 +639,7 @@ namespace OddSource::Interfaces
 
     OddSource_Inline
     IPv4Address::
-    ~IPv4Address() noexcept
+    ~IPv4Address() noexcept // NOLINT(*-use-equals-default)
     {
     }
 
@@ -821,7 +888,7 @@ namespace OddSource::Interfaces
 
     OddSource_Inline
     IPv6Address::
-    ~IPv6Address() noexcept
+    ~IPv6Address() noexcept // NOLINT(*-use-equals-default)
     {
     }
 
@@ -847,7 +914,7 @@ namespace OddSource::Interfaces
     {
         if (this->_scope)
         {
-            return IPv6Address( this->_data.get(), *this->_scope );
+            return { this->_data.get(), *this->_scope };
         }
         return IPv6Address( this->_data.get() );
     }
@@ -921,7 +988,7 @@ namespace OddSource::Interfaces
     IPv6Address::
     has_scope_id() const
     {
-        return (bool)this->_scope;
+        return static_cast< bool >( this->_scope );
     }
 
     OddSource_Inline
@@ -937,7 +1004,7 @@ namespace OddSource::Interfaces
     IPv6Address::
     scope_id() const
     {
-        static ::std::optional<::std::uint32_t> const nil; // prevent "returning ref to temp local"
+        static constexpr ::std::optional< ::std::uint32_t > nil; // prevent "returning ref to temp local"
         return this->_scope ? this->_scope->scope_id : nil;
     }
 
@@ -1009,6 +1076,14 @@ namespace OddSource::Interfaces
         IPv6Address const & other) const
     {
         return !this->operator==(other);
+    }
+
+    OddSource_Export
+    ::std::string
+    toString(
+        IPAddress const & address )
+    {
+        return address.operator::std::string();;
     }
 
     OddSource_Inline

@@ -45,7 +45,7 @@ namespace OddSource::Interfaces
 
         OddSource_Inline
         virtual
-        ~InterfaceBrowserSystemError() noexcept;
+        ~InterfaceBrowserSystemError() noexcept; // NOLINT(*-use-override)
     };
 
 #ifdef ODDSOURCE_IS_WINDOWS
