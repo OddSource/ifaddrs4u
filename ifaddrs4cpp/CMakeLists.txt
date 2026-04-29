@@ -1,5 +1,5 @@
 #[[
-    Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+    Copyright © 2010-2026 OddSource Code (license@oddsource.io)
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -105,12 +105,6 @@ set(${PROJECT_NAME}_sources
 configure_file(version.h.in version.h)
 #file(COPY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CMAKE_BINARY_DIR}/version.h DESTINATION ${CMAKE_BINARY_DIR}/include/oddsource/network/interfaces/detail)
-#file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
-#file(COPY ${CMAKE_BINARY_DIR}/version.h DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
-#file(GLOB PUBLIC_HEADERS_TO_COPY ${CMAKE_SOURCE_DIR}/*.h)
-#file(COPY ${PUBLIC_HEADERS_TO_COPY} DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
-#file(GLOB PUBLIC_HEADERS_TO_COPY ${CMAKE_SOURCE_DIR}/*.hpp)
-#file(COPY ${PUBLIC_HEADERS_TO_COPY} DESTINATION ${CMAKE_BINARY_DIR}/include/ifaddrs4cpp)
 
 add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE cxx_std_17)
@@ -148,6 +142,8 @@ if(NOT ${BUILD_DYNAMIC_ONLY})
 endif()
 
 if (${ENABLE_TESTS})
+    find_package(Boost CONFIG)
+
     add_executable(${PROJECT_NAME}_tests
                    tests/main.cpp
                    tests/TestIPv4Address.cpp
@@ -157,6 +153,15 @@ if (${ENABLE_TESTS})
                    tests/TestInterfaceIPAddress.cpp
                    tests/TestVersionInfo.cpp
                    tests/TestInterfaceBrowser.cpp)
+
+    if(Boost_FOUND)
+        message(STATUS "Boost found, enabling Boost::Asio::IP features.")
+        target_link_libraries(${PROJECT_NAME}_tests PRIVATE Boost::asio)
+        target_compile_definitions(${PROJECT_NAME}_tests PRIVATE ODDSOURCE_INCLUDE_BOOST=1)
+    else()
+        message(STATUS "Boost not found, building without Boost::Asio::IP features.")
+    endif()
+
     target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}_compiler_flags)
     target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}-static)
     target_include_directories(${PROJECT_NAME}_tests PUBLIC "${CMAKE_SOURCE_DIR}/include")

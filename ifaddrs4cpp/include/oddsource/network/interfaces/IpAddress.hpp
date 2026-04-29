@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,10 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+#  include ODDSOURCE_BOOST_HEADER(asio/ip/address.hpp)
+#endif /* ODDSOURCE_INCLUDE_BOOST */
 
 namespace OddSource::Interfaces
 {
@@ -170,6 +174,13 @@ namespace OddSource::Interfaces
         explicit
         operator char const *() const;
 
+#ifdef ODDSOURCE_INCLUDE_BOOST
+        [[nodiscard]]
+        virtual
+        explicit
+        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const = 0;
+#endif /* ODDSOURCE_INCLUDE_BOOST */
+
         /**
          * Indicates whether this address represents the unspecified address
          * (0.0.0.0 or ::0).
@@ -255,12 +266,12 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         virtual
         IPAddressVersion
-        version() const = 0;
+        version() const noexcept = 0;
 
         [[nodiscard]]
         virtual
         ::std::uint8_t
-        maximum_prefix_length() const = 0;
+        maximum_prefix_length() const noexcept = 0;
 
     protected:
         OddSource_Inline
@@ -329,15 +340,28 @@ namespace OddSource::Interfaces
         explicit
         operator in_addr const *() const;
 
+#ifdef ODDSOURCE_INCLUDE_BOOST
         [[nodiscard]]
-        OddSource_Inline
-        IPAddressVersion
-        version() const final;
+        virtual
+        inline
+        explicit
+        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const final;
 
         [[nodiscard]]
-        OddSource_Inline
+        inline
+        explicit
+        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4() const;
+#endif /* ODDSOURCE_INCLUDE_BOOST */
+
+        [[nodiscard]]
+        inline
+        IPAddressVersion
+        version() const noexcept final;
+
+        [[nodiscard]]
+        inline
         ::std::uint8_t
-        maximum_prefix_length() const final;
+        maximum_prefix_length() const noexcept final;
 
         [[nodiscard]]
         OddSource_Inline
@@ -422,6 +446,19 @@ namespace OddSource::Interfaces
         OddSource_Inline
         explicit
         operator in6_addr const *() const;
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+        [[nodiscard]]
+        virtual
+        inline
+        explicit
+        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const final;
+
+        [[nodiscard]]
+        inline
+        explicit
+        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6() const;
+#endif /* ODDSOURCE_INCLUDE_BOOST */
 
         /**
          * Returns a copy of this address with a normalized string representation.
@@ -544,14 +581,14 @@ namespace OddSource::Interfaces
             MulticastV6Flag const & flag ) const;
 
         [[nodiscard]]
-        OddSource_Inline
+        inline
         IPAddressVersion
-        version() const final;
+        version() const noexcept final;
 
         [[nodiscard]]
-        OddSource_Inline
+        inline
         ::std::uint8_t
-        maximum_prefix_length() const final;
+        maximum_prefix_length() const noexcept final;
 
         [[nodiscard]]
         OddSource_Inline
@@ -583,8 +620,8 @@ namespace OddSource::Interfaces
             ::std::unique_ptr< in6_addr const > && data,
             ::std::optional< v6Scope > && scope );
 
-        ::std::unique_ptr<in6_addr const> _data;
-        ::std::optional<v6Scope> const _scope;
+        ::std::unique_ptr< in6_addr const > _data;
+        ::std::optional< v6Scope > const _scope;
         ::std::string const _without_scope;
         bool _is_unique_local = false;
         bool _is_site_local = false;
@@ -592,7 +629,7 @@ namespace OddSource::Interfaces
         bool _is_v4_compatible = false;
         bool _is_v4_translated = false;
         bool _is_6to4 = false;
-        ::std::optional<::std::uint8_t> _multicast_flags;
+        ::std::optional< ::std::uint8_t > _multicast_flags;
     };
 
     OddSource_Export
@@ -606,6 +643,8 @@ namespace OddSource::Interfaces
         ::std::ostream & os,
         IPAddress const & address );
 }
+
+#include "detail/IpAddress.hpp"
 
 #ifdef IFADDRS4CPP_INLINE_SOURCE
 #include "impl/IpAddress.ipp"

@@ -61,6 +61,22 @@ purposes::
     -- on Linux
     $ ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0 ./cmake-build-test-with-asan/ifaddrs4cpp_tests
 
+Boost Support
+*************
+
+ifaddrs4cpp supports converting IP address objects to Boost IP address objects. To enable this, define
+:code:`ODDSOURCE_INCLUDE_BOOST` before including any ifaddrs4cpp headers and/or at build time with
+:code:`-DODDSOURCE_INCLUDE_BOOST`.
+
+If you need your Boost namespace to be something other than :code:`boost`,
+define :code:`ODDSOURCE_BOOST_NAMESPACE_ROOT=my_boost` to indicate an alternate namespace. If you need the include root
+to be something other than :code:`boost`, define :code:`ODDSOURCE_BOOST_HEADER_ROOT=my_boost` to indicate an alternate
+root.
+
+To run tests with Boost support, include :code:`-DBOOST_ROOT=/path/to/boot` or
+:code:`-DBoost_DIR=/path/to/boost` in the cmake commands above. This will have the side effect of
+automatically defining :code:`ODDSOURCE_INCLUDE_BOOST` for that cmake build.
+
 Usage
 *****
 

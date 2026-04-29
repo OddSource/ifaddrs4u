@@ -659,22 +659,6 @@ namespace OddSource::Interfaces
     }
 
     OddSource_Inline
-    IPAddressVersion
-    IPv4Address::
-    version() const
-    {
-        return IPAddressVersion::IPv4;
-    }
-
-    OddSource_Inline
-    ::std::uint8_t
-    IPv4Address::
-    maximum_prefix_length() const
-    {
-        return 32;
-    }
-
-    OddSource_Inline
     bool
     IPv4Address::
     operator==(
@@ -917,22 +901,6 @@ namespace OddSource::Interfaces
             return { this->_data.get(), *this->_scope };
         }
         return IPv6Address( this->_data.get() );
-    }
-
-    OddSource_Inline
-    IPAddressVersion
-    IPv6Address::
-    version() const
-    {
-        return IPAddressVersion::IPv6;
-    }
-
-    OddSource_Inline
-    ::std::uint8_t
-    IPv6Address::
-    maximum_prefix_length() const
-    {
-        return 128;
     }
 
     OddSource_Inline
