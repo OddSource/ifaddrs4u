@@ -62,12 +62,8 @@ class TestSamples(TestCase):
         self.assertIsNotNone(interface)
         self.assertEqual(interface.index, 3)
         self.assertEqual(interface.name, "en0")
-
-        if IS_WINDOWS:
-            self.assertTrue(hasattr(interface, "windows_uuid"))
-            self.assertEqual(interface.windows_uuid, uuid.UUID("24af9519-2a42-4f62-99fa-1ed3147ad90a"))
-        else:
-            self.assertFalse(hasattr(interface, "windows_uuid"))
+        self.assertEqual(interface.friendly_name, "en0")
+        self.assertEqual(interface.description, "en0")
 
         self.assertEqual(f"{interface.mac_address}", "ac:de:48:00:11:22")
 

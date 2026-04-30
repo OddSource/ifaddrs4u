@@ -15,18 +15,19 @@
  */
 
 #include "config.h"
+#include "helpers.h"
 #include "interface.h"
 #include "ip_address.h"
 #include "mac_address.h"
 #include "macros.h"
 #include "version.h"
 
-#include "structmember.h"  // not include in Python.h
+#include "structmember.h"  // not included in Python.h
 
 #include <sstream>
 #include <stdexcept>
 
-#include <ifaddrs4cpp/Interfaces.h>
+#include <oddsource/network/interfaces/Interfaces.hpp>
 
 #if PY_MINOR_VERSION < 10
 int PyModule_AddObjectRef(PyObject * module, char const * name, PyObject * value)
@@ -123,11 +124,11 @@ _get_interfaces(OddSource::Interfaces::InterfaceBrowser & browser)
         }
 
         int i(0);
-        for (auto const & iface : interfaces)
+        for (auto const & pInterface : interfaces)
         {
             try
             {
-                PyObject * item = OddSource::ifaddrs4py::convert_to_python(iface);
+                PyObject * item = OddSource::ifaddrs4py::convert_to_python( *pInterface );
                 if (PyTuple_SetItem(tuple, i++, item) != 0)
                 {
                     Py_XDECREF(item);
@@ -362,7 +363,7 @@ InterfaceBrowser___getitem___mapping(InterfaceBrowser_PyObj * self, PyObject * k
         {
             try
             {
-                return OddSource::ifaddrs4py::convert_to_python(self->browser->get_interface(chars));
+                return OddSource::ifaddrs4py::convert_to_python( (*self->browser)[ chars ] );
             }
             CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_KeyError, return NULL)
         }
@@ -379,7 +380,7 @@ InterfaceBrowser___getitem___mapping(InterfaceBrowser_PyObj * self, PyObject * k
     {
         try
         {
-            return OddSource::ifaddrs4py::convert_to_python(self->browser->get_interface(PyLong_AsUnsignedLong(key)));
+            return OddSource::ifaddrs4py::convert_to_python( (*self->browser)[ PyLong_AsUnsignedLong( key ) ] );
         }
         CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_KeyError, return NULL)
     }
@@ -471,11 +472,7 @@ static PyTypeObject InterfaceBrowser_PyType =
     NULL, // .tp_getattro
     NULL, // .tp_setattro
     NULL, // .tp_as_buffer
-#if PY_MINOR_VERSION > 9
     Py_TPFLAGS_METHOD_DESCRIPTOR | Py_TPFLAGS_IMMUTABLETYPE, // .tp_flags
-#else
-    Py_TPFLAGS_METHOD_DESCRIPTOR, // .tp_flags
-#endif
     NULL, // .tp_doc
     NULL, // .tp_traverse
     NULL, // .tp_clear
@@ -505,11 +502,12 @@ static PyTypeObject InterfaceBrowser_PyType =
     0, // .tp_version_tag
     NULL, // .tp_finalize
     NULL, // .tp_vectorcall
-#if PY_MINOR_VERSION < 9
-    0, // Py_DEPRECATED(3.8) .tp_print
-#elif PY_MINOR_VERSION > 11
+#if PY_MINOR_VERSION > 11
     0, // .tp_watched added in 3.12
-#endif /* PY_MINOR_VERSION < 9 */
+#endif /* PY_MINOR_VERSION > 11 */
+#if PY_MINOR_VERSION > 12
+    0, // .tp_versions_used added in 3.13
+#endif /* PY_MINOR_VERSION > 12 */
 };
 
 #ifndef ODDSOURCE_IS_WINDOWS
@@ -520,10 +518,45 @@ static int ifaddrs4py_module_init(PyObject * module_self)
 {
     using namespace OddSource::ifaddrs4py;
 
-    void * void_state_wrapper(PyType_GetModuleState(module_self));
+    void * void_state_wrapper( PyModule_GetState( module_self ) );
     IF_NULL_RETURN_INT(void_state_wrapper)
-    auto state_wrapper(reinterpret_cast<ModuleStateWrapper *>(void_state_wrapper));
-    state_wrapper->state = ::std::make_shared<ModuleState>();
+    auto state_wrapper( reinterpret_cast< ModuleStateWrapper * >( void_state_wrapper ) );
+
+    auto pState( ::std::make_shared< ModuleState >() );
+    state_wrapper->state = ::std::move( pState );
+
+    try
+    {
+        OddSource::ifaddrs4py::init_version_constants(module_self);
+        OddSource::ifaddrs4py::init_interface_enums(module_self);
+        OddSource::ifaddrs4py::init_ip_address_samples(module_self);
+        OddSource::ifaddrs4py::init_mac_address_sample(module_self);
+    }
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_ImportError, { return -1; })
+
+    IllegalStateError = PyErr_NewException("ifaddrs4py.extern.IllegalStateError", PyExc_RuntimeError, NULL);
+    if (IllegalStateError == NULL)
+    {
+        //Py_DECREF(module_self);
+        return -1;
+    }
+
+    Py_INCREF(IllegalStateError);
+    if (PyModule_AddObject(module_self, "IllegalStateError", IllegalStateError) != 0)
+    {
+        Py_DECREF(IllegalStateError);
+        //Py_DECREF(module_self);
+        return -1;
+    }
+
+    Py_INCREF(&InterfaceBrowser_PyType);
+    if (PyModule_AddObject(module_self, "InterfaceBrowser", (PyObject *)&InterfaceBrowser_PyType) != 0)
+    {
+        Py_DECREF(IllegalStateError);
+        Py_DECREF(&InterfaceBrowser_PyType);
+        //Py_DECREF(module_self);
+        return -1;
+    }
 
     return 0;
 }
@@ -532,7 +565,7 @@ static int ifaddrs4py_module_traverse(PyObject * module_self, visitproc visit, v
 {
     using namespace OddSource::ifaddrs4py;
 
-    ModuleState::get_state_of(module_self)->gc_visit(visit, arg);
+    return ModuleState::get_state_of(module_self)->gc_visit(visit, arg);
 }
 
 static void ifaddrs4py_module_free(PyObject * module_self)
@@ -554,7 +587,7 @@ static struct PyMethodDef ifaddrs4py_module_methods [] =
 };
 
 static PyModuleDef_Slot ifaddrs4py_module_slots [] = {
-    {Py_mod_exec, ifaddrs4py_module_init},
+    {Py_mod_exec, reinterpret_cast< void * >( ifaddrs4py_module_init )},
     {0, NULL}
 };
 
@@ -587,44 +620,15 @@ PyInit_extern(void)
     {
         return NULL;
     }
+    return PyModuleDef_Init(&ifaddrs4py_module);
 
-    PyObject * module = PyModule_Create(&ifaddrs4py_module);
+    /*PyObject * module = PyModuleDef_Init(&ifaddrs4py_module);
     if (module == NULL)
     {
         return NULL;
-    }
+    }*/
 
-    try
-    {
-        OddSource::ifaddrs4py::init_version_constants(module);
-        OddSource::ifaddrs4py::init_interface_enums(module);
-        OddSource::ifaddrs4py::init_ip_address_samples(module);
-        OddSource::ifaddrs4py::init_mac_address_sample(module);
-    }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_ImportError, { Py_DECREF(module); return NULL; })
+    //
 
-    IllegalStateError = PyErr_NewException("ifaddrs4py.extern.IllegalStateError", PyExc_RuntimeError, NULL);
-    if (IllegalStateError == NULL)
-    {
-        Py_DECREF(module);
-        return NULL;
-    }
-    Py_INCREF(IllegalStateError);
-    if (PyModule_AddObject(module, "IllegalStateError", IllegalStateError) != 0)
-    {
-        Py_DECREF(IllegalStateError);
-        Py_DECREF(module);
-        return NULL;
-    }
-
-    Py_INCREF(&InterfaceBrowser_PyType);
-    if (PyModule_AddObject(module, "InterfaceBrowser", (PyObject *)&InterfaceBrowser_PyType) != 0)
-    {
-        Py_DECREF(IllegalStateError);
-        Py_DECREF(&InterfaceBrowser_PyType);
-        Py_DECREF(module);
-        return NULL;
-    }
-
-    return module;
+    //return module;
 }

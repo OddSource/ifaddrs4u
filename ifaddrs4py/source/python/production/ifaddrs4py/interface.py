@@ -18,26 +18,18 @@ from __future__ import annotations
 
 import sys
 from typing import (
+    Dict,
     final,
     Generic,
     Optional,
     TypeVar,
 )
-import uuid
-
-if sys.version_info >= (3, 9):
-    Tuple = tuple
-else:
-    from typing import Tuple
 
 if sys.version_info >= (3, 12):
     from typing import override
 else:
     from typing_extensions import override
 
-from ifaddrs4py.constants import (
-    IS_WINDOWS,
-)
 from ifaddrs4py.extern import (
     InterfaceIPAddressFlag,
     InterfaceFlag,
@@ -60,7 +52,7 @@ __all__ = (
 
 IPAddressT = TypeVar("IPAddressT", IPv4Address, IPv6Address)
 
-_IP_ADDRESS_FLAG_DISPLAYS = {
+_IP_ADDRESS_FLAG_DISPLAYS: Dict[str, InterfaceIPAddressFlag] = {
     "autoconf": InterfaceIPAddressFlag.AutoConfigured,
     "deprecated": InterfaceIPAddressFlag.Deprecated,
     "secured": InterfaceIPAddressFlag.Secured,
@@ -74,7 +66,7 @@ _IP_ADDRESS_FLAG_DISPLAYS = {
     "nodad": InterfaceIPAddressFlag.NoDad,
 }
 
-_INTERFACE_FLAG_DISPLAYS = {
+_INTERFACE_FLAG_DISPLAYS: Dict[str, InterfaceFlag] = {
     "UP": InterfaceFlag.IsUp,
     "RUNNING": InterfaceFlag.IsRunning,
     "LOOPBACK": InterfaceFlag.IsLoopback,
@@ -179,61 +171,34 @@ class InterfaceIPAddress(Generic[IPAddressT]):
         )
 
 
-_slots: Tuple[str, ...]
-if IS_WINDOWS:
-    _slots = (
-        "_index", "_name", "_windows_uuid", "_flags", "_mtu",
-        "_mac_address", "_ipv4_addresses", "_ipv6_addresses",
-    )
-else:
-    _slots = (
-        "_index", "_name", "_flags", "_mtu",
-        "_mac_address", "_ipv4_addresses", "_ipv6_addresses",
-    )
-
-
 @final
 class Interface(object):
-    __slots__ = _slots
+    __slots__ = (
+        "_index", "_name", "_friendly_name", "_description", "_flags", "_mtu",
+        "_mac_address", "_ipv4_addresses", "_ipv6_addresses",
+    )
 
-    if IS_WINDOWS:
-        def __init__(
-            self,
-            index: int,
-            name: str,
-            windows_uuid: str,
-            flags: int,
-            mtu: Optional[int] = None,
-            mac_address: Optional[MacAddress] = None,
-            ipv4_addresses: Optional[Tuple[InterfaceIPAddress[IPv4Address], ...]] = None,
-            ipv6_addresses: Optional[Tuple[InterfaceIPAddress[IPv6Address], ...]] = None,
-        ) -> None:
-            self._index = index
-            self._name = name
-            self._windows_uuid = uuid.UUID(windows_uuid)
-            self._flags = flags
-            self._mtu = mtu
-            self._mac_address = mac_address
-            self._ipv4_addresses = ipv4_addresses or ()
-            self._ipv6_addresses = ipv6_addresses or ()
-    else:
-        def __init__(  # type: ignore[misc]
-            self,
-            index: int,
-            name: str,
-            flags: int,
-            mtu: Optional[int] = None,
-            mac_address: Optional[MacAddress] = None,
-            ipv4_addresses: Optional[Tuple[InterfaceIPAddress[IPv4Address], ...]] = None,
-            ipv6_addresses: Optional[Tuple[InterfaceIPAddress[IPv6Address], ...]] = None,
-        ) -> None:
-            self._index = index
-            self._name = name
-            self._flags = flags
-            self._mtu = mtu
-            self._mac_address = mac_address
-            self._ipv4_addresses = ipv4_addresses or ()
-            self._ipv6_addresses = ipv6_addresses or ()
+    def __init__(
+        self,
+        index: int,
+        name: str,
+        friendly_name: str,
+        description: str,
+        flags: int,
+        mtu: Optional[int] = None,
+        mac_address: Optional[MacAddress] = None,
+        ipv4_addresses: Optional[tuple[InterfaceIPAddress[IPv4Address], ...]] = None,
+        ipv6_addresses: Optional[tuple[InterfaceIPAddress[IPv6Address], ...]] = None,
+    ) -> None:
+        self._index = index
+        self._name = name
+        self._friendly_name = friendly_name
+        self._description = description
+        self._flags = flags
+        self._mtu = mtu
+        self._mac_address = mac_address
+        self._ipv4_addresses = ipv4_addresses or ()
+        self._ipv6_addresses = ipv6_addresses or ()
 
     @property
     def index(self) -> int:
@@ -243,10 +208,13 @@ class Interface(object):
     def name(self) -> str:
         return self._name
 
-    if IS_WINDOWS:
-        @property
-        def windows_uuid(self) -> uuid.UUID:
-            return self._windows_uuid
+    @property
+    def friendly_name(self) -> str:
+        return self._friendly_name
+
+    @property
+    def description(self) -> str:
+        return self._description
 
     @property
     def mtu(self) -> Optional[int]:
@@ -257,11 +225,11 @@ class Interface(object):
         return self._mac_address
 
     @property
-    def ipv4_addresses(self) -> Tuple[InterfaceIPAddress[IPv4Address], ...]:
+    def ipv4_addresses(self) -> tuple[InterfaceIPAddress[IPv4Address], ...]:
         return self._ipv4_addresses
 
     @property
-    def ipv6_addresses(self) -> Tuple[InterfaceIPAddress[IPv6Address], ...]:
+    def ipv6_addresses(self) -> tuple[InterfaceIPAddress[IPv6Address], ...]:
         return self._ipv6_addresses
 
     def is_flag_enabled(self, flag: InterfaceFlag) -> bool:

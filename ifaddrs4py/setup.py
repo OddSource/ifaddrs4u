@@ -158,6 +158,7 @@ libraries: List[str] = []
 extra_objects: List[str] = []
 extra_compile_args: List[str] = []
 extra_link_args: List[str] = []
+undef_macros: List[str] = []
 if IS_WINDOWS:
     extra_compile_args.extend(["/std:c++17", "/wd4275", "/wd4251", "/wd4455"])
 else:
@@ -169,9 +170,10 @@ else:
         "-Wpedantic",
         "-Wshadow",
         "-Wunused",
-        "-Werror",
+        "-Werror"
     ])
     if IS_MACOS:
+        # noinspection PyDeprecation
         target = (
             sysconfig.get_config_var("MACOSX_DEPLOYMENT_TARGET") or
             sysconfig.get_config_var("MACOS_DEPLOYMENT_TARGET")
@@ -183,9 +185,19 @@ else:
         target_opts = [f"-mmacosx-version-min={MACOS_TARGET}"]
         extra_compile_args.extend(target_opts)
         extra_link_args.extend(target_opts)
+        extra_compile_args.append("-Wno-cast-function-type-mismatch")
+    else:
+        extra_compile_args.append("-Wno-cast-function-type")
 
 
 def pre_build(options: Options) -> None:
+    if options.cpp_debug:
+        undef_macros.append("NDEBUG")
+        if IS_WINDOWS:
+            pass  # TODO
+        else:
+            extra_compile_args.extend(["-g3", "-O0"])
+
     extern_cpp_base: pathlib.Path
     if EXTERN_CPP_SOURCE_SDIST.exists():
         extern_cpp_base = EXTERN_CPP_SOURCE_SDIST
@@ -201,10 +213,11 @@ def pre_build(options: Options) -> None:
     print_fast(f"Found ifaddrs4cpp sources at {extern_cpp_base}...")
 
     cmake_path = extern_cpp_base / CMAKE_BUILD_DIRECTORY
+    include_dirs.append(f"{extern_cpp_base / 'include'}")
     include_dirs.append(f"{cmake_path / 'include'}")
-    library_dirs.append(f"{cmake_path}")
+    #library_dirs.append(f"{cmake_path}")
     print_fast(f"Using extra include dirs: {include_dirs}")
-    print_fast(f"Using extra library dirs: {library_dirs}")
+    #print_fast(f"Using extra library dirs: {library_dirs}")
 
     if options.clean:
         for d in (cmake_path, BASE_PATH / "build", BASE_PATH / "dist"):
@@ -231,7 +244,7 @@ def pre_build(options: Options) -> None:
     else:
         static_lib_file = cmake_path / f"libifaddrs4cpp-static{suffix}.{STATIC_LIBRARY_EXTENSION}"
         test_executable = cmake_path / "ifaddrs4cpp_tests"
-    extra_objects.append(f"{static_lib_file}")
+    #extra_objects.append(f"{static_lib_file}")
 
     if not static_lib_file.exists() or (options.cpp_test and not test_executable.exists()):
         extra_args: List[str] = []
@@ -285,8 +298,10 @@ def pre_sdist() -> None:
 
     print(f"Temporarily copying files from {EXTERN_CPP_SOURCE_GIT} to {EXTERN_CPP_SOURCE_SDIST}...")
     for file in [EXTERN_CPP_SOURCE_GIT / "CMakeLists.txt", ] + \
-            list(EXTERN_CPP_SOURCE_GIT.glob("*.h*")) + \
-            list(EXTERN_CPP_SOURCE_GIT.glob("*.cpp")):
+            list(EXTERN_CPP_SOURCE_GIT.glob("**/*.h")) + \
+            list(EXTERN_CPP_SOURCE_GIT.glob("**/*.hpp")) + \
+            list(EXTERN_CPP_SOURCE_GIT.glob("**/*.ipp")) + \
+            list(EXTERN_CPP_SOURCE_GIT.glob("**/*.cpp")):
         shutil.copy(file, EXTERN_CPP_SOURCE_SDIST)
 
     print(f"Temporarily copying files from {tests_src} to {tests_dest}...")
@@ -330,7 +345,8 @@ cpp_extension = Extension(
     extra_objects=extra_objects,
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args,
-    define_macros=[("ODDSOURCE_BUILDING_LIBRARY", "1")],
+    define_macros=[("IFADDRS4CPP_INLINE_SOURCE", "1")],
+    undef_macros=undef_macros,
     optional=False,
 )
 

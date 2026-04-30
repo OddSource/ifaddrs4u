@@ -18,7 +18,7 @@
 
 #include "config.h"
 
-#include <ifaddrs4cpp/IpAddress.h>
+#include <oddsource/network/interfaces/IpAddress.hpp>
 
 namespace OddSource::ifaddrs4py
 {

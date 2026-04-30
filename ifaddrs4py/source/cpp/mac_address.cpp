@@ -16,8 +16,6 @@
 
 #include "mac_address.h"
 
-#include <ifaddrs4cpp/MacAddress.h>
-
 #include <sstream>
 
 namespace

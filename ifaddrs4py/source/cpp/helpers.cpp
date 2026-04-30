@@ -36,6 +36,7 @@ namespace OddSource::ifaddrs4py
     gc_visit(visitproc visit, void * arg)
     {
         Py_VISIT(this->ref);
+        return 0;
     }
 
     ImportedModule::
@@ -55,7 +56,7 @@ namespace OddSource::ifaddrs4py
         if (found == this->_attrs.end())
         {
             PyObject * attr = PyObject_GetAttrString(this->_module->ref, attr_name);
-            IF_NULL_RETURN(module, nullptr)
+            IF_NULL_RETURN(attr, nullptr)
 
             this->_attrs.emplace(attr_name, ::std::make_shared<PyRef>(attr));
             found = this->_attrs.find(attr_name);
@@ -78,6 +79,7 @@ namespace OddSource::ifaddrs4py
                 return result;
             }
         }
+        return 0;
     }
 
     ModuleState::
@@ -101,7 +103,7 @@ namespace OddSource::ifaddrs4py
     get_state_of(PyTypeObject * module)
     {
         void * state_wrapper(PyType_GetModuleState(module));
-        IF_NULL_RETURN_NULL(state)
+        IF_NULL_RETURN_NULL(state_wrapper)
         return state_from_state_wrapper(state_wrapper);
     }
 
@@ -110,7 +112,7 @@ namespace OddSource::ifaddrs4py
     get_state_of(PyObject * module)
     {
         void * state_wrapper(PyModule_GetState(module));
-        IF_NULL_RETURN_NULL(state)
+        IF_NULL_RETURN_NULL(state_wrapper)
         return state_from_state_wrapper(state_wrapper);
     }
 
@@ -133,7 +135,7 @@ namespace OddSource::ifaddrs4py
     }
 
     int
-    ImportedModule::
+    ModuleState::
     gc_visit(visitproc visit, void * arg)
     {
         ::std::unique_lock<::std::mutex> lock(this->_modules_mutex);
@@ -146,5 +148,6 @@ namespace OddSource::ifaddrs4py
                 return result;
             }
         }
+        return 0;
     }
 }

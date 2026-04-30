@@ -19,8 +19,6 @@
 #include "mac_address.h"
 #include "macros.h"
 
-#include <ifaddrs4cpp/Interface.h>
-
 namespace
 {
     template<typename F>
@@ -34,7 +32,10 @@ namespace
             PyObject * constants_dict = PyDict_New();
             for (auto const & [name, value] : values)
             {
-                PyDict_SetItemString(constants_dict, name.c_str(),  PyLong_FromLong(value));
+                PyDict_SetItemString(
+                    constants_dict,
+                    name.c_str(),
+                    PyLong_FromLong( static_cast< ::std::underlying_type_t< F > >( value ) ) );
             }
 
             enum_class = PyObject_CallMethod(enum_module,
@@ -132,10 +133,9 @@ PyObject *
 OddSource::ifaddrs4py::
 convert_to_python(OddSource::Interfaces::Interface const & iface)
 {
-    ::std::string name(iface.name());
-#ifdef ODDSOURCE_IS_WINDOWS
-    ::std::string windows_uuid(iface.windows_uuid());
-#endif /* ODDSOURCE_IS_WINDOWS */
+    ::std::string const name(iface.name());
+    ::std::string const friendlyName(iface.friendlyName());
+    ::std::string const description(iface.description());
 
     PyObject * index = NULL, * flags = NULL, * mtu = NULL, * mac_address = NULL,
              * ipv4_addresses = NULL, * ipv6_addresses = NULL;
@@ -219,16 +219,11 @@ convert_to_python(OddSource::Interfaces::Interface const & iface)
 
     PyObject * args(PyTuple_New(0));
     PyObject * kwargs(Py_BuildValue(
-#ifdef ODDSOURCE_IS_WINDOWS
-        "{s:O,s:s#,s:s#,s:O,s:O,s:O,s:O,s:O}",
-#else /* ODDSOURCE_IS_WINDOWS */
-        "{s:O,s:s#,s:O,s:O,s:O,s:O,s:O}",
-#endif /* !ODDSOURCE_IS_WINDOWS */
+        "{s:O,s:s#,s:s#,s:s#,s:O,s:O,s:O,s:O,s:O}",
         "index", index,
         "name", name.c_str(), name.length(),
-#ifdef ODDSOURCE_IS_WINDOWS
-        "windows_uuid", windows_uuid.c_str(), windows_uuid.length(),
-#endif /* ODDSOURCE_IS_WINDOWS */
+        "friendly_name", friendlyName.c_str(), friendlyName.length(),
+        "description", description.c_str(), description.length(),
         "flags", flags,
         "mtu", mtu,
         "mac_address", mac_address,
@@ -265,6 +260,7 @@ extern_get_sample_interface_ipv4_address(PyObject * Py_UNUSED(module_self), PyOb
         OddSource::Interfaces::IPv4Address("192.168.0.42"),
         0,
         24u,
+        OddSource::Interfaces::Broadcast,
         OddSource::Interfaces::IPv4Address("192.168.0.254"));
 
     try
@@ -277,9 +273,10 @@ extern_get_sample_interface_ipv4_address(PyObject * Py_UNUSED(module_self), PyOb
 PyObject *
 extern_get_sample_interface_ipv6_address(PyObject * Py_UNUSED(module_self), PyObject * Py_UNUSED(ignore))
 {
-    static OddSource::Interfaces::InterfaceIPv6Address const IPv6(
-        OddSource::Interfaces::IPv6Address("2001:470:2ccb:a61b:e:acf8:6736:d81e"),
-        OddSource::Interfaces::AutoConfigured | OddSource::Interfaces::Secured,
+    using namespace OddSource::Interfaces;
+    static InterfaceIPv6Address const IPv6(
+        IPv6Address("2001:470:2ccb:a61b:e:acf8:6736:d81e"),
+        InterfaceIPAddressFlag::AutoConfigured | InterfaceIPAddressFlag::Secured,
         56u);
 
     try
@@ -295,7 +292,7 @@ extern_get_sample_interface_scoped_ipv6_address(PyObject * Py_UNUSED(module_self
     using namespace OddSource::Interfaces;
     static InterfaceIPv6Address const Scoped_IPv6(
         IPv6Address(static_cast<in6_addr const *>(IPv6Address("fe80::aede:48ff:fe00:1122")), v6Scope {6, "en5"}),
-        Secured,
+        0 | InterfaceIPAddressFlag::Secured,
         64u);
 
     try
@@ -310,7 +307,7 @@ extern_get_sample_interface(PyObject * Py_UNUSED(module_self), PyObject * Py_UNU
 {
     try
     {
-        return OddSource::ifaddrs4py::convert_to_python(OddSource::Interfaces::Interface::SAMPLE_INTERFACE);
+        return OddSource::ifaddrs4py::convert_to_python(OddSource::Interfaces::Interface::getSampleInterface());
     }
     CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
 }

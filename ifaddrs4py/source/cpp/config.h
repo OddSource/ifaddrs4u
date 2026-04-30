@@ -22,17 +22,13 @@
 #include <stdexcept>
 #include <string>
 
-#if PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 9
-#error "ifaddrs4py requires Python 3.9+"
-#endif /* PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 8 */
+#if PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 10
+#error "ifaddrs4py requires Python 3.10+"
+#endif /* PY_MAJOR_VERSION != 3 || PY_MINOR_VERSION < 10 */
 
-#if PY_MINOR_VERSION < 10
-int PyModule_AddObjectRef(PyObject * module, char const * name, PyObject * value);
-#endif /* PY_MINOR_VERSION < 10 */
+#include <oddsource/network/interfaces/detail/os.h>
 
-#include <ifaddrs4cpp/os.h>
-
-#include <ifaddrs4cpp/s.h>
+using namespace ::std::string_literals;
 
 namespace OddSource::ifaddrs4py
 {

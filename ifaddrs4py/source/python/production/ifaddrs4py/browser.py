@@ -16,25 +16,17 @@
 
 import sys
 
+from collections.abc import (
+    Callable,
+    Generator,
+    Iterator,
+)
 from typing import (
     final,
     Optional,
     Union,
     Tuple,
 )
-
-if sys.version_info <= (3, 9):
-    from typing import (
-        Callable,
-        Generator,
-        Iterator,
-    )
-else:
-    from collections.abc import (
-        Callable,
-        Generator,
-        Iterator,
-    )
 
 if sys.version_info >= (3, 12):
     from typing import override

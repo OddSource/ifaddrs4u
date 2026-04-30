@@ -387,7 +387,7 @@ namespace OddSource::Interfaces
                static_cast< ::std::underlying_type_t< MulticastV6Flag > >( rhs );
     }
 
-    OddSource_Export
+    OddSource_Inline
     ::std::underlying_type_t< MulticastV6Flag >
     operator|(
         ::std::underlying_type_t< MulticastV6Flag > lhs,
@@ -1046,7 +1046,7 @@ namespace OddSource::Interfaces
         return !this->operator==(other);
     }
 
-    OddSource_Export
+    OddSource_Inline
     ::std::string
     toString(
         IPAddress const & address )

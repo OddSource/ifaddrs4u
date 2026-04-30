@@ -53,7 +53,7 @@ namespace OddSource::Interfaces
     ::std::unordered_map< InterfaceIPAddressFlag, ::std::string const > const
     InterfaceIPAddressFlag_Names = detail::flip( InterfaceIPAddressFlag_Values );
 
-    OddSource_Export
+    OddSource_Inline
     ::std::string
     toString(
         InterfaceIPAddressFlag const & flag )
@@ -103,7 +103,7 @@ namespace OddSource::Interfaces
     ::std::unordered_map< InterfaceFlag, ::std::string const > const
     InterfaceFlag_Names = detail::flip( InterfaceFlag_Values );
 
-    OddSource_Export
+    OddSource_Inline
     ::std::string
     toString(
         InterfaceFlag const & flag )
@@ -145,7 +145,7 @@ namespace OddSource::Interfaces
                static_cast< ::std::underlying_type_t< InterfaceIPAddressFlag > >( rhs );
     }
 
-    OddSource_Export
+    OddSource_Inline
     ::std::underlying_type_t< InterfaceIPAddressFlag >
     operator|(
         ::std::underlying_type_t< InterfaceIPAddressFlag > lhs,
@@ -182,7 +182,7 @@ namespace OddSource::Interfaces
                static_cast< ::std::underlying_type_t< InterfaceFlag > >( rhs );
     }
 
-    OddSource_Export
+    OddSource_Inline
     ::std::underlying_type_t< InterfaceFlag >
     operator|(
         ::std::underlying_type_t< InterfaceFlag > lhs,

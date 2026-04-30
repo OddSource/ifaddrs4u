@@ -19,7 +19,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <ifaddrs4cpp/config.h>
+#include <oddsource/network/interfaces/detail/config.h>
 
 void
 OddSource::ifaddrs4py::

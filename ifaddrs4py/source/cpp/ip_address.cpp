@@ -16,8 +16,6 @@
 
 #include "ip_address.h"
 
-#include <ifaddrs4cpp/IpAddress.h>
-
 PyObject *
 OddSource::ifaddrs4py::
 convert_to_python(OddSource::Interfaces::IPv4Address const & address)

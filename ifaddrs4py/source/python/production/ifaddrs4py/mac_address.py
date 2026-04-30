@@ -25,11 +25,6 @@ from typing import (
     Optional,
 )
 
-if sys.version_info >= (3, 9):
-    Tuple = tuple
-else:
-    from typing import Tuple
-
 if sys.version_info >= (3, 12):
     from typing import override
 else:
@@ -41,15 +36,15 @@ __all__ = (
 )
 
 
-get_mac_address_data_from_repr: Optional[Callable[[str], Tuple[int, ...]]] = None
-get_mac_address_repr_from_data: Optional[Callable[[Tuple[int, ...]], str]] = None
+get_mac_address_data_from_repr: Optional[Callable[[str], tuple[int, ...]]] = None
+get_mac_address_repr_from_data: Optional[Callable[[tuple[int, ...]], str]] = None
 
 
 @final
 class MacAddress(object):
     __slots__ = ("_formatted", "_data", "_data_length")
 
-    def __init__(self, formatted: Optional[str] = None, data: Optional[Tuple[int, ...]] = None) -> None:
+    def __init__(self, formatted: Optional[str] = None, data: Optional[tuple[int, ...]] = None) -> None:
         global get_mac_address_repr_from_data, get_mac_address_data_from_repr
         if (not formatted or not data) and (not get_mac_address_repr_from_data or not get_mac_address_data_from_repr):
             # This is ugly, but in order to avoid circular imports, we don't really have an option.
@@ -71,12 +66,15 @@ class MacAddress(object):
             assert get_mac_address_data_from_repr is not None  # for mypy
             data = get_mac_address_data_from_repr(formatted)
 
-        self._formatted = formatted
-        self._data = data
-        self._data_length = len(data)
+        assert formatted is not None
+        assert data is not None
+
+        self._formatted: str = formatted
+        self._data: tuple[int, ...] = data
+        self._data_length = len(self._data)
 
     @property
-    def data(self) -> Tuple[int, ...]:
+    def data(self) -> tuple[int, ...]:
         return self._data
 
     @property

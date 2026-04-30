@@ -133,6 +133,7 @@ namespace OddSource::Interfaces
         ::std::underlying_type_t< InterfaceIPAddressFlag > lhs,
         InterfaceIPAddressFlag const & rhs );
 
+#ifndef IFADDRS4CPP_INLINE_SOURCE
     OddSource_Extern OddSource_Export
     ::std::unordered_map< ::std::string, InterfaceIPAddressFlag const > const
     InterfaceIPAddressFlag_Values;
@@ -140,6 +141,7 @@ namespace OddSource::Interfaces
     OddSource_Extern OddSource_Export
     ::std::unordered_map< InterfaceIPAddressFlag, ::std::string const > const
     InterfaceIPAddressFlag_Names;
+#endif /* !IFADDRS4CPP_INLINE_SOURCE */
 
     OddSource_Export
     ::std::string
@@ -220,6 +222,7 @@ namespace OddSource::Interfaces
         ::std::underlying_type_t< InterfaceFlag > lhs,
         InterfaceFlag const & rhs );
 
+#ifndef IFADDRS4CPP_INLINE_SOURCE
     OddSource_Extern OddSource_Export
     ::std::unordered_map< ::std::string, InterfaceFlag const > const
     InterfaceFlag_Values;
@@ -227,6 +230,7 @@ namespace OddSource::Interfaces
     OddSource_Extern OddSource_Export
     ::std::unordered_map< InterfaceFlag, ::std::string const > const
     InterfaceFlag_Names;
+#endif /* !IFADDRS4CPP_INLINE_SOURCE */
 
     OddSource_Export
     ::std::string
@@ -240,12 +244,18 @@ namespace OddSource::Interfaces
         InterfaceFlag const & flag );
 
     struct Broadcast_t {};
+
+#ifndef IFADDRS4CPP_INLINE_SOURCE
     OddSource_Extern OddSource_Export
     Broadcast_t const Broadcast;
+#endif /* !IFADDRS4CPP_INLINE_SOURCE */
 
     struct PointToPoint_t {};
+
+#ifndef IFADDRS4CPP_INLINE_SOURCE
     OddSource_Extern OddSource_Export
     PointToPoint_t const PointToPoint;
+#endif /* !IFADDRS4CPP_INLINE_SOURCE */
 
     template< class IPAddressT >
     class OddSource_Export InterfaceIPAddress

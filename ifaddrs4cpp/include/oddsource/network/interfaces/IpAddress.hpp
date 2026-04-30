@@ -94,6 +94,7 @@ namespace OddSource::Interfaces
         Unassigned
     };
 
+#ifndef IFADDRS4CPP_INLINE_SOURCE
     OddSource_Extern OddSource_Export
     ::std::unordered_map< ::std::string, MulticastScope const > const
     MulticastScope_Values;
@@ -101,6 +102,7 @@ namespace OddSource::Interfaces
     OddSource_Extern OddSource_Export
     ::std::unordered_map< MulticastScope, ::std::string const > const
     MulticastScope_Names;
+#endif /* !IFADDRS4CPP_INLINE_SOURCE */
 
     OddSource_Export
     ::std::string
