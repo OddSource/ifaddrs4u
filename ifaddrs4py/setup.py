@@ -19,6 +19,7 @@ import dataclasses
 import functools
 import os
 import pathlib
+import shlex
 import shutil
 import subprocess
 import sys
@@ -46,6 +47,7 @@ CONFIG_DEBUG = "Debug"
 
 IS_MACOS = sys.platform == "darwin" or sys.platform == "macos"
 IS_WINDOWS = sys.platform == "win32" or sys.platform == "win64" or sys.platform == "cygwin"
+IS_CYGWIN = sys.platform == "cygwin"
 
 MACOS_TARGET = "10.15"
 
@@ -158,7 +160,9 @@ libraries: List[str] = []
 extra_objects: List[str] = []
 extra_compile_args: List[str] = []
 extra_link_args: List[str] = []
+define_macros: List[tuple[str, str]] = [("IFADDRS4CPP_INLINE_SOURCE", "1")]
 undef_macros: List[str] = []
+debug = "no"
 if IS_WINDOWS:
     extra_compile_args.extend(["/std:c++17", "/wd4275", "/wd4251", "/wd4455"])
 else:
@@ -191,12 +195,31 @@ else:
 
 
 def pre_build(options: Options) -> None:
-    if options.cpp_debug:
-        undef_macros.append("NDEBUG")
-        if IS_WINDOWS:
-            pass  # TODO
-        else:
+    global debug
+    if not IS_WINDOWS and not IS_CYGWIN:
+        if options.cpp_debug:
+            debug = "yes"
             extra_compile_args.extend(["-g3", "-O0"])
+        else:
+            define_macros.append(("NDEBUG", "1"))
+            extra_compile_args.extend(["-g", "-O3"])
+
+        # The "Unix" compiler in setuptools blindly takes the value from CFLAGS and uses it for the C++ compiler,
+        # without any filtering, ignoring the value passed to the debug option. But the environment variable CXXFLAGS
+        # can override this. So we set CXXFLAGS to a filtered subset of CFLAGS so that we, exclusively, can control
+        # debug and optimization options.
+        # noinspection PyDeprecation
+        original_cf_flags = sysconfig.get_config_var("CFLAGS")
+        new_cf_flags = shlex.join([
+            f for f in shlex.split(original_cf_flags)
+            if "NDEBUG" not in f and f != "-g" and f != "--optimize" and not f.startswith("-O") and (
+                    f == "-Wunreachable-code" or not f.startswith("-W")
+            )
+        ])
+        print_fast(f"Setting CXXFLAGS to '{new_cf_flags}' from original CFLAGS '{original_cf_flags}'")
+        os.environ["CXXFLAGS"] = new_cf_flags
+
+    print_fast(f"debug = {debug}")
 
     extern_cpp_base: pathlib.Path
     if EXTERN_CPP_SOURCE_SDIST.exists():
@@ -296,7 +319,7 @@ def pre_sdist() -> None:
     if not tests_dest.exists():
         tests_dest.mkdir()
 
-    print(f"Temporarily copying files from {EXTERN_CPP_SOURCE_GIT} to {EXTERN_CPP_SOURCE_SDIST}...")
+    print_fast(f"Temporarily copying files from {EXTERN_CPP_SOURCE_GIT} to {EXTERN_CPP_SOURCE_SDIST}...")
     for file in [EXTERN_CPP_SOURCE_GIT / "CMakeLists.txt", ] + \
             list(EXTERN_CPP_SOURCE_GIT.glob("**/*.h")) + \
             list(EXTERN_CPP_SOURCE_GIT.glob("**/*.hpp")) + \
@@ -304,14 +327,14 @@ def pre_sdist() -> None:
             list(EXTERN_CPP_SOURCE_GIT.glob("**/*.cpp")):
         shutil.copy(file, EXTERN_CPP_SOURCE_SDIST)
 
-    print(f"Temporarily copying files from {tests_src} to {tests_dest}...")
+    print_fast(f"Temporarily copying files from {tests_src} to {tests_dest}...")
     for file in tests_src.glob("*"):
         shutil.copy(file, tests_dest)
 
 
 def post_sdist() -> None:
     if EXTERN_CPP_SOURCE_SDIST.parent.exists():
-        print(f"Removing temporary directory {EXTERN_CPP_SOURCE_SDIST.parent}")
+        print_fast(f"Removing temporary directory {EXTERN_CPP_SOURCE_SDIST.parent}")
         shutil.rmtree(EXTERN_CPP_SOURCE_SDIST.parent, ignore_errors=True)
 
 
@@ -345,7 +368,7 @@ cpp_extension = Extension(
     extra_objects=extra_objects,
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args,
-    define_macros=[("IFADDRS4CPP_INLINE_SOURCE", "1")],
+    define_macros=define_macros,
     undef_macros=undef_macros,
     optional=False,
 )
@@ -354,6 +377,7 @@ setup(
     ext_modules=[
         cpp_extension,
     ],
+    options={"build_ext": {"debug": debug, "parallel": "15"}},
 )
 
 if __name__ == "__main__":
