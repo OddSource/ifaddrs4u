@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #pragma once
 
-#define IF_NULL_STMT(thing, stmt) if (thing == NULL) \
+#define IF_NULL_STMT(thing, stmt) if ( thing == NULL ) \
     { \
         stmt; \
     }
@@ -28,11 +28,11 @@
 #define IF_NULL_RETURN_VOID(thing) IF_NULL_RETURN(thing, )
 #define IF_NULL_RETURN_ERR(thing) IF_NULL_RETURN(thing, JNI_ERR)
 
-#define CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(err, ret) catch (::std::exception const & e) \
+#define CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(err, ret) catch ( ::std::exception const & e ) \
     { \
-        if (PyErr_Occurred() == NULL) \
+        if ( PyErr_Occurred() == NULL ) \
         { \
-            PyErr_SetString(err, e.what()); \
+            PyErr_SetString( err, e.what() ); \
         } \
         ret; \
     }

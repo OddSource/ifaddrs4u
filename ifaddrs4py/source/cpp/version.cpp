@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,38 +23,43 @@
 
 void
 OddSource::ifaddrs4py::
-init_version_constants(PyObject * module)
+initVersionConstants(
+    PyObject * module )
 {
-    auto l(::strlen(IFADDRS4CPP_VERSION_SUFFIX));
-    ::std::string version(IFADDRS4CPP_VERSION);
-    if (l > 0)
+    auto const l( ::strlen( IFADDRS4CPP_VERSION_SUFFIX ) );
+    ::std::string version( IFADDRS4CPP_VERSION );
+    if ( l > 0 )
     {
         version += "-";
         version += IFADDRS4CPP_VERSION_SUFFIX;
     }
 
-    if (PyModule_AddStringConstant(module, "__VERSION_EXT__", version.c_str()) != 0)
+    if ( PyModule_AddStringConstant( module, "__VERSION_EXT__", version.c_str() ) != 0 )
     {
-        throw ::std::runtime_error("Failed to initialized __VERSION_EXT__");
+        throw ::std::runtime_error( "Failed to initialized __VERSION_EXT__" );
     }
 
-    if (l > 0 && PyModule_AddObject(
+    if ( l > 0 && PyModule_AddObject(
         module,
         "__VERSION_INFO_EXT__",
-        Py_BuildValue("iiis", IFADDRS4CPP_VERSION_MAJOR,
-                              IFADDRS4CPP_VERSION_MINOR,
-                              IFADDRS4CPP_VERSION_PATCH,
-                              IFADDRS4CPP_VERSION_SUFFIX)) != 0)
+        Py_BuildValue(
+            "iiis",
+            IFADDRS4CPP_VERSION_MAJOR,
+            IFADDRS4CPP_VERSION_MINOR,
+            IFADDRS4CPP_VERSION_PATCH,
+            IFADDRS4CPP_VERSION_SUFFIX ) ) != 0 )
     {
-        throw ::std::runtime_error("Failed to initialized __VERSION_INFO_EXT__");
+        throw ::std::runtime_error( "Failed to initialized __VERSION_INFO_EXT__" );
     }
-    else if(l == 0 && PyModule_AddObject(
+    else if ( l == 0 && PyModule_AddObject(
         module,
         "__VERSION_INFO_EXT__",
-        Py_BuildValue("iii", IFADDRS4CPP_VERSION_MAJOR,
-                              IFADDRS4CPP_VERSION_MINOR,
-                              IFADDRS4CPP_VERSION_PATCH)) != 0)
+        Py_BuildValue(
+            "iii",
+            IFADDRS4CPP_VERSION_MAJOR,
+            IFADDRS4CPP_VERSION_MINOR,
+            IFADDRS4CPP_VERSION_PATCH ) ) != 0 )
     {
-        throw ::std::runtime_error("Failed to initialized __VERSION_INFO_EXT__");
+        throw ::std::runtime_error( "Failed to initialized __VERSION_INFO_EXT__" );
     }
 }

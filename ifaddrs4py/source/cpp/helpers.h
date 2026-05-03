@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,33 +25,62 @@
 
 namespace OddSource::ifaddrs4py
 {
+    template< class PyT = PyObject >
     class PyRef
     {
     public:
-        PyRef(PyObject * object);
+        class IncreasedReference
+        {
+        public:
+            IncreasedReference(
+                PyT * object ) noexcept;
 
-        ~PyRef();
+            ~IncreasedReference() noexcept;
 
-        int gc_visit(visitproc visit, void * arg);
+        private:
+            PyT * _ref;
+        };
 
-        PyObject * ref;
+        PyRef(
+            PyT * object ) noexcept;
+
+        ~PyRef() noexcept;
+
+        operator PyT *() noexcept;
+
+        IncreasedReference
+        incRef() noexcept;
+
+        int
+        gcVisit(
+            visitproc visit,
+            void * arg );
+
+    private:
+        PyT * _ref;
     };
 
     class ImportedModule
     {
     public:
-        ImportedModule(PyObject * module);
+        ImportedModule(
+            PyObject * module );
 
         ~ImportedModule() = default;
 
-        ::std::shared_ptr<PyRef> get_attribute(const char * attr_name);
+        ::std::shared_ptr< PyRef<> >
+        getAttribute(
+            char const * attrName );
 
-        int gc_visit(visitproc visit, void * arg);
+        int
+        gcVisit(
+            visitproc visit,
+            void * arg );
 
     private:
-        ::std::shared_ptr<PyRef> _module;
-        ::std::mutex _attrs_mutex;
-        ::std::unordered_map<::std::string, ::std::shared_ptr<PyRef>> _attrs;
+        ::std::shared_ptr< PyRef<> > _module;
+        ::std::mutex _attrsMutex;
+        ::std::unordered_map< ::std::string, ::std::shared_ptr< PyRef<> > > _attrs;
     };
 
     class ModuleState
@@ -61,21 +90,32 @@ namespace OddSource::ifaddrs4py
 
         ~ModuleState() = default;
 
-        static ::std::shared_ptr<ModuleState> get_state_of(PyTypeObject * type);
+        static
+        ::std::shared_ptr< ModuleState >
+        getStateOf(
+            PyTypeObject * type );
 
-        static ::std::shared_ptr<ModuleState> get_state_of(PyObject * module);
+        static
+        ::std::shared_ptr< ModuleState >
+        getStateOf(
+            PyObject * module );
 
-        ::std::shared_ptr<ImportedModule> get_module(const char * module_name);
+        ::std::shared_ptr< ImportedModule >
+        getModule(
+            char const * moduleName );
 
-        int gc_visit(visitproc visit, void * arg);
+        int
+        gcVisit(
+            visitproc visit,
+            void * arg );
 
     private:
-        ::std::mutex _modules_mutex;
-        ::std::unordered_map<::std::string, ::std::shared_ptr<ImportedModule>> _modules;
+        ::std::mutex _modulesMutex;
+        ::std::unordered_map< ::std::string, ::std::shared_ptr< ImportedModule > > _modules;
     };
 
     struct ModuleStateWrapper
     {
-        ::std::shared_ptr<ModuleState> state = nullptr;
+        ::std::shared_ptr< ModuleState > state = nullptr;
     };
 }

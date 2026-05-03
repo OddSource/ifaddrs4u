@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,161 +29,160 @@
 
 #include <oddsource/network/interfaces/Interfaces.hpp>
 
-#if PY_MINOR_VERSION < 10
-int PyModule_AddObjectRef(PyObject * module, char const * name, PyObject * value)
-{
-    int result = PyModule_AddObject(module, name, value);
-    if (result == 0)
-    {
-        // PyModule_AddObject is different from PyModule_AddObjectRef in that it "steals a reference to value on
-        // success (if it returns 0)", but the caller is expecting to unconditionally Py_DECREF the value, so
-        // increment the reference count to emulate the behavior of PyModule_AddObjectRef.
-        Py_XINCREF(value);
-    }
-    return result;
-}
-#endif /* PY_MINOR_VERSION < 10 */
-
 static PyObject * IllegalStateError;
 
 typedef struct
 {
     PyObject_HEAD
-    ::std::unique_ptr<OddSource::Interfaces::InterfaceBrowser> browser;
+    ::std::unique_ptr< OddSource::Interfaces::InterfaceBrowser > browser;
     PyTupleObject * interfaces;  // tuple
 } InterfaceBrowser_PyObj;
 
-static int
-InterfaceBrowser___init__(InterfaceBrowser_PyObj * self, PyObject * args, PyObject * kwargs)
+static
+int
+InterfaceBrowser___init__(
+    InterfaceBrowser_PyObj * self,
+    PyObject * args,
+    PyObject * kwargs )
 {
-    if (PyTuple_Size(args) > 0 || (kwargs != NULL && PyDict_Size(kwargs) > 0))
+    if ( PyTuple_Size( args ) > 0 || ( kwargs != NULL && PyDict_Size( kwargs ) > 0 ) )
     {
-        PyErr_SetString(PyExc_TypeError, "ifaddrs4py.extern.InterfaceBrowser() takes no arguments");
+        PyErr_SetString( PyExc_TypeError, "ifaddrs4py.extern.InterfaceBrowser() takes no arguments" );
         return -1;
     }
 
     try
     {
-        self->browser = ::std::make_unique<OddSource::Interfaces::InterfaceBrowser>();
+        self->browser = ::std::make_unique< OddSource::Interfaces::InterfaceBrowser >();
     }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return -1)
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_RuntimeError, return -1 )
 
-    if (self->interfaces != NULL)
+    if ( self->interfaces != NULL )
     {
         PyTupleObject * tmp = self->interfaces;
         self->interfaces = NULL;
-        Py_DECREF(tmp);
+        Py_DECREF( tmp );
     }
 
     return 0;
 }
 
-static void
-InterfaceBrowser_dealloc(InterfaceBrowser_PyObj * self)
+static
+void
+InterfaceBrowser_dealloc(
+    InterfaceBrowser_PyObj * self )
 {
     self->browser.reset();
-    Py_XDECREF(self->interfaces);
-    Py_TYPE(self)->tp_free((PyObject *)self);
+    Py_XDECREF( self->interfaces );
+    Py_TYPE( self )->tp_free( reinterpret_cast< PyObject * >( self ) );
 }
 
-static PyObject *
-InterfaceBrowser___repr__(InterfaceBrowser_PyObj * self)
+static
+PyObject *
+InterfaceBrowser___repr__(
+    InterfaceBrowser_PyObj * self )
 {
     ::std::ostringstream oss;
     oss << "<ifaddrs4py.extern.InterfaceBrowser: ";
-    if (!self->browser)
+    if ( !self->browser )
     {
         oss << "uninitialized";
     }
-    else if(self->interfaces == NULL)
+    else if( self->interfaces == NULL )
     {
         oss << "pending population";
     }
     else
     {
-        oss << "contains info on " << ::std::to_string(PyTuple_Size((PyObject *)self->interfaces))
+        oss << "contains info on "
+            << ::std::to_string( PyTuple_Size( reinterpret_cast< PyObject * >( self->interfaces ) ) )
             << " interfaces";
     }
     oss << ">";
 
-    ::std::string repr(oss.str());
-    return PyUnicode_FromStringAndSize(repr.c_str(), repr.length());
+    ::std::string const repr( oss.str() );
+    return PyUnicode_FromStringAndSize( repr.c_str(), repr.length() );
 }
 
-static PyTupleObject *
-_get_interfaces(OddSource::Interfaces::InterfaceBrowser & browser)
+static
+PyTupleObject *
+_get_interfaces(
+    OddSource::Interfaces::InterfaceBrowser & browser )
 {
     try
     {
-        auto interfaces(browser.get_interfaces());
+        auto const interfaces( browser.get_interfaces() );
 
-        PyObject * tuple = PyTuple_New(interfaces.size());
-        if(tuple == NULL)
+        PyObject * tuple = PyTuple_New( interfaces.size() );
+        if( tuple == NULL )
         {
             return NULL;
         }
 
-        int i(0);
-        for (auto const & pInterface : interfaces)
+        int i{ 0 };
+        for ( auto const & pInterface : interfaces )
         {
             try
             {
-                PyObject * item = OddSource::ifaddrs4py::convert_to_python( *pInterface );
-                if (PyTuple_SetItem(tuple, i++, item) != 0)
+                PyObject * item( OddSource::ifaddrs4py::convertToPython( *pInterface ) );
+                if ( PyTuple_SetItem( tuple, i++, item ) != 0 )
                 {
-                    Py_XDECREF(item);
+                    Py_XDECREF( item );
                     return NULL;
                 }
             }
-            CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
+            CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_RuntimeError, return NULL )
         }
 
-        return (PyTupleObject *)tuple;
+        return reinterpret_cast< PyTupleObject * >( tuple );
     }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_RuntimeError, return NULL )
 }
 
-#define ENSURE_INITIALIZED(ret) if (!self->browser) \
+#define ENSURE_INITIALIZED(ret) if ( !self->browser ) \
     { \
-        PyErr_SetString(IllegalStateError, "ifaddrs4py.extern.InterfaceBrowser() has not been initialized"); \
+        PyErr_SetString( IllegalStateError, "ifaddrs4py.extern.InterfaceBrowser() has not been initialized" ); \
         return ret; \
     }
 
 namespace
 {
-    PyObject * for_each_populated_interface(InterfaceBrowser_PyObj * self, PyObject * callable)
+    PyObject *
+    forEachPopulatedInterface(
+        InterfaceBrowser_PyObj * self,
+        PyObject * callable )
     {
-        Py_ssize_t num_interfaces(PyTuple_Size((PyObject *) self->interfaces));
-        if (PyErr_Occurred() != NULL)
+        Py_ssize_t numInterfaces{ PyTuple_Size( reinterpret_cast< PyObject * >( self->interfaces ) ) };
+        if ( PyErr_Occurred() != NULL )
         {
             return NULL;
         }
 
-        for (Py_ssize_t i(0); i < num_interfaces; i++)
+        for ( Py_ssize_t i{ 0 }; i < numInterfaces; ++i )
         {
-            PyObject * iface(PyTuple_GetItem((PyObject *) self->interfaces, i));
-            if (iface == NULL)
+            PyObject * interfacePy( PyTuple_GetItem( reinterpret_cast< PyObject * >( self->interfaces ), i ) );
+            if (interfacePy == NULL)
             {
                 return NULL;
             }
 
-            Py_INCREF(iface);
-            PyObject * result = PyObject_CallFunctionObjArgs(callable, iface, NULL);
-            Py_DECREF(iface);
-            if (result == NULL)
+            Py_INCREF(interfacePy);
+            PyObject * result( PyObject_CallFunctionObjArgs( callable, interfacePy, NULL ) );
+            Py_DECREF(interfacePy);
+            if ( result == NULL )
             {
                 return NULL;
             }
-            if (!PyBool_Check(result))
+            if ( !PyBool_Check( result ) )
             {
                 ::std::ostringstream oss;
                 oss << "InterfaceBrowser.for_each_interface() expected second argument to be a callable that returns "
                     << "a bool, but instead it returned a " << result->ob_type->tp_name << ".";
-                PyErr_SetString(PyExc_ValueError, oss.str().c_str());
-                Py_DECREF(result);
+                PyErr_SetString( PyExc_ValueError, oss.str().c_str() );
+                Py_DECREF( result );
                 return NULL;
             }
-            if (!PyObject_IsTrue(result))
+            if ( !PyObject_IsTrue( result ) )
             {
                 return result;
             }
@@ -192,250 +191,279 @@ namespace
         return Py_True;
     }
 
-    PyObject * for_each_interface_and_populate(InterfaceBrowser_PyObj * self, PyObject * callable)
+    PyObject *
+    forEachInterfaceAndPopulate(
+        InterfaceBrowser_PyObj * self,
+        PyObject * callable )
     {
-        bool keep_calling_callable(true);
-        bool return_error(false);
+        bool keepCallingCallable{ true };
+        bool returnError{ false };
 
-        PyObject * temp_list(PyList_New(0));
-        if (temp_list == NULL)
+        PyObject * tempList( PyList_New( 0 ) );
+        if ( tempList == NULL )
         {
             return NULL;
         }
 
-        ::std::function<bool(Interface const &)> do_this =
-        [callable, &keep_calling_callable, &return_error, &temp_list](auto cpp_interface)
+        ::std::function< bool( Interface const & )> doThis =
+        [ callable, &keepCallingCallable, &returnError, &tempList ]
+        ( Interface const & rInterface )
         {
-            PyObject * iface;
+            PyObject * interfacePy;
             try
             {
-                iface = OddSource::ifaddrs4py::convert_to_python(cpp_interface);
+                interfacePy = OddSource::ifaddrs4py::convertToPython( rInterface );
             }
-            CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return_error = true; return false)
+            CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_RuntimeError, returnError = true; return false )
 
-            if (!return_error && keep_calling_callable)
+            if ( !returnError && keepCallingCallable )
             {
-                Py_INCREF(iface);
-                PyObject * result = PyObject_CallFunctionObjArgs(callable, iface, NULL);
-                Py_DECREF(iface);
-                if (result == NULL)
+                Py_INCREF( interfacePy );
+                PyObject * result = PyObject_CallFunctionObjArgs( callable, interfacePy, NULL );
+                Py_DECREF( interfacePy );
+                if ( result == NULL )
                 {
-                    return_error = true;
+                    returnError = true;
                 }
-                else if (!PyBool_Check(result))
+                else if ( !PyBool_Check( result ) )
                 {
                     ::std::ostringstream oss;
                     oss << "InterfaceBrowser.for_each_interface() expected second argument to be a callable that "
                         << "returns a bool, but instead it returned a " << result->ob_type->tp_name << ".";
-                    PyErr_SetString(PyExc_ValueError, oss.str().c_str());
-                    return_error = true;
+                    PyErr_SetString( PyExc_ValueError, oss.str().c_str() );
+                    returnError = true;
                 }
                 else
                 {
-                    keep_calling_callable = PyObject_IsTrue(result) ? true : false;
+                    keepCallingCallable = PyObject_IsTrue( result ) ? true : false;
                 }
-                Py_DECREF(result);
+                Py_DECREF( result );
             }
 
-            if (!return_error && PyList_Append(temp_list, iface) != 0)
+            if ( !returnError && PyList_Append( tempList, interfacePy ) != 0 )
             {
-                return_error = true;
+                returnError = true;
             }
 
-            Py_DECREF(iface);
-            return !return_error;
+            Py_DECREF( interfacePy );
+            return !returnError;
         };
 
-        self->browser->for_each_interface(do_this);
+        self->browser->for_each_interface( doThis );
 
-        if (!return_error && self->interfaces == NULL)
+        if ( !returnError && self->interfaces == NULL )
         {
-            self->interfaces = (PyTupleObject *) PyList_AsTuple(temp_list);
-            if (self->interfaces == NULL)
+            self->interfaces = reinterpret_cast< PyTupleObject * >( PyList_AsTuple( tempList ) );
+            if ( self->interfaces == NULL )
             {
-                return_error = true;
+                returnError = true;
             }
         }
 
-        Py_DECREF(temp_list);
+        Py_DECREF( tempList );
 
-        if (return_error)
+        if ( returnError )
         {
             return NULL;
         }
 
-        return keep_calling_callable ? Py_True : Py_False;
+        return keepCallingCallable ? Py_True : Py_False;
     }
 }
 
-static PyObject *
-InterfaceBrowser_for_each_interface(InterfaceBrowser_PyObj * self, PyObject * const * args, Py_ssize_t nargs)
+static
+PyObject *
+InterfaceBrowser_for_each_interface(
+    InterfaceBrowser_PyObj * self,
+    PyObject * const * args,
+    Py_ssize_t nargs )
 {
-    if (nargs != 1)
+    if ( nargs != 1 )
     {
         ::std::ostringstream oss;
         oss << "InterfaceBrowser.for_each_interface() expected 2 arguments, but "
-            << ::std::to_string(nargs + 1) << " given.";
-        PyErr_SetString(PyExc_ValueError, oss.str().c_str());
+            << ::std::to_string( nargs + 1 ) << " given.";
+        PyErr_SetString( PyExc_ValueError, oss.str().c_str() );
         return NULL;
     }
 
-    ENSURE_INITIALIZED(NULL)
+    ENSURE_INITIALIZED( NULL )
 
-    PyObject * callable(args[0]);
-    if (!PyCallable_Check(callable))
+    PyObject * callable( args[ 0 ] );
+    if ( !PyCallable_Check( callable ) )
     {
         ::std::ostringstream oss;
         oss << "InterfaceBrowser.for_each_interface() expected second argument to be callable, not "
             << callable->ob_type->tp_name << ".";
-        PyErr_SetString(PyExc_ValueError, oss.str().c_str());
+        PyErr_SetString( PyExc_ValueError, oss.str().c_str() );
         return NULL;
     }
 
-    if (self->interfaces == NULL)
+    if ( self->interfaces == NULL )
     {
-        return for_each_interface_and_populate(self, callable);
+        return forEachInterfaceAndPopulate( self, callable );
     }
-    return for_each_populated_interface(self, callable);
+    return forEachPopulatedInterface( self, callable );
 }
 
-#define ENSURE_POPULATED(ret) if (self->interfaces == NULL) \
+#define ENSURE_POPULATED(ret) if ( self->interfaces == NULL ) \
     { \
-        self->interfaces = _get_interfaces(*(self->browser)); \
-        if (self->interfaces == NULL) \
+        self->interfaces = _get_interfaces( *self->browser ); \
+        if ( self->interfaces == NULL ) \
         { \
             return ret; \
         } \
     }
 
-static PyObject *
-InterfaceBrowser_get_interfaces(InterfaceBrowser_PyObj * self, PyObject * Py_UNUSED(ignore))
+static
+PyObject *
+InterfaceBrowser_get_interfaces(
+    InterfaceBrowser_PyObj * self,
+    PyObject * Py_UNUSED( args ) )
 {
-    ENSURE_INITIALIZED(NULL)
-    ENSURE_POPULATED(NULL)
-    Py_INCREF(self->interfaces);
-    return (PyObject *)self->interfaces;
+    ENSURE_INITIALIZED( NULL )
+    ENSURE_POPULATED( NULL )
+    Py_INCREF( self->interfaces );
+    return reinterpret_cast< PyObject * >( self->interfaces );
 }
 
-static PyObject *
-InterfaceBrowser___iter__(InterfaceBrowser_PyObj * self, PyObject * args)
+static
+PyObject *
+InterfaceBrowser___iter__(
+    InterfaceBrowser_PyObj * self,
+    PyObject * args )
 {
-    return PyObject_GetIter(InterfaceBrowser_get_interfaces(self, args));
+    return PyObject_GetIter( InterfaceBrowser_get_interfaces( self, args ) );
 }
 
-static Py_ssize_t
-InterfaceBrowser___len__(InterfaceBrowser_PyObj * self)
+static
+Py_ssize_t
+InterfaceBrowser___len__(
+    InterfaceBrowser_PyObj * self )
 {
-    ENSURE_INITIALIZED(-1)
+    ENSURE_INITIALIZED( -1 )
 
-    if (self->interfaces != NULL)
+    if ( self->interfaces != NULL )
     {
-        return PyTuple_Size((PyObject *) self->interfaces);
+        return PyTuple_Size( reinterpret_cast< PyObject * >( self->interfaces ) );
     }
 
     try
     {
         return self->browser->get_interfaces().size();
     }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return -1)
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_RuntimeError, return -1 )
 }
 
-static PyObject *
-InterfaceBrowser_length(InterfaceBrowser_PyObj * self, PyObject * Py_UNUSED(ignore))
+static
+PyObject *
+InterfaceBrowser_length(
+    InterfaceBrowser_PyObj * self,
+    PyObject * Py_UNUSED( args ) )
 {
-    Py_ssize_t length(InterfaceBrowser___len__(self));
-    if (length == -1)
+    Py_ssize_t const length{ InterfaceBrowser___len__( self ) };
+    if ( length == -1 )
     {
         return NULL;
     }
-    return PyLong_FromSsize_t(length);
+    return PyLong_FromSsize_t( length );
 }
 
-static PyObject *
-InterfaceBrowser___getitem___mapping(InterfaceBrowser_PyObj * self, PyObject * key)
+static
+PyObject *
+InterfaceBrowser___getitem___mapping(
+    InterfaceBrowser_PyObj * self,
+    PyObject * key )
 {
-    ENSURE_INITIALIZED(NULL)
-    if (PyUnicode_Check(key))
+    ENSURE_INITIALIZED( NULL )
+    if ( PyUnicode_Check( key ) )
     {
-        Py_ssize_t size(0);
-        char const * chars(PyUnicode_AsUTF8AndSize(key, &size));
-        if (chars)
+        Py_ssize_t size{ 0 };
+        char const * chars( PyUnicode_AsUTF8AndSize( key, &size ) );
+        if ( chars && size > 0 )
         {
             try
             {
-                return OddSource::ifaddrs4py::convert_to_python( (*self->browser)[ chars ] );
+                return OddSource::ifaddrs4py::convertToPython( ( *self->browser )[ chars ] );
             }
-            CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_KeyError, return NULL)
+            CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_KeyError, return NULL )
         }
         else
         {
-            if (PyErr_Occurred() == NULL)
+            if ( PyErr_Occurred() == NULL )
             {
-                PyErr_SetString(PyExc_ValueError, "Interface key must be a str or int");
+                PyErr_SetString( PyExc_ValueError, "Interface key must be a str or int" );
             }
             return NULL;
         }
     }
-    else if(PyLong_Check(key))
+    else if( PyLong_Check( key ) )
     {
         try
         {
-            return OddSource::ifaddrs4py::convert_to_python( (*self->browser)[ PyLong_AsUnsignedLong( key ) ] );
+            return OddSource::ifaddrs4py::convertToPython( (*self->browser)[ PyLong_AsUnsignedLong( key ) ] );
         }
-        CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_KeyError, return NULL)
+        CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_KeyError, return NULL )
     }
     else
     {
-        if (PyErr_Occurred() == NULL)
+        if ( PyErr_Occurred() == NULL )
         {
-            PyErr_SetString(PyExc_ValueError, "Interface key must be a str or int");
+            PyErr_SetString( PyExc_ValueError, "Interface key must be a str or int" );
         }
         return NULL;
     }
 }
 
-static PyObject *
-InterfaceBrowser_get_interface(InterfaceBrowser_PyObj * self, PyObject * const * args, Py_ssize_t nargs)
+static
+PyObject *
+InterfaceBrowser_get_interface(
+    InterfaceBrowser_PyObj * self,
+    PyObject * const * args,
+    Py_ssize_t nargs )
 {
-    if (nargs != 1)
+    if ( nargs != 1 )
     {
         ::std::ostringstream oss;
         oss << "InterfaceBrowser.get_interface() expected 2 arguments, but "
-            << ::std::to_string(nargs + 1) << " given.";
-        PyErr_SetString(PyExc_ValueError, oss.str().c_str());
+            << ::std::to_string( nargs + 1 ) << " given.";
+        PyErr_SetString( PyExc_ValueError, oss.str().c_str() );
         return NULL;
     }
 
-    ENSURE_INITIALIZED(NULL)
-    ENSURE_POPULATED(NULL)
-    return InterfaceBrowser___getitem___mapping(self, args[0]);
+    ENSURE_INITIALIZED( NULL )
+    ENSURE_POPULATED( NULL )
+    return InterfaceBrowser___getitem___mapping( self, args[ 0 ] );
 }
 
 #ifndef ODDSOURCE_IS_WINDOWS
-#ifndef __clang__
-#pragma GCC diagnostic push
 // "cast between incompatible function types from <...> to ‘PyCFunction’"
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif /* __clang__ */
+#  ifdef __clang__
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+#  else /* __clang__ */
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wcast-function-type"
+#  endif /* !__clang__ */
 #endif /* ODDSOURCE_IS_WINDOWS */
 
 static struct PyMemberDef InterfaceBrowser_members [] =
 {
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    { NULL, 0, 0, 0, NULL }  /* Sentinel */
 };
 
 static struct PyMethodDef InterfaceBrowser_methods [] =
 {
-    {"get_interfaces", (PyCFunction) InterfaceBrowser_get_interfaces, METH_NOARGS, NULL},
-    {"length", (PyCFunction) InterfaceBrowser_length, METH_NOARGS, NULL},
-    {"get_interface", (PyCFunction) InterfaceBrowser_get_interface, METH_FASTCALL, NULL},
-    {"for_each_interface", (PyCFunction) InterfaceBrowser_for_each_interface, METH_FASTCALL, NULL},
-    {NULL, NULL, 0, NULL}  /* Sentinel */
+    { "get_interfaces", (PyCFunction) InterfaceBrowser_get_interfaces, METH_NOARGS, NULL },
+    { "length", (PyCFunction) InterfaceBrowser_length, METH_NOARGS, NULL },
+    { "get_interface", (PyCFunction) InterfaceBrowser_get_interface, METH_FASTCALL, NULL },
+    { "for_each_interface", (PyCFunction) InterfaceBrowser_for_each_interface, METH_FASTCALL, NULL },
+    { NULL, NULL, 0, NULL }  /* Sentinel */
 };
 
 static struct PyGetSetDef InterfaceBrowser_getters_and_setters [] =
 {
-    {NULL, NULL, NULL, NULL, NULL}  /* Sentinel */
+    { NULL, NULL, NULL, NULL, NULL }  /* Sentinel */
 };
 
 static PyMappingMethods InterfaceBrowser_mapping =
@@ -445,17 +473,11 @@ static PyMappingMethods InterfaceBrowser_mapping =
     NULL, // .mp_ass_subscript
 };
 
-#ifndef ODDSOURCE_IS_WINDOWS
-#pragma GCC diagnostic push
-// "error: 'tp_print' is deprecated" on Py3.8, but if you remove it, you get compiler errors about missing tp_print
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif /* ODDSOURCE_IS_WINDOWS */
-
 static PyTypeObject InterfaceBrowser_PyType =
 {
-    PyVarObject_HEAD_INIT(&PyType_Type, 0)
+    PyVarObject_HEAD_INIT( &PyType_Type, 0 )
     "ifaddrs4py.extern.InterfaceBrowser", // .tp_name
-    sizeof(InterfaceBrowser_PyObj), // .tp_basicsize
+    sizeof( InterfaceBrowser_PyObj ), // .tp_basicsize
     0, // .tp_itemsize
     (destructor) InterfaceBrowser_dealloc, // .tp_dealloc
     0, // .tp_vectorcall_offset
@@ -510,16 +532,15 @@ static PyTypeObject InterfaceBrowser_PyType =
 #endif /* PY_MINOR_VERSION > 12 */
 };
 
-#ifndef ODDSOURCE_IS_WINDOWS
-#pragma GCC diagnostic pop
-#endif /* ODDSOURCE_IS_WINDOWS */
-
-static int ifaddrs4py_module_init(PyObject * module_self)
+static
+int
+ifaddrs4py_module_init(
+    PyObject * moduleSelf )
 {
     using namespace OddSource::ifaddrs4py;
 
-    void * void_state_wrapper( PyModule_GetState( module_self ) );
-    IF_NULL_RETURN_INT(void_state_wrapper)
+    void * void_state_wrapper( PyModule_GetState( moduleSelf ) );
+    IF_NULL_RETURN_INT( void_state_wrapper )
     auto state_wrapper( reinterpret_cast< ModuleStateWrapper * >( void_state_wrapper ) );
 
     auto pState( ::std::make_shared< ModuleState >() );
@@ -527,68 +548,77 @@ static int ifaddrs4py_module_init(PyObject * module_self)
 
     try
     {
-        OddSource::ifaddrs4py::init_version_constants(module_self);
-        OddSource::ifaddrs4py::init_interface_enums(module_self);
-        OddSource::ifaddrs4py::init_ip_address_samples(module_self);
-        OddSource::ifaddrs4py::init_mac_address_sample(module_self);
+        OddSource::ifaddrs4py::initVersionConstants( moduleSelf );
+        OddSource::ifaddrs4py::initInterfaceEnums( moduleSelf );
+        OddSource::ifaddrs4py::initIPAddressSamples( moduleSelf );
+        OddSource::ifaddrs4py::initMacAddressSamples( moduleSelf );
     }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_ImportError, { return -1; })
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_ImportError, { return -1; } )
 
-    IllegalStateError = PyErr_NewException("ifaddrs4py.extern.IllegalStateError", PyExc_RuntimeError, NULL);
-    if (IllegalStateError == NULL)
+    IllegalStateError = PyErr_NewException( "ifaddrs4py.extern.IllegalStateError", PyExc_RuntimeError, NULL );
+    if ( IllegalStateError == NULL )
     {
-        //Py_DECREF(module_self);
         return -1;
     }
 
-    Py_INCREF(IllegalStateError);
-    if (PyModule_AddObject(module_self, "IllegalStateError", IllegalStateError) != 0)
+    Py_INCREF( IllegalStateError );
+    if ( PyModule_AddObject( moduleSelf, "IllegalStateError", IllegalStateError ) != 0 )
     {
-        Py_DECREF(IllegalStateError);
-        //Py_DECREF(module_self);
+        Py_DECREF( IllegalStateError );
         return -1;
     }
 
-    Py_INCREF(&InterfaceBrowser_PyType);
-    if (PyModule_AddObject(module_self, "InterfaceBrowser", (PyObject *)&InterfaceBrowser_PyType) != 0)
+    Py_INCREF( &InterfaceBrowser_PyType );
+    if ( PyModule_AddObject(
+        moduleSelf,
+        "InterfaceBrowser",
+        reinterpret_cast< PyObject * >( &InterfaceBrowser_PyType ) ) != 0 )
     {
-        Py_DECREF(IllegalStateError);
-        Py_DECREF(&InterfaceBrowser_PyType);
-        //Py_DECREF(module_self);
+        Py_DECREF( IllegalStateError );
+        Py_DECREF( &InterfaceBrowser_PyType );
         return -1;
     }
 
     return 0;
 }
 
-static int ifaddrs4py_module_traverse(PyObject * module_self, visitproc visit, void * arg)
+static
+int
+ifaddrs4py_module_traverse(
+    PyObject * moduleSelf,
+    visitproc visit,
+    void * arg  )
 {
     using namespace OddSource::ifaddrs4py;
 
-    return ModuleState::get_state_of(module_self)->gc_visit(visit, arg);
+    return ModuleState::getStateOf( moduleSelf )->gcVisit( visit, arg );
 }
 
-static void ifaddrs4py_module_free(PyObject * module_self)
+static
+void
+ifaddrs4py_module_free(
+    PyObject * moduleSelf )
 {
     using namespace OddSource::ifaddrs4py;
 
-    ModuleState::get_state_of(module_self).reset();
+    ModuleState::getStateOf( moduleSelf ).reset();
 }
 
 static struct PyMethodDef ifaddrs4py_module_methods [] =
 {
-    {"get_sample_interface_ipv4_address", extern_get_sample_interface_ipv4_address, METH_NOARGS, NULL},
-    {"get_sample_interface_ipv6_address", extern_get_sample_interface_ipv6_address, METH_NOARGS, NULL},
-    {"get_sample_interface_scoped_ipv6_address", extern_get_sample_interface_scoped_ipv6_address, METH_NOARGS, NULL},
-    {"get_sample_interface", extern_get_sample_interface, METH_NOARGS, NULL},
-    {"get_mac_address_data_from_repr", (PyCFunction) extern_get_mac_address_data_from_repr, METH_FASTCALL, NULL},
-    {"get_mac_address_repr_from_data", (PyCFunction) extern_get_mac_address_repr_from_data, METH_FASTCALL, NULL},
-    {NULL, NULL, 0, NULL}        /* Sentinel */
+    { "get_sample_interface_ipv4_address", extern_get_sample_interface_ipv4_address, METH_NOARGS, NULL },
+    { "get_sample_interface_ipv6_address", extern_get_sample_interface_ipv6_address, METH_NOARGS, NULL },
+    { "get_sample_interface_scoped_ipv6_address", extern_get_sample_interface_scoped_ipv6_address, METH_NOARGS, NULL },
+    { "get_sample_interface", extern_get_sample_interface, METH_NOARGS, NULL },
+    { "get_mac_address_data_from_repr", (PyCFunction) extern_get_mac_address_data_from_repr, METH_FASTCALL, NULL },
+    { "get_mac_address_repr_from_data", (PyCFunction) extern_get_mac_address_repr_from_data, METH_FASTCALL, NULL },
+    { NULL, NULL, 0, NULL }        /* Sentinel */
 };
 
-static PyModuleDef_Slot ifaddrs4py_module_slots [] = {
-    {Py_mod_exec, reinterpret_cast< void * >( ifaddrs4py_module_init )},
-    {0, NULL}
+static PyModuleDef_Slot ifaddrs4py_module_slots [] =
+{
+    { Py_mod_exec, reinterpret_cast< void * >( ifaddrs4py_module_init ) },
+    { 0, NULL }
 };
 
 static struct PyModuleDef ifaddrs4py_module =
@@ -597,9 +627,8 @@ static struct PyModuleDef ifaddrs4py_module =
     "ifaddrs4py.extern", // .m_name, name of module
     PyDoc_STR(
         "The native interface between ifaddrs4py and ifaddrs4cpp. You should not use this directly, but "
-        "rather should use the pure Python modules wrapping it."
-    ), // .m_doc, module documentation
-    sizeof(OddSource::ifaddrs4py::ModuleStateWrapper), // .m_size, size of per-interpreter state of the module
+        "rather should use the pure Python modules wrapping it." ), // .m_doc, module documentation
+    sizeof( OddSource::ifaddrs4py::ModuleStateWrapper ), // .m_size, size of per-interpreter state of the module
     ifaddrs4py_module_methods, // .m_methods
     ifaddrs4py_module_slots, // .m_slots
     ifaddrs4py_module_traverse, // .m_traverse
@@ -608,27 +637,20 @@ static struct PyModuleDef ifaddrs4py_module =
 };
 
 #ifndef ODDSOURCE_IS_WINDOWS
-#ifndef __clang__
-#pragma GCC diagnostic pop
-#endif /* __clang__ */
+#  ifdef __clang__
+#    pragma clang diagnostic pop
+#  else
+#    pragma GCC diagnostic pop
+#  endif /* __clang__ */
 #endif /* ODDSOURCE_IS_WINDOWS */
 
 PyMODINIT_FUNC
-PyInit_extern(void)
+PyInit_extern(
+    void )
 {
-    if (PyType_Ready(&InterfaceBrowser_PyType) != 0)
+    if ( PyType_Ready( &InterfaceBrowser_PyType ) != 0 )
     {
         return NULL;
     }
-    return PyModuleDef_Init(&ifaddrs4py_module);
-
-    /*PyObject * module = PyModuleDef_Init(&ifaddrs4py_module);
-    if (module == NULL)
-    {
-        return NULL;
-    }*/
-
-    //
-
-    //return module;
+    return PyModuleDef_Init( &ifaddrs4py_module );
 }

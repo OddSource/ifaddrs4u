@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+# Copyright © 2010-2026 OddSource Code (license@oddsource.io)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -169,6 +169,7 @@ else:
     extra_compile_args.extend([
         "-std=c++17",
         "-fvisibility=hidden",
+        "-Wall",
         "-Wdeprecated",
         "-Wextra",
         "-Wpedantic",
@@ -189,9 +190,6 @@ else:
         target_opts = [f"-mmacosx-version-min={MACOS_TARGET}"]
         extra_compile_args.extend(target_opts)
         extra_link_args.extend(target_opts)
-        extra_compile_args.append("-Wno-cast-function-type-mismatch")
-    else:
-        extra_compile_args.append("-Wno-cast-function-type")
 
 
 def pre_build(options: Options) -> None:

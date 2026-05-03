@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,27 +32,34 @@ using namespace ::std::string_literals;
 
 namespace OddSource::ifaddrs4py
 {
-    inline PyObject * get_module(char const * module_name)
+    inline
+    PyObject *
+    getModule(
+        char const * moduleName )
     {
-        PyObject * module = PyImport_ImportModule(module_name);
-        if (module == NULL)
+        PyObject * module = PyImport_ImportModule( moduleName );
+        if ( module == NULL )
         {
             throw ::std::runtime_error(
-                "Failed to import module '"s + module_name + "'"s);
+                "Failed to import module '"s + moduleName + "'"s );
         }
         return module;
     }
 
-    inline PyObject * get_module_class(char const * module_name, char const * class_name)
+    inline
+    PyObject *
+    getModuleClass(
+        char const * moduleName,
+        char const * className )
     {
-        PyObject * module = get_module(module_name);
+        PyObject * module = getModule( moduleName );
 
-        PyObject * klass = PyObject_GetAttrString(module, class_name);
-        Py_DECREF(module);
-        if (klass == NULL)
+        PyObject * klass = PyObject_GetAttrString( module, className );
+        Py_DECREF( module );
+        if ( klass == NULL )
         {
             throw ::std::runtime_error(
-                "Failed to retrieve class '"s + class_name + "' from module '"s + module_name + "'"s);
+                "Failed to retrieve class '"s + className + "' from module '"s + moduleName + "'"s );
         }
 
         return klass;

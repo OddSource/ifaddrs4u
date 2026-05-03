@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,23 @@
 
 namespace OddSource::ifaddrs4py
 {
-    void init_mac_address_sample(PyObject *);
+    void
+    initMacAddressSamples(
+        PyObject * module );
 
-    PyObject * convert_to_python(OddSource::Interfaces::MacAddress const &);
+    PyObject *
+    convertToPython(
+        OddSource::Interfaces::MacAddress const & address );
 }
 
 PyObject *
-extern_get_mac_address_data_from_repr(PyObject *, PyObject * const *, Py_ssize_t);
+extern_get_mac_address_data_from_repr(
+    PyObject * moduleSelf,
+    PyObject * const * args,
+    Py_ssize_t nargs );
 
 PyObject *
-extern_get_mac_address_repr_from_data(PyObject *, PyObject * const *, Py_ssize_t);
+extern_get_mac_address_repr_from_data(
+    PyObject * moduleSelf,
+    PyObject * const * args,
+    Py_ssize_t nargs );

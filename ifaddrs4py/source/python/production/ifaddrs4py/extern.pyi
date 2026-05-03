@@ -1,5 +1,5 @@
 #
-# Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+# Copyright © 2010-2026 OddSource Code (license@oddsource.io)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,25 +14,15 @@
 # limitations under the License.
 #
 
+from collections.abc import (
+    Callable,
+    Iterator,
+)
 import enum
-import sys
 from typing import (
     Optional,
     Union,
 )
-
-if sys.version_info >= (3, 9):
-    from collections.abc import (
-        Callable,
-        Iterator,
-    )
-    Tuple = tuple
-else:
-    from typing import (
-        Callable,
-        Iterator,
-        Tuple,
-    )
 
 from ifaddrs4py.interface import (
     Interface,
@@ -46,7 +36,7 @@ from ifaddrs4py.mac_address import MacAddress
 
 
 __VERSION_EXT__: str
-__VERSION_INFO_EXT__: Tuple[Union[str, int], ...]
+__VERSION_INFO_EXT__: tuple[Union[str, int], ...]
 
 _TEST_LOOPBACK_V4: IPv4Address
 _TEST_LOOPBACK_V6: IPv6Address
@@ -65,10 +55,10 @@ def get_sample_interface_scoped_ipv6_address() -> InterfaceIPAddress[IPv6Address
 def get_sample_interface() -> Interface: ...
 
 
-def get_mac_address_data_from_repr(s: str) -> Tuple[int, ...]: ...
+def get_mac_address_data_from_repr(s: str) -> tuple[int, ...]: ...
 
 
-def get_mac_address_repr_from_data(d: Tuple[int, ...]) -> str: ...
+def get_mac_address_repr_from_data(d: tuple[int, ...]) -> str: ...
 
 
 class InterfaceIPAddressFlag(enum.IntEnum):
@@ -109,7 +99,7 @@ class IllegalStateError(RuntimeError): ...
 
 
 class InterfaceBrowser:
-    def get_interfaces(self) -> Tuple[Interface, ...]: ...
+    def get_interfaces(self) -> tuple[Interface, ...]: ...
 
     def length(self) -> int: ...
 

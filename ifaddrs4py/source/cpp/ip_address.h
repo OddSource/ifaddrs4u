@@ -22,9 +22,15 @@
 
 namespace OddSource::ifaddrs4py
 {
-    void init_ip_address_samples(PyObject *);
+    void
+    initIPAddressSamples(
+        PyObject * module );
 
-    PyObject * convert_to_python(OddSource::Interfaces::IPv4Address const &);
+    PyObject *
+    convertToPython(
+        OddSource::Interfaces::IPv4Address const & address );
 
-    PyObject * convert_to_python(OddSource::Interfaces::IPv6Address const &);
+    PyObject *
+    convertToPython(
+        OddSource::Interfaces::IPv6Address const & address );
 }

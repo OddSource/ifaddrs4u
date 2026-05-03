@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +22,36 @@
 
 namespace OddSource::ifaddrs4py
 {
-    void init_interface_enums(PyObject *);
+    void
+    initInterfaceEnums(
+        PyObject * module );
 
-    template<class IPAddressT>
-    PyObject * convert_to_python(OddSource::Interfaces::InterfaceIPAddress<IPAddressT> const &);
+    template< class IPAddressT >
+    PyObject *
+    convertToPython(
+        OddSource::Interfaces::InterfaceIPAddress< IPAddressT > const & interfaceAddress );
 
-    PyObject * convert_to_python(OddSource::Interfaces::Interface const &);
+    PyObject *
+    convertToPython(
+        OddSource::Interfaces::Interface const & rInterface );
 }
 
 PyObject *
-extern_get_sample_interface_ipv4_address(PyObject *, PyObject *);
+extern_get_sample_interface_ipv4_address(
+    PyObject * moduleSelf,
+    PyObject * args );
 
 PyObject *
-extern_get_sample_interface_ipv6_address(PyObject *, PyObject *);
+extern_get_sample_interface_ipv6_address(
+    PyObject * moduleSelf,
+    PyObject * args );
 
 PyObject *
-extern_get_sample_interface_scoped_ipv6_address(PyObject *, PyObject *);
+extern_get_sample_interface_scoped_ipv6_address(
+    PyObject * moduleSelf,
+    PyObject * args );
 
 PyObject *
-extern_get_sample_interface(PyObject *, PyObject *);
+extern_get_sample_interface(
+    PyObject * moduleSelf,
+    PyObject * args );

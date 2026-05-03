@@ -18,26 +18,27 @@
 
 PyObject *
 OddSource::ifaddrs4py::
-convert_to_python(OddSource::Interfaces::IPv4Address const & address)
+convertToPython(
+    OddSource::Interfaces::IPv4Address const & address )
 {
-    PyObject * IPv4Address(get_module_class("ifaddrs4py.ip_address", "IPv4Address"));
+    PyObject * IPv4Address( getModuleClass( "ifaddrs4py.ip_address", "IPv4Address" ) );
 
-    auto addr = static_cast< in_addr const * >(address);
-    auto ints = reinterpret_cast< uint32_t const * >(addr);
+    auto const addr( static_cast< in_addr const * >( address ) );
+    auto const ints( reinterpret_cast< uint32_t const * >( addr ) );
 
-    PyObject * args(Py_BuildValue("(I)", ntohl(*ints)));
-    if (args == NULL)
+    PyObject * args( Py_BuildValue( "(I)", ntohl( *ints ) ) );
+    if ( args == NULL )
     {
-        Py_DECREF(IPv4Address);
-        throw ::std::runtime_error("Unable to create args list");
+        Py_DECREF( IPv4Address );
+        throw ::std::runtime_error( "Unable to create args list" );
     }
 
-    PyObject * instance = PyObject_Call(IPv4Address, args, NULL);
-    Py_DECREF(IPv4Address);
-    Py_DECREF(args);
-    if (instance == NULL)
+    PyObject * instance = PyObject_Call( IPv4Address, args, NULL );
+    Py_DECREF( IPv4Address );
+    Py_DECREF( args );
+    if ( instance == NULL )
     {
-        throw ::std::runtime_error("Unable to instantiate ifaddrs4py.ip_address.IPv4Address class");
+        throw ::std::runtime_error( "Unable to instantiate ifaddrs4py.ip_address.IPv4Address class" );
     }
 
     return instance;
@@ -45,54 +46,55 @@ convert_to_python(OddSource::Interfaces::IPv4Address const & address)
 
 PyObject *
 OddSource::ifaddrs4py::
-convert_to_python(OddSource::Interfaces::IPv6Address const & address)
+convertToPython(
+    OddSource::Interfaces::IPv6Address const & address )
 {
-    PyObject * IPv6Address(get_module_class("ifaddrs4py.ip_address", "IPv6Address"));
+    PyObject * IPv6Address( getModuleClass( "ifaddrs4py.ip_address", "IPv6Address" ) );
 
-    auto addr = static_cast< in6_addr const * >(address);
-    auto bytes = reinterpret_cast< uint8_t const * >(addr);
+    auto const addr( static_cast< in6_addr const * >( address ) );
+    auto const bytes( reinterpret_cast< uint8_t const * >( addr ) );
 
-    PyObject * args(Py_BuildValue("(y#)", bytes, 16));
-    if (args == NULL)
+    PyObject * args( Py_BuildValue( "(y#)", bytes, 16 ) );
+    if ( args == NULL )
     {
-        Py_DECREF(IPv6Address);
-        throw ::std::runtime_error("Unable to create args list");
+        Py_DECREF( IPv6Address );
+        throw ::std::runtime_error( "Unable to create args list" );
     }
 
-    PyObject * kwargs(NULL);
-    if (address.has_scope_id())
+    PyObject * kwargs( NULL );
+    if ( address.has_scope_id() )
     {
-        PyObject * scope_id_py(Py_None);
-        if (address.scope_id())
+        PyObject * scopeIDPy( Py_None );
+        if ( address.scope_id() )
         {
-            scope_id_py = PyLong_FromUnsignedLong(*address.scope_id());
+            scopeIDPy = PyLong_FromUnsignedLong( *address.scope_id() );
         }
 
-        PyObject * scope_name_py(Py_None);
-        if (address.scope_name())
+        PyObject * scopeNamePy( Py_None );
+        if ( address.scope_name() )
         {
-            ::std::string scope_name(*address.scope_name());
-            scope_name_py = PyUnicode_FromStringAndSize(scope_name.c_str(), scope_name.length());
+            ::std::string const scopeName( *address.scope_name() );
+            scopeNamePy = PyUnicode_FromStringAndSize( scopeName.c_str(), scopeName.length() );
         }
 
-        kwargs = Py_BuildValue("{s:O,s:O}", "scope_id", scope_name_py, "scope_number", scope_id_py);
-        Py_XDECREF(scope_name_py);
-        Py_XDECREF(scope_id_py);
-        if (kwargs == NULL)
+        kwargs = Py_BuildValue( "{s:O,s:O}", "scope_id", scopeNamePy, "scope_number", scopeIDPy );
+        Py_XDECREF( scopeNamePy );
+        Py_XDECREF( scopeIDPy );
+        if ( kwargs == NULL )
         {
-            Py_DECREF(IPv6Address);
-            Py_DECREF(args);
-            throw ::std::runtime_error("Unable to create kwargs dict");
+            Py_DECREF( IPv6Address );
+            Py_DECREF( args );
+            throw ::std::runtime_error( "Unable to create kwargs dict" );
         }
     }
 
-    PyObject * instance = PyObject_Call(IPv6Address, args, kwargs);
-    Py_DECREF(IPv6Address);
-    Py_DECREF(args);
-    Py_XDECREF(kwargs);
-    if (instance == NULL)
+    PyObject * instance = PyObject_Call( IPv6Address, args, kwargs );
+    Py_DECREF( IPv6Address );
+    Py_DECREF( args );
+    Py_XDECREF( kwargs );
+    if ( instance == NULL )
     {
-        throw ::std::runtime_error("Unable to instantiate ifaddrs4py.ip_address.IPv6Address class");
+        throw ::std::runtime_error( "Unable to instantiate ifaddrs4py.ip_address.IPv6Address class" );
     }
 
     return instance;
@@ -100,24 +102,25 @@ convert_to_python(OddSource::Interfaces::IPv6Address const & address)
 
 void
 OddSource::ifaddrs4py::
-init_ip_address_samples(PyObject * module)
+initIPAddressSamples(
+    PyObject * module )
 {
-    static OddSource::Interfaces::IPv4Address const LO_V4("127.0.0.1");
-    static OddSource::Interfaces::IPv6Address const LO_V6("::1");
+    static OddSource::Interfaces::IPv4Address const LO_V4( "127.0.0.1" );
+    static OddSource::Interfaces::IPv6Address const LO_V6( "::1" );
 
-    PyObject * lo = convert_to_python(LO_V4);
-    int result = PyModule_AddObjectRef(module, "_TEST_LOOPBACK_V4", lo);
-    Py_DECREF(lo);
-    if (result != 0)
+    PyObject * lo = convertToPython( LO_V4 );
+    int result = PyModule_AddObjectRef( module, "_TEST_LOOPBACK_V4", lo );
+    Py_DECREF( lo );
+    if ( result != 0 )
     {
-        throw ::std::runtime_error("Unable to initialize _TEST_LOOPBACK_V4.");
+        throw ::std::runtime_error( "Unable to initialize _TEST_LOOPBACK_V4." );
     }
 
-    lo = convert_to_python(LO_V6);
-    result = PyModule_AddObjectRef(module, "_TEST_LOOPBACK_V6", lo);
-    Py_DECREF(lo);
-    if (result != 0)
+    lo = convertToPython( LO_V6 );
+    result = PyModule_AddObjectRef( module, "_TEST_LOOPBACK_V6", lo );
+    Py_DECREF( lo );
+    if ( result != 0 )
     {
-        throw ::std::runtime_error("Unable to initialize _TEST_LOOPBACK_V6.");
+        throw ::std::runtime_error( "Unable to initialize _TEST_LOOPBACK_V6." );
     }
 }

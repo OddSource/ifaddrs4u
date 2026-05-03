@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,109 +21,110 @@
 
 namespace
 {
-    template<typename F>
-    PyObject * make_enum_class(PyObject * enum_module,
-                               char const * enum_name,
-                               ::std::unordered_map<::std::string, F const> const & values)
+    template< typename F >
+    PyObject *
+    createEnumClass(
+        PyObject * enumModule,
+        char const * enumName,
+        ::std::unordered_map< ::std::string, F const > const & values )
     {
-        PyObject * enum_class = NULL;
+        PyObject * enumClass = NULL;
 
         {
-            PyObject * constants_dict = PyDict_New();
-            for (auto const & [name, value] : values)
+            PyObject * constantsDict = PyDict_New();
+            for ( auto const & [ name, value ] : values )
             {
                 PyDict_SetItemString(
-                    constants_dict,
+                    constantsDict,
                     name.c_str(),
                     PyLong_FromLong( static_cast< ::std::underlying_type_t< F > >( value ) ) );
             }
 
-            enum_class = PyObject_CallMethod(enum_module,
-                                             "IntEnum",
-                                             "sO",
-                                             enum_name,
-                                             constants_dict);
-            Py_CLEAR(constants_dict);
+            enumClass = PyObject_CallMethod(enumModule, "IntEnum", "sO", enumName, constantsDict);
+            Py_CLEAR( constantsDict );
         }
 
-        if (enum_class == NULL)
+        if ( enumClass == NULL )
         {
-            throw ::std::runtime_error("Failed to define new IntEnum class");
+            throw ::std::runtime_error( "Failed to define new IntEnum class" );
         }
 
-        return enum_class;
+        return enumClass;
     }
 }
 
-template<class IPAddressT>
+template< class IPAddressT >
 PyObject *
 OddSource::ifaddrs4py::
-convert_to_python(OddSource::Interfaces::InterfaceIPAddress<IPAddressT> const & interface_address)
+convertToPython(
+    OddSource::Interfaces::InterfaceIPAddress< IPAddressT > const & interfaceAddress )
 {
-    PyObject * address = NULL, * broadcast_address = NULL, * point_to_point_destination = NULL,
-             * flags = NULL, * prefix_length = NULL;
+    PyObject * address = NULL, * broadcastAddress = NULL, * pointToPointDestinationAddress = NULL,
+             * flags = NULL, * prefixLength = NULL;
     PyObject * InterfaceIPAddress = NULL;
 
     try
     {
-        address = convert_to_python(interface_address.address());
-        broadcast_address = interface_address.broadcast_address() ?
-            convert_to_python(*interface_address.broadcast_address()) :
-            Py_None;
-        point_to_point_destination = interface_address.point_to_point_destination() ?
-            convert_to_python(*interface_address.point_to_point_destination()) :
+        address = convertToPython( interfaceAddress.address() );
+
+        broadcastAddress = interfaceAddress.broadcast_address() ?
+            convertToPython( *interfaceAddress.broadcast_address() ) :
             Py_None;
 
-        flags = PyLong_FromUnsignedLong(interface_address.flags());
-        if (flags == NULL)
+        pointToPointDestinationAddress = interfaceAddress.point_to_point_destination() ?
+            convertToPython( *interfaceAddress.point_to_point_destination() ) :
+            Py_None;
+
+        flags = PyLong_FromUnsignedLong( interfaceAddress.flags() );
+        if ( flags == NULL )
         {
-            throw ::std::runtime_error("Failed to create flags long");
+            throw ::std::runtime_error( "Failed to create flags long" );
         }
 
-        prefix_length = interface_address.prefix_length() ?
-            PyLong_FromUnsignedLong(*interface_address.prefix_length()) :
+        prefixLength = interfaceAddress.prefix_length() ?
+            PyLong_FromUnsignedLong( *interfaceAddress.prefix_length() ) :
             Py_None;
-        if (prefix_length == NULL)
+        if ( prefixLength == NULL )
         {
-            throw ::std::runtime_error("Failed to create prefix_length long");
+            throw ::std::runtime_error( "Failed to create prefixLength long" );
         }
 
-        InterfaceIPAddress = get_module_class("ifaddrs4py.interface", "InterfaceIPAddress");
+        InterfaceIPAddress = getModuleClass( "ifaddrs4py.interface", "InterfaceIPAddress" );
     }
     catch (...)
     {
-        Py_XDECREF(address);
-        Py_XDECREF(broadcast_address);
-        Py_XDECREF(point_to_point_destination);
+        Py_XDECREF( address );
+        Py_XDECREF( broadcastAddress );
+        Py_XDECREF( pointToPointDestinationAddress );
         throw;
     }
 
-    PyObject * args(PyTuple_New(0));
-    PyObject * kwargs(Py_BuildValue(
+    PyObject * args( PyTuple_New( 0 ) );
+    PyObject * kwargs( Py_BuildValue(
         "{s:O,s:O,s:O,s:O,s:O}",
         "address", address,
         "flags", flags,
-        "prefix_length", prefix_length,
-        "broadcast_address", broadcast_address,
-        "point_to_point_destination", point_to_point_destination));
-    Py_DECREF(address);
-    Py_XDECREF(broadcast_address);
-    Py_XDECREF(point_to_point_destination);
-    if (args == NULL || kwargs == NULL)
+        "prefix_length", prefixLength,
+        "broadcast_address", broadcastAddress,
+        "point_to_point_destination", pointToPointDestinationAddress ) );
+    Py_DECREF( address );
+    Py_XDECREF( broadcastAddress );
+    Py_XDECREF( pointToPointDestinationAddress );
+    if ( args == NULL || kwargs == NULL )
     {
-        Py_DECREF(InterfaceIPAddress);
-        Py_XDECREF(args);
-        Py_XDECREF(kwargs);
-        throw ::std::runtime_error("Unable to create args or kwargs");
+        Py_DECREF( InterfaceIPAddress );
+        Py_XDECREF( args );
+        Py_XDECREF( kwargs );
+        throw ::std::runtime_error( "Unable to create args or kwargs" );
     }
 
-    PyObject * instance = PyObject_Call(InterfaceIPAddress, args, kwargs);
-    Py_DECREF(InterfaceIPAddress);
-    Py_DECREF(args);
-    Py_DECREF(kwargs);
-    if (instance == NULL)
+    PyObject * instance = PyObject_Call( InterfaceIPAddress, args, kwargs );
+    Py_DECREF( InterfaceIPAddress );
+    Py_DECREF( args );
+    Py_DECREF( kwargs );
+    if ( instance == NULL )
     {
-        throw ::std::runtime_error("Unable to instantiate ifaddrs4py.interface.InterfaceIPAddress class");
+        throw ::std::runtime_error( "Unable to instantiate ifaddrs4py.interface.InterfaceIPAddress class" );
     }
 
     return instance;
@@ -131,36 +132,37 @@ convert_to_python(OddSource::Interfaces::InterfaceIPAddress<IPAddressT> const & 
 
 PyObject *
 OddSource::ifaddrs4py::
-convert_to_python(OddSource::Interfaces::Interface const & iface)
+convertToPython(
+    OddSource::Interfaces::Interface const & rInterface  )
 {
-    ::std::string const name(iface.name());
-    ::std::string const friendlyName(iface.friendlyName());
-    ::std::string const description(iface.description());
+    ::std::string const name( rInterface.name() );
+    ::std::string const friendlyName( rInterface.friendlyName() );
+    ::std::string const description( rInterface.description() );
 
-    PyObject * index = NULL, * flags = NULL, * mtu = NULL, * mac_address = NULL,
-             * ipv4_addresses = NULL, * ipv6_addresses = NULL;
+    PyObject * index = NULL, * flags = NULL, * mtu = NULL, * macAddress = NULL,
+             * ipv4Addresses = NULL, * ipv6Addresses = NULL;
     PyObject * Interface = NULL;
 
     try
     {
-        index = PyLong_FromUnsignedLong(iface.index());
-        if (index == NULL)
+        index = PyLong_FromUnsignedLong( rInterface.index() );
+        if ( index == NULL )
         {
-            throw ::std::runtime_error("Failed to create index long");
+            throw ::std::runtime_error( "Failed to create index long" );
         }
 
-        flags = PyLong_FromUnsignedLong(iface.flags());
-        if (flags == NULL)
+        flags = PyLong_FromUnsignedLong( rInterface.flags() );
+        if ( flags == NULL )
         {
-            throw ::std::runtime_error("Failed to create flags long");
+            throw ::std::runtime_error( "Failed to create flags long" );
         }
 
-        if (iface.mtu())
+        if ( rInterface.mtu() )
         {
-            mtu = PyLong_FromUnsignedLongLong(*iface.mtu());
-            if (mtu == NULL)
+            mtu = PyLong_FromUnsignedLongLong( *rInterface.mtu() );
+            if ( mtu == NULL )
             {
-                throw ::std::runtime_error("Unable to create MTU long");
+                throw ::std::runtime_error( "Unable to create MTU long" );
             }
         }
         else
@@ -168,57 +170,57 @@ convert_to_python(OddSource::Interfaces::Interface const & iface)
             mtu = Py_None;
         }
 
-        mac_address = iface.mac_address() ?
-            convert_to_python(*iface.mac_address()) :
+        macAddress = rInterface.mac_address() ?
+            convertToPython( *rInterface.mac_address() ) :
             Py_None;
 
-        ipv4_addresses = PyTuple_New(iface.ipv4_addresses().size());
-        if (ipv4_addresses == NULL)
+        ipv4Addresses = PyTuple_New( rInterface.ipv4_addresses().size() );
+        if ( ipv4Addresses == NULL )
         {
-            throw ::std::runtime_error("Unable to create tuple of IPv4 interface addresses");
+            throw ::std::runtime_error( "Unable to create tuple of IPv4 interface addresses" );
         }
-        int i(0);
-        for (auto const & ipv4_address : iface.ipv4_addresses())
+        int i{ 0 };
+        for ( auto const & ipv4Address : rInterface.ipv4_addresses() )
         {
-            PyObject * item = convert_to_python(ipv4_address);
-            if (PyTuple_SetItem(ipv4_addresses, i++, item) != 0)
+            PyObject * item = convertToPython( ipv4Address );
+            if ( PyTuple_SetItem( ipv4Addresses, i++, item ) != 0 )
             {
-                Py_XDECREF(item);
-                throw ::std::runtime_error("Unable to place IPv4 address into tuple");
+                Py_XDECREF( item );
+                throw ::std::runtime_error( "Unable to place IPv4 address into tuple" );
             }
         }
 
-        ipv6_addresses = PyTuple_New(iface.ipv6_addresses().size());
-        if (ipv6_addresses == NULL)
+        ipv6Addresses = PyTuple_New( rInterface.ipv6_addresses().size() );
+        if ( ipv6Addresses == NULL )
         {
-            throw ::std::runtime_error("Unable to create tuple of IPv6 interface addresses");
+            throw ::std::runtime_error( "Unable to create tuple of IPv6 interface addresses" );
         }
         i = 0;
-        for (auto const & ipv6_address : iface.ipv6_addresses())
+        for ( auto const & ipv6Address : rInterface.ipv6_addresses() )
         {
-            PyObject * item = convert_to_python(ipv6_address);
-            if (PyTuple_SetItem(ipv6_addresses, i++, item) != 0)
+            PyObject * item = convertToPython( ipv6Address );
+            if ( PyTuple_SetItem( ipv6Addresses, i++, item ) != 0 )
             {
-                Py_XDECREF(item);
-                throw ::std::runtime_error("Unable to place IPv6 address into tuple");
+                Py_XDECREF( item );
+                throw ::std::runtime_error( "Unable to place IPv6 address into tuple" );
             }
         }
 
-        Interface = get_module_class("ifaddrs4py.interface", "Interface");
+        Interface = getModuleClass( "ifaddrs4py.interface", "Interface" );
     }
     catch (...)
     {
-        Py_XDECREF(index);
-        Py_XDECREF(flags);
-        Py_XDECREF(mtu);
-        Py_XDECREF(mac_address);
-        Py_XDECREF(ipv4_addresses);
-        Py_XDECREF(ipv6_addresses);
+        Py_XDECREF( index );
+        Py_XDECREF( flags );
+        Py_XDECREF( mtu );
+        Py_XDECREF( macAddress );
+        Py_XDECREF( ipv4Addresses );
+        Py_XDECREF( ipv6Addresses );
         throw;
     }
 
-    PyObject * args(PyTuple_New(0));
-    PyObject * kwargs(Py_BuildValue(
+    PyObject * args( PyTuple_New( 0 ) );
+    PyObject * kwargs( Py_BuildValue(
         "{s:O,s:s#,s:s#,s:s#,s:O,s:O,s:O,s:O,s:O}",
         "index", index,
         "name", name.c_str(), name.length(),
@@ -226,120 +228,133 @@ convert_to_python(OddSource::Interfaces::Interface const & iface)
         "description", description.c_str(), description.length(),
         "flags", flags,
         "mtu", mtu,
-        "mac_address", mac_address,
-        "ipv4_addresses", ipv4_addresses,
-        "ipv6_addresses", ipv6_addresses));
-    Py_XDECREF(mtu);
-    Py_XDECREF(mac_address);
-    Py_XDECREF(ipv4_addresses);
-    Py_XDECREF(ipv6_addresses);
-    if (args == NULL || kwargs == NULL)
+        "mac_address", macAddress,
+        "ipv4_addresses", ipv4Addresses,
+        "ipv6_addresses", ipv6Addresses ) );
+    Py_XDECREF( mtu );
+    Py_XDECREF( macAddress );
+    Py_XDECREF( ipv4Addresses );
+    Py_XDECREF( ipv6Addresses );
+    if ( args == NULL || kwargs == NULL )
     {
-        Py_DECREF(Interface);
-        Py_XDECREF(args);
-        Py_XDECREF(kwargs);
-        throw ::std::runtime_error("Unable to create args or kwargs");
+        Py_DECREF( Interface );
+        Py_XDECREF( args );
+        Py_XDECREF( kwargs );
+        throw ::std::runtime_error( "Unable to create args or kwargs" );
     }
 
-    PyObject * instance = PyObject_Call(Interface, args, kwargs);
-    Py_DECREF(Interface);
-    Py_DECREF(args);
-    Py_DECREF(kwargs);
-    if (instance == NULL)
+    PyObject * instance = PyObject_Call( Interface, args, kwargs );
+    Py_DECREF( Interface );
+    Py_DECREF( args );
+    Py_DECREF( kwargs );
+    if ( instance == NULL )
     {
-        throw ::std::runtime_error("Unable to instantiate ifaddrs4py.interface.Interface class");
+        throw ::std::runtime_error( "Unable to instantiate ifaddrs4py.interface.Interface class" );
     }
 
     return instance;
 }
 
 PyObject *
-extern_get_sample_interface_ipv4_address(PyObject * Py_UNUSED(module_self), PyObject * Py_UNUSED(ignore))
+extern_get_sample_interface_ipv4_address(
+    PyObject * Py_UNUSED( moduleSelf ),
+    PyObject * Py_UNUSED( args ) )
 {
     static OddSource::Interfaces::InterfaceIPv4Address const IPv4(
-        OddSource::Interfaces::IPv4Address("192.168.0.42"),
+        OddSource::Interfaces::IPv4Address( "192.168.0.42" ),
         0,
         24u,
         OddSource::Interfaces::Broadcast,
-        OddSource::Interfaces::IPv4Address("192.168.0.254"));
+        OddSource::Interfaces::IPv4Address( "192.168.0.254" ) );
 
     try
     {
-        return OddSource::ifaddrs4py::convert_to_python(IPv4);
+        return OddSource::ifaddrs4py::convertToPython( IPv4 );
     }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_RuntimeError, return NULL )
 }
 
 PyObject *
-extern_get_sample_interface_ipv6_address(PyObject * Py_UNUSED(module_self), PyObject * Py_UNUSED(ignore))
+extern_get_sample_interface_ipv6_address(
+    PyObject * Py_UNUSED( moduleSelf ),
+    PyObject * Py_UNUSED( args ) )
 {
     using namespace OddSource::Interfaces;
     static InterfaceIPv6Address const IPv6(
-        IPv6Address("2001:470:2ccb:a61b:e:acf8:6736:d81e"),
+        IPv6Address( "2001:470:2ccb:a61b:e:acf8:6736:d81e" ),
         InterfaceIPAddressFlag::AutoConfigured | InterfaceIPAddressFlag::Secured,
-        56u);
+        56u );
 
     try
     {
-        return OddSource::ifaddrs4py::convert_to_python(IPv6);
+        return OddSource::ifaddrs4py::convertToPython( IPv6 );
     }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_RuntimeError, return NULL )
 }
 
 PyObject *
-extern_get_sample_interface_scoped_ipv6_address(PyObject * Py_UNUSED(module_self), PyObject * Py_UNUSED(ignore))
+extern_get_sample_interface_scoped_ipv6_address(
+    PyObject * Py_UNUSED( moduleSelf ),
+    PyObject * Py_UNUSED( args ) )
 {
     using namespace OddSource::Interfaces;
     static InterfaceIPv6Address const Scoped_IPv6(
-        IPv6Address(static_cast<in6_addr const *>(IPv6Address("fe80::aede:48ff:fe00:1122")), v6Scope {6, "en5"}),
+        IPv6Address(
+            static_cast< in6_addr const * >( IPv6Address( "fe80::aede:48ff:fe00:1122" ) ),
+            v6Scope{ 6, "en5" } ),
         0 | InterfaceIPAddressFlag::Secured,
-        64u);
+        64u );
 
     try
     {
-        return OddSource::ifaddrs4py::convert_to_python(Scoped_IPv6);
+        return OddSource::ifaddrs4py::convertToPython( Scoped_IPv6 );
     }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_RuntimeError, return NULL )
 }
 
 PyObject *
-extern_get_sample_interface(PyObject * Py_UNUSED(module_self), PyObject * Py_UNUSED(ignore))
+extern_get_sample_interface(
+    PyObject * Py_UNUSED( moduleSelf ),
+    PyObject * Py_UNUSED( args ) )
 {
     try
     {
-        return OddSource::ifaddrs4py::convert_to_python(OddSource::Interfaces::Interface::getSampleInterface());
+        return OddSource::ifaddrs4py::convertToPython( OddSource::Interfaces::Interface::getSampleInterface() );
     }
-    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET(PyExc_RuntimeError, return NULL)
+    CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_RuntimeError, return NULL )
 }
 
 void
 OddSource::ifaddrs4py::
-init_interface_enums(PyObject * module)
+initInterfaceEnums(
+    PyObject * module )
 {
-    PyObject * enum_module = get_module("enum");
+    PyObject * enumModule = getModule("enum");
 
-    PyObject * enum_class;
+    PyObject * enumClass;
     int result;
 
     using namespace OddSource::Interfaces;
 
-    enum_class = make_enum_class<InterfaceIPAddressFlag>(enum_module,
-                                                         "InterfaceIPAddressFlag",
-                                                         InterfaceIPAddressFlag_Values);
-    result = PyModule_AddObjectRef(module, "InterfaceIPAddressFlag", enum_class);
-    Py_XDECREF(enum_class);
-    if (result != 0)
+    enumClass = createEnumClass< InterfaceIPAddressFlag >(
+        enumModule,
+        "InterfaceIPAddressFlag",
+        InterfaceIPAddressFlag_Values );
+    result = PyModule_AddObjectRef( module, "InterfaceIPAddressFlag", enumClass );
+    Py_XDECREF( enumClass );
+    if ( result != 0 )
     {
-        throw ::std::runtime_error("Failed to add enum to module");
+        throw ::std::runtime_error( "Failed to add enum to module" );
     }
 
-    enum_class = make_enum_class<InterfaceFlag>(enum_module,
-                                                "InterfaceFlag",
-                                                InterfaceFlag_Values);
-    result = PyModule_AddObjectRef(module, "InterfaceFlag", enum_class);
-    Py_XDECREF(enum_class);
-    if (result != 0)
+    enumClass = createEnumClass< InterfaceFlag >(
+        enumModule,
+        "InterfaceFlag",
+        InterfaceFlag_Values );
+    result = PyModule_AddObjectRef( module, "InterfaceFlag", enumClass );
+    Py_XDECREF( enumClass );
+    if ( result != 0 )
     {
-        throw ::std::runtime_error("Failed to add enum to module");
+        throw ::std::runtime_error( "Failed to add enum to module" );
     }
 }
