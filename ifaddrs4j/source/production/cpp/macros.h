@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <ifaddrs4cpp/os.h>
+#include <oddsource/network/interfaces/detail/os.h>
 
 #define IF_NULL_STMT(thing, stmt) if (thing == NULL) \
     { \

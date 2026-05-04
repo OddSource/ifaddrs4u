@@ -1,5 +1,5 @@
 #[[
-    Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+    Copyright © 2010-2026 OddSource Code (license@oddsource.io)
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE cxx_std_17)
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
                        "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3;-wd4275;-wd4251;-wd4455>>")
-target_compile_definitions(${PROJECT_NAME}_compiler_flags INTERFACE ODDSOURCE_BUILDING_LIBRARY=1)
+target_compile_definitions(${PROJECT_NAME}_compiler_flags INTERFACE IFADDRS4CPP_INLINE_SOURCE=1)
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       CXX_STANDARD_REQUIRED ON
                       CXX_EXTENSIONS OFF)
@@ -102,18 +102,19 @@ add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES
                       CXX_VISIBILITY_PRESET hidden)
 if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
-# Apparently, we do not have to link to java.dll on Windows like we link to java.so/dylib on oter platforms.
+# Apparently, we do not have to link to java.dll on Windows like we link to java.so/dylib on other platforms.
     target_link_libraries(${PROJECT_NAME} PUBLIC
-                          ${PROJECT_NAME}_compiler_flags
-                          "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static${IFADDRS_LIBRARY_SUFFIX}.${STATIC_LIBRARY_EXTENSION}")
+                          ${PROJECT_NAME}_compiler_flags)
+                          #"${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static${IFADDRS_LIBRARY_SUFFIX}.${STATIC_LIBRARY_EXTENSION}")
 else()
     target_link_libraries(${PROJECT_NAME} PUBLIC
                           ${PROJECT_NAME}_compiler_flags
-                          "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static${IFADDRS_LIBRARY_SUFFIX}.${STATIC_LIBRARY_EXTENSION}"
                           "$ENV{JAVA_HOME}/${LIB_JAVA}.${DYNAMIC_LIBRARY_EXTENSION}")
+                          #"${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static${IFADDRS_LIBRARY_SUFFIX}.${STATIC_LIBRARY_EXTENSION}"
 endif()
 target_include_directories(${PROJECT_NAME} PUBLIC
                            "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/include"
+                           "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/include"
                            "$ENV{JAVA_HOME}/include"
                            "$ENV{JAVA_HOME}/include/${JAVA_PLATFORM_INCLUDE}")
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

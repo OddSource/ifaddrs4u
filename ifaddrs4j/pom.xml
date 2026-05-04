@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+    Copyright © 2010-2026 OddSource Code (license@oddsource.io)
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -56,11 +56,11 @@
         <maven.compiler.release>11</maven.compiler.release>
         <project.tasks.maximum.memory>256m</project.tasks.maximum.memory>
         <version.dependency.test.junit>4.13.2</version.dependency.test.junit>
-        <version.dependency.test.log4j>2.21.0</version.dependency.test.log4j>
+        <version.dependency.test.log4j>2.25.4</version.dependency.test.log4j>
         <version.plugin.cmake>3.27.7-b1</version.plugin.cmake>
         <version.plugin.resources>3.3.1</version.plugin.resources>
         <version.plugin.surefire>3.2.1</version.plugin.surefire>
-        <version.plugin.reports>3.4.5</version.plugin.reports>
+        <version.plugin.reports>3.9.0</version.plugin.reports>
         <cmake.download>false</cmake.download>
         <cpp.config>Release</cpp.config>
         <enable.asan>OFF</enable.asan>

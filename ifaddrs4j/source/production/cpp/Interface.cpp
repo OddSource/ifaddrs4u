@@ -16,8 +16,6 @@
 
 #include "generated/io_oddsource_java_net_ifaddrs4j_EnumConstantsHelper.h"
 
-#include <ifaddrs4cpp/Interface.h>
-
 #include "cache.h"
 #include "common.h"
 #include "Interface.h"
@@ -58,7 +56,7 @@ jint JNICALL Java_io_oddsource_java_net_ifaddrs4j_EnumConstantsHelper_getInterfa
         return UNSUPPORTED_FLAG;
     }
 
-    return found->second;
+    return static_cast< jint >( found->second );
 }
 
 /*
@@ -92,7 +90,7 @@ jint JNICALL Java_io_oddsource_java_net_ifaddrs4j_EnumConstantsHelper_getInterfa
         return -1;
     }
 
-    return found->second;
+    return static_cast< jint >( found->second );
 }
 
 /**

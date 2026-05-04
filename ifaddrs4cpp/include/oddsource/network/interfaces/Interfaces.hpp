@@ -83,35 +83,42 @@ namespace OddSource::Interfaces
         operator=(
             InterfaceBrowser const & ) = delete;
 
+        [[nodiscard]]
         OddSource_Inline
         bool
         for_each_interface(
             ::std::function< bool( Interface const & ) > doThis ) const;
 
+        [[nodiscard]]
         OddSource_Inline
         ::std::list< ::std::shared_ptr< Interface const > > const &
         get_interfaces() const;
 
+        [[nodiscard]]
         OddSource_Inline
         ::std::shared_ptr< Interface const >
         get_interface(
             ::std::uint32_t index ) const;
 
+        [[nodiscard]]
         OddSource_Inline
         Interface const &
         operator[](
             ::std::uint32_t index ) const;
 
+        [[nodiscard]]
         OddSource_Inline
         ::std::shared_ptr< Interface const >
         get_interface(
             ::std::string_view name ) const;
 
+        [[nodiscard]]
         OddSource_Inline
         Interface const &
         operator[](
             ::std::string_view name ) const;
 
+        [[nodiscard]]
         OddSource_Inline
         ::std::list< ::std::string > const &
         getWarnings() const;

@@ -16,7 +16,7 @@
 
 #include "generated/io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_NativeBrowser.h"
 
-#include <ifaddrs4cpp/Interfaces.h>
+#include <oddsource/network/interfaces/Interfaces.hpp>
 
 #include "cache.h"
 #include "Interface.h"
@@ -89,9 +89,9 @@ namespace
 
             ArrayList interfaces_list(env, (jint) interfaces.size());
 
-            for (auto const & iface : interfaces)
+            for ( auto const & pInterface : interfaces )
             {
-                auto jInterface(convert_to_java(env, iface));
+                auto jInterface( convert_to_java( env, *pInterface ) );
                 IF_NULL_RETURN_NULL(jInterface)
                 if (!interfaces_list.add(jInterface))
                 {
@@ -201,9 +201,9 @@ Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_getInte
 
     try
     {
-        return convert_to_java(env, browser->get_interface(name_str));
+        return convert_to_java( env, (*browser)[ name_str ] );
     }
-    catch (::std::invalid_argument const &)
+    catch ( ::std::out_of_range const & )
     {
         return NULL;
     }
@@ -229,9 +229,9 @@ Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_getInte
 
     try
     {
-        return convert_to_java(env, browser->get_interface(index));
+        return convert_to_java( env, (*browser)[ index ] );
     }
-    catch (::std::invalid_argument const &)
+    catch ( ::std::out_of_range const & )
     {
         return NULL;
     }
@@ -279,8 +279,8 @@ Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_forEach
     ArrayList interfaces_list(env);
     IF_INVALID_STMT(interfaces_list, return false)
 
-    bool keep_calling_callable(true);
-    bool return_error(false);
+    bool keep_calling_callable{ true };
+    bool return_error{ false };
 
     ::std::function<bool(Interface const &)> do_this = [
         env,
@@ -333,7 +333,7 @@ Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_forEach
 
     try
     {
-        browser->for_each_interface(do_this);
+        std::ignore = browser->for_each_interface(do_this);
     }
     CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN("RuntimeException"s, return false)
 

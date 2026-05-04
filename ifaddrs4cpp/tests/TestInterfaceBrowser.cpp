@@ -113,7 +113,7 @@ public:
 
 #endif /* !ODDSOURCE_IS_WINDOWS && !ODDSOURCE_IS_MACOS */
 
-        assert_throws( this->_browser[ "fooBar42" ], ::std::out_of_range );
+        assert_throws( std::ignore = this->_browser[ "fooBar42" ], ::std::out_of_range );
         assert_equals( this->_browser.get_interface( "fooBar42" ), nullptr );
     }
 
@@ -158,7 +158,7 @@ public:
 
 #endif /* !ODDSOURCE_IS_WINDOWS && !ODDSOURCE_IS_MACOS */
 
-        assert_throws( this->_browser[ 4'294'967'294 ], ::std::out_of_range );
+        assert_throws( std::ignore = this->_browser[ 4'294'967'294 ], ::std::out_of_range );
         assert_equals( this->_browser.get_interface( 4'294'967'294 ), nullptr );
     }
 

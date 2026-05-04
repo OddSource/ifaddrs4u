@@ -249,7 +249,7 @@ namespace
             return !returnError;
         };
 
-        self->browser->for_each_interface( doThis );
+        std::ignore = self->browser->for_each_interface( doThis );
 
         if ( !returnError && self->interfaces == NULL )
         {

@@ -18,7 +18,7 @@
 
 #include <jni.h>
 
-#include <ifaddrs4cpp/MacAddress.h>
+#include <oddsource/network/interfaces/MacAddress.hpp>
 
 namespace OddSource::ifaddrs4j
 {

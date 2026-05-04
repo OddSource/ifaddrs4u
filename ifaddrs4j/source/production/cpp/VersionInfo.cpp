@@ -16,7 +16,7 @@
 
 #include "generated/io_oddsource_java_net_ifaddrs4j_VersionInfo.h"
 
-#include <ifaddrs4cpp/VersionInfo.h>
+#include <oddsource/network/interfaces/VersionInfo.hpp>
 
 #include <string>
 
