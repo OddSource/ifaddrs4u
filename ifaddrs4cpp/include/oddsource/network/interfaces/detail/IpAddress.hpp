@@ -16,8 +16,64 @@
 
 #pragma once
 
+// ReSharper disable once CppUnnamedNamespaceInHeaderFile
+namespace
+{
+#ifdef ODDSOURCE_INCLUDE_BOOST
+    using namespace OddSource::Interfaces;
+
+    inline
+    ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4
+    toV4(
+        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
+    {
+        using namespace std::string_literals;
+        if ( !other.is_v4() )
+        {
+            throw InvalidIPAddress(
+                "The Boost address provided, "s + other.to_string() +
+                ", is not an IPv4 address and cannot be converted to an IPv4Address."s );
+        }
+        return other.to_v4();
+    }
+
+    inline
+    ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6
+    toV6(
+        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
+    {
+        using namespace std::string_literals;
+        if ( !other.is_v6() )
+        {
+            throw InvalidIPAddress(
+                "The Boost address provided, "s + other.to_string() +
+                ", is not an IPv6 address and cannot be converted to an IPv6Address."s );
+        }
+        return other.to_v6();
+    }
+#endif /* ODDSOURCE_INCLUDE_BOOST */
+}
+
 namespace OddSource::Interfaces
 {
+#ifdef ODDSOURCE_INCLUDE_BOOST
+    inline
+    IPv4Address::
+    IPv4Address(
+        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
+        : IPv4Address( toV4( other ) )
+    {
+    }
+
+    inline
+    IPv4Address::
+    IPv4Address(
+        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 const & other )
+        : IPv4Address( other.to_uint() )
+    {
+    }
+#endif /* ODDSOURCE_INCLUDE_BOOST */
+
     inline
     IPAddressVersion
     IPv4Address::
@@ -47,9 +103,25 @@ namespace OddSource::Interfaces
     IPv4Address::
     operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4() const
     {
-        return ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4( ntohl( this->_data->s_addr ) );
+        return ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4( static_cast< ::std::uint32_t >( *this ) );
     }
-#endif
+
+    inline
+    IPv6Address::
+    IPv6Address(
+        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
+        : IPv6Address( toV6( other ) )
+    {
+    }
+
+    inline
+    IPv6Address::
+    IPv6Address(
+        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 const & other )
+        : IPv6Address( other.to_bytes(), other.scope_id() )
+    {
+    }
+#endif /* ODDSOURCE_INCLUDE_BOOST */
 
     inline
     IPAddressVersion
@@ -59,7 +131,7 @@ namespace OddSource::Interfaces
         return IPAddressVersion::IPv6;
     }
 
-    OddSource_Inline
+    inline
     ::std::uint8_t
     IPv6Address::
     maximum_prefix_length() const noexcept
@@ -73,18 +145,14 @@ namespace OddSource::Interfaces
     operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const
     {
         return ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address(
-            static_cast< ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >( *this ) )
+            static_cast< ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >( *this ) );
     }
 
     inline
     IPv6Address::
     operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6() const
     {
-        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6::bytes_type bytes;
-        // Copy the 16 bytes from in6_addr to bytes_type
-        ::std::memcpy( bytes.data(), this->_data->s6_addr, 16 );
-        // Construct and return the address_v6 object
-        return ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6( bytes );
+        return ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6( static_cast< Bytes >( *this ) );
     }
 #endif /* ODDSOURCE_INCLUDE_BOOST */
 }

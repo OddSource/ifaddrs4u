@@ -39,6 +39,8 @@ public:
         add_test( test_string_round_trip_scoped );
         add_test( test_in_addr_round_trip_unscoped );
         add_test( test_in_addr_round_trip_scoped );
+        add_test( test_bytes_round_trip_unscoped );
+        add_test( test_bytes_round_trip_scoped );
         add_test( test_normalize );
         add_test( test_unspecified_address );
         add_test( test_loopback_address );
@@ -51,6 +53,10 @@ public:
         add_test( test_v4_compatible_addresses );
         add_test( test_6to4_addresses );
         add_test( test_construct_malformed );
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+        add_test( test_boost_address_conversion );
+#endif
     }
 
     void
@@ -159,6 +165,63 @@ public:
         for( size_t i{ 0 }; i < sizeof( in6_addr ); i++ )
         {
             assert_equals( bytes1[ i ], bytes2[ i ], "Bytes "s + ::std::to_string( i ) + " do not match."s );
+        }
+    }
+
+    void
+    test_bytes_round_trip_unscoped()
+    {
+        using namespace ::std::string_literals;
+        IPv6Address::Bytes const data{
+            0x20, 0x01,
+            0x04, 0x71,
+            0xc2, 0xbd,
+            0xbb, 0x61,
+            0x06, 0x7b,
+            0x48, 0xa5,
+            0x63, 0x04,
+            0x31, 0x5e };
+        IPv6Address const address( data );
+        assert_equals( static_cast< ::std::string >( address ), "2001:471:c2bd:bb61:67b:48a5:6304:315e" );
+        assert_not_that( address.has_scope_id() );
+
+        assert_equals( address.version(), IPAddressVersion::IPv6 );
+        assert_equals( address.maximum_prefix_length(), 128 );
+
+        auto const bytes( static_cast< IPv6Address::Bytes >( address ) );
+        for( size_t i{ 0 }; i < 16; ++i )
+        {
+            assert_equals( bytes[ i ], data[ i ], "Bytes "s + ::std::to_string( i ) + " do not match."s );
+        }
+    }
+
+    void
+    test_bytes_round_trip_scoped()
+    {
+        using namespace std::string_literals;
+        IPv6Address::Bytes const data{
+            0xfe, 0x80,
+            0x00, 0x00,
+            0x00, 0x00,
+            0x00, 0x00,
+            0x00, 0x1f,
+            0x12, 0x16,
+            0x7b, 0x44,
+            0xc5, 0x70 };
+        IPv6Address const address( data, 32 );
+        assert_equals( static_cast< ::std::string >( address ), "fe80::1f:1216:7b44:c570%32" );
+        assert_that( address.has_scope_id() );
+        assert_that( static_cast< bool >( address.scope_id() ) );
+        assert_equals( *address.scope_id(), 32u );
+        assert_equals( address.without_scope_id(), "fe80::1f:1216:7b44:c570" );
+
+        assert_equals( address.version(), IPAddressVersion::IPv6 );
+        assert_equals( address.maximum_prefix_length(), 128 );
+
+        auto const bytes( static_cast< IPv6Address::Bytes >( address ) );
+        for( size_t i{ 0 }; i < 16; ++i )
+        {
+            assert_equals( bytes[ i ], data[ i ], "Bytes "s + ::std::to_string( i ) + " do not match."s );
         }
     }
 
@@ -850,6 +913,29 @@ public:
         assert_throws( IPv6Address( "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" ), InvalidIPAddress );
         assert_throws( IPv6Address( "ffff::1::2" ), InvalidIPAddress );
     }
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+    void
+    test_boost_address_conversion()
+    {
+        IPv6Address const address( "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" );
+        auto const genericBoostAddress( static_cast< boost::asio::ip::address >( address ) );
+        assert_that( genericBoostAddress.is_v6(), "The generic Boost address should be an IPv6 address." );
+        assert_equals( genericBoostAddress.to_string(), "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" );
+
+        auto const versionedBoostAddress( static_cast< boost::asio::ip::address_v6 >( address ) );
+        assert_equals( versionedBoostAddress.to_string(), "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" );
+
+        IPv6Address const genericRoundTrip( genericBoostAddress );
+        assert_equals( toString( genericRoundTrip ), "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" );
+
+        IPv6Address const versionedRoundTrip( versionedBoostAddress );
+        assert_equals( toString( versionedRoundTrip ), "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" );
+
+        auto const v4Address( boost::asio::ip::make_address( "129.173.55.4" ) );
+        assert_throws( IPv6Address{ v4Address }, InvalidIPAddress );
+    }
+#endif
 
     [[maybe_unused]]
     static

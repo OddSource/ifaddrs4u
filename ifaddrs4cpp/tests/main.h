@@ -17,9 +17,11 @@
 #pragma once
 
 #include <functional>
+#include <list>
 #include <map>
 #include <memory>
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 #include <oddsource/network/interfaces/detail/os.h>
@@ -62,7 +64,9 @@ namespace OddSource::Interfaces::Tests
         void
         run();
 
-#define add_test(name) this->_tests.emplace(::std::string(ARGUMENT_TO_QUOTED_STRING(name)), [this] { name(); })
+#define add_test(name) \
+        this->_tests.emplace( ARGUMENT_TO_QUOTED_STRING( name ), [ this ] { name(); } ); \
+        this->_testNames.emplace_back( ARGUMENT_TO_QUOTED_STRING( name ) )
 
         template< typename V1, typename V2 >
         void
@@ -179,7 +183,8 @@ namespace OddSource::Interfaces::Tests
         };
 
     protected:
-        ::std::map< ::std::string const, ::std::function< void() > const > _tests;
+        ::std::unordered_map< ::std::string, ::std::function< void() > const > _tests;
+        ::std::list< ::std::string > _testNames;
 
     private:
         [[nodiscard]]

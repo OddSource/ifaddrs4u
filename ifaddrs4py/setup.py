@@ -270,7 +270,7 @@ def pre_build(options: Options) -> None:
     if not static_lib_file.exists() or (options.cpp_test and not test_executable.exists()):
         extra_args: List[str] = []
         if options.cpp_test:
-            extra_args.append("-DENABLE_TESTS:BOOL=ON")
+            extra_args.extend(["-DENABLE_TESTS:BOOL=ON", "-DSKIP_BOOST:BOOL=ON"])
         if options.cpp_asan:
             extra_args.extend(["-DENABLE_ADDRESS_SANITIZER:BOOL=ON", "-DSHARED_ADDRESS_SANITIZER:BOOL=ON"])
         if not options.dynamic:

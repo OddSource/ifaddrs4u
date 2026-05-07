@@ -37,6 +37,9 @@ option(ENABLE_ADDRESS_SANITIZER
 option(SHARED_ADDRESS_SANITIZER
        "If enabled with ENABLE_ADDRESS_SANITIZER, the -shared-libsan option will be used (ignored without ENABLE_ADDRESS_SANITIZER)"
        False)
+option(SKIP_BOOST
+       "If enabled, Boost will not be found and used in the tests."
+       False)
 
 if(${BUILD_STATIC_ONLY} AND ${BUILD_DYNAMIC_ONLY})
     message(FATAL_ERROR
@@ -141,9 +144,7 @@ if(NOT ${BUILD_DYNAMIC_ONLY})
                           CXX_VISIBILITY_PRESET hidden)
 endif()
 
-if (${ENABLE_TESTS})
-    find_package(Boost CONFIG)
-
+if(${ENABLE_TESTS})
     add_executable(${PROJECT_NAME}_tests
                    tests/main.cpp
                    tests/TestIPv4Address.cpp
@@ -154,12 +155,17 @@ if (${ENABLE_TESTS})
                    tests/TestVersionInfo.cpp
                    tests/TestInterfaceBrowser.cpp)
 
-    if(Boost_FOUND)
-        message(STATUS "Boost found, enabling Boost::Asio::IP features.")
-        target_link_libraries(${PROJECT_NAME}_tests PRIVATE Boost::asio)
-        target_compile_definitions(${PROJECT_NAME}_tests PRIVATE ODDSOURCE_INCLUDE_BOOST=1)
+    if(NOT ${SKIP_BOOST})
+        find_package(Boost CONFIG)
+        if(Boost_FOUND)
+            message(STATUS "Boost found, enabling Boost::Asio::IP features.")
+            target_include_directories(${PROJECT_NAME}_tests PRIVATE Boost)
+            target_compile_definitions(${PROJECT_NAME}_tests PRIVATE ODDSOURCE_INCLUDE_BOOST=1)
+        else()
+            message(STATUS "Boost not found, building without Boost::Asio::IP features.")
+        endif()
     else()
-        message(STATUS "Boost not found, building without Boost::Asio::IP features.")
+        message(STATUS "Boost skipped for tests.")
     endif()
 
     target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}_compiler_flags)

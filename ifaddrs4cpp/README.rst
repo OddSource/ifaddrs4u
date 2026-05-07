@@ -64,7 +64,7 @@ purposes::
 Boost Support
 *************
 
-ifaddrs4cpp supports converting IP address objects to Boost IP address objects. To enable this, define
+ifaddrs4cpp supports converting IP address objects to and from Boost IP address objects. To enable this, define
 :code:`ODDSOURCE_INCLUDE_BOOST` before including any ifaddrs4cpp headers and/or at build time with
 :code:`-DODDSOURCE_INCLUDE_BOOST`.
 
@@ -73,9 +73,12 @@ define :code:`ODDSOURCE_BOOST_NAMESPACE_ROOT=my_boost` to indicate an alternate 
 to be something other than :code:`boost`, define :code:`ODDSOURCE_BOOST_HEADER_ROOT=my_boost` to indicate an alternate
 root.
 
-To run tests with Boost support, include :code:`-DBOOST_ROOT=/path/to/boot` or
-:code:`-DBoost_DIR=/path/to/boost` in the cmake commands above. This will have the side effect of
-automatically defining :code:`ODDSOURCE_INCLUDE_BOOST` for that cmake build.
+To run tests with Boost support using CMake if it does not automatically find Boost, include
+:code:`-DBOOST_ROOT=/path/to/boot` or :code:`-DBoost_DIR=/path/to/boost` in the CMake configuration commands above.
+This will have  the side effect of automatically defining :code:`ODDSOURCE_INCLUDE_BOOST` for that cmake build.
+
+If CMake automatically finds and uses Boost but you do not want it to, include :code:`-DSKIP_BOOST:BOOL=ON` in the
+CMake configuration commands above.
 
 Usage
 *****

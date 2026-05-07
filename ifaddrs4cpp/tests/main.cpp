@@ -125,7 +125,7 @@ Test::
 run()
 {
     using namespace std::string_literals;
-    for ( auto const & [name, test_function] : this->_tests )
+    for ( auto const & name : this->_testNames )
     {
         ::std::cout << "  ::" << name << " ... " << ::std::flush;
         size_t failure_count{ this->_failures.size() };
@@ -133,7 +133,7 @@ run()
         this->_test_count++;
         try
         {
-            test_function();
+            this->_tests.at( name )();
         }
         catch ( TestAssertFailureAbort const & )
         {

@@ -37,6 +37,7 @@ public:
         add_test( test_equals );
         add_test( test_string_round_trip );
         add_test( test_in_addr_round_trip );
+        add_test( test_uint_round_trip );
         add_test( test_unspecified_address );
         add_test( test_loopback_addresses );
         add_test( test_link_local_addresses );
@@ -44,6 +45,10 @@ public:
         add_test( test_private_addresses );
         add_test( test_other_reserved_addresses );
         add_test( test_construct_malformed );
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+        add_test( test_boost_address_conversion );
+#endif
     }
 
     void
@@ -91,6 +96,14 @@ public:
         {
             assert_equals( bytes1[ i ], bytes2[ i ], "Bytes "s + ::std::to_string( i ) + " do not match."s );
         }
+    }
+
+    void
+    test_uint_round_trip()
+    {
+        IPv4Address const address( 1767959308u );
+        assert_equals( static_cast< ::std::string >( address ), "105.96.235.12" );
+        assert_equals( static_cast< ::std::uint32_t >( address ), 1767959308u );
     }
 
     void
@@ -257,6 +270,29 @@ public:
         assert_throws( IPv4Address( "192.168.0.1.2" ), InvalidIPAddress );
         assert_throws( IPv4Address( "192.168.0.256" ), InvalidIPAddress );
     }
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+    void
+    test_boost_address_conversion()
+    {
+        IPv4Address const address( "172.19.52.141" );
+        auto const genericBoostAddress( static_cast< boost::asio::ip::address >( address ) );
+        assert_that( genericBoostAddress.is_v4(), "The generic Boost address should be an IPv4 address." );
+        assert_equals( genericBoostAddress.to_string(), "172.19.52.141" );
+
+        auto const versionedBoostAddress( static_cast< boost::asio::ip::address_v4 >( address ) );
+        assert_equals( versionedBoostAddress.to_string(), "172.19.52.141" );
+
+        IPv4Address const genericRoundTrip( genericBoostAddress );
+        assert_equals( toString( genericRoundTrip ), "172.19.52.141" );
+
+        IPv4Address const versionedRoundTrip( versionedBoostAddress );
+        assert_equals( toString( versionedRoundTrip ), "172.19.52.141" );
+
+        auto const v6Address( boost::asio::ip::make_address( "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" ) );
+        assert_throws( IPv4Address{ v6Address }, InvalidIPAddress );
+    }
+#endif
 
     [[maybe_unused]]
     static

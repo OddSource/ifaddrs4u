@@ -138,6 +138,7 @@
                                 <targetPath>${project.basedir}/../ifaddrs4cpp/cmake-external-build</targetPath>
                                 <options>
                                     <option>-DENABLE_TESTS:BOOL=ON</option>
+                                    <option>-DSKIP_BOOST:BOOL=ON</option>
                                     <option>-DBUILD_STATIC_ONLY:BOOL=ON</option>
                                     <option>-DCMAKE_BUILD_TYPE=${cpp.config}</option>
                                     <option>-DENABLE_ADDRESS_SANITIZER:BOOL=${enable.asan}</option>

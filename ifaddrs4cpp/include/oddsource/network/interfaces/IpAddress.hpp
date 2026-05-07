@@ -27,6 +27,7 @@
 #include <netinet/in.h>
 #endif /* !ODDSOURCE_IS_WINDOWS */
 
+#include <array>
 #include <memory>
 #include <optional>
 #include <ostream>
@@ -315,13 +316,30 @@ namespace OddSource::Interfaces
         OddSource_Inline
         explicit
         IPv4Address(
-            ::std::string_view const & );
+            ::std::string_view const & repr );
 
         // conversion constructor
         OddSource_Inline
         explicit
         IPv4Address(
-        in_addr const *);
+            in_addr const * data );
+
+        OddSource_Inline
+        explicit
+        IPv4Address(
+            ::std::uint32_t data );
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+        inline
+        explicit
+        IPv4Address(
+            ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other );
+
+        inline
+        explicit
+        IPv4Address(
+            ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 const & other );
+#endif /* ODDSOURCE_INCLUDE_BOOST */
 
         // copy constructor
         OddSource_Inline
@@ -341,6 +359,11 @@ namespace OddSource::Interfaces
         OddSource_Inline
         explicit
         operator in_addr const *() const;
+
+        [[nodiscard]]
+        OddSource_Inline
+        explicit
+        operator ::std::uint32_t() const;
 
 #ifdef ODDSOURCE_INCLUDE_BOOST
         [[nodiscard]]
@@ -401,6 +424,8 @@ namespace OddSource::Interfaces
     class OddSource_Export IPv6Address : public IPAddress
     {
     public:
+        using Bytes = ::std::array< ::std::uint8_t, 16 >;
+
         IPv6Address() = delete;
 
         // conversion constructor
@@ -430,6 +455,38 @@ namespace OddSource::Interfaces
             in6_addr const * data,
             v6Scope const & scope );
 
+        OddSource_Inline
+        explicit
+        IPv6Address(
+            Bytes const & data );
+
+        OddSource_Inline
+        IPv6Address(
+            Bytes const & data,
+            ::std::uint32_t scopeId );
+
+        OddSource_Inline
+        IPv6Address(
+            Bytes const & data,
+            ::std::string_view const & scopeName );
+
+        OddSource_Inline
+        IPv6Address(
+            Bytes const & data,
+            v6Scope const & scope );
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+        inline
+        explicit
+        IPv6Address(
+            ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other );
+
+        inline
+        explicit
+        IPv6Address(
+            ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 const & other );
+#endif /* ODDSOURCE_INCLUDE_BOOST */
+
         // copy constructor
         OddSource_Inline
         IPv6Address(
@@ -448,6 +505,11 @@ namespace OddSource::Interfaces
         OddSource_Inline
         explicit
         operator in6_addr const *() const;
+
+        [[nodiscard]]
+        OddSource_Inline
+        explicit
+        operator Bytes() const;
 
 #ifdef ODDSOURCE_INCLUDE_BOOST
         [[nodiscard]]
@@ -615,6 +677,11 @@ namespace OddSource::Interfaces
         IPv6Address(
             ::std::string_view const & reprWithScope,
             ::std::string_view const & reprWithoutScope );
+
+        OddSource_Inline
+        IPv6Address(
+            ::std::unique_ptr< in6_addr const > && data,
+            ::std::optional< v6Scope > && scope );
 
         OddSource_Inline
         IPv6Address(

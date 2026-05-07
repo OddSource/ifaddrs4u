@@ -33,6 +33,7 @@
 #include <sys/socket.h>
 #endif /* ODDSOURCE_IS_WINDOWS */
 
+#include <array>
 #include <cstring>
 #include <string>
 #include <string_view>
@@ -184,7 +185,7 @@ namespace
     copy_in_addr(
         Addr const * data )
     {
-        auto new_data = ::std::make_unique<Addr>();
+        auto new_data = ::std::make_unique< Addr >();
         ::std::memcpy(new_data.get(), data, sizeof(Addr));
         return new_data;
     }
@@ -195,6 +196,24 @@ namespace
         ::std::unique_ptr< Addr const > const & data )
     {
         return copy_in_addr(data.get());
+    }
+
+    ::std::unique_ptr< in_addr >
+    to_in_addr(
+        ::std::uint32_t const data )
+    {
+        auto addr( ::std::make_unique< in_addr >() );
+        addr->s_addr = htonl( data );
+        return addr;
+    }
+
+    ::std::unique_ptr< in6_addr >
+    to_in6_addr(
+        IPv6Address::Bytes const & data )
+    {
+        auto addr( ::std::make_unique< in6_addr >() );
+        ::std::memcpy( &addr->s6_addr, data.data(), sizeof( addr->s6_addr ) );
+        return addr;
     }
 
     v6Scope &&
@@ -544,6 +563,14 @@ namespace OddSource::Interfaces
     OddSource_Inline
     IPv4Address::
     IPv4Address(
+        ::std::uint32_t const data )
+        : IPv4Address( to_in_addr( data ) )
+    {
+    }
+
+    OddSource_Inline
+    IPv4Address::
+    IPv4Address(
         ::std::unique_ptr< in_addr const > && data )
         : IPAddress( toRepr( data ) ),
           _data( ::std::move( data ) )
@@ -659,6 +686,13 @@ namespace OddSource::Interfaces
     }
 
     OddSource_Inline
+    IPv4Address::
+    operator ::std::uint32_t() const
+    {
+        return ntohl( this->_data->s_addr );
+    }
+
+    OddSource_Inline
     bool
     IPv4Address::
     operator==(
@@ -689,7 +723,7 @@ namespace OddSource::Interfaces
     IPv6Address::
     IPv6Address(
         in6_addr const * data )
-        : IPv6Address( toRepr( data ), copy_in_addr( data ), std::nullopt )
+        : IPv6Address( copy_in_addr( data ), std::nullopt )
     {
     }
 
@@ -697,8 +731,10 @@ namespace OddSource::Interfaces
     IPv6Address::
     IPv6Address(
         in6_addr const * data,
-        ::std::uint32_t scopeId )
-        : IPv6Address( toRepr( data ), copy_in_addr( data ), scopeFrom( scopeId ) )
+        ::std::uint32_t const scopeId )
+        : IPv6Address(
+            copy_in_addr( data ),
+            scopeId > 0 ? ::std::optional( scopeFrom( scopeId ) ) : ::std::nullopt )
     {
     }
 
@@ -707,7 +743,7 @@ namespace OddSource::Interfaces
     IPv6Address(
         in6_addr const * data,
         ::std::string_view const & scopeName )
-        : IPv6Address( toRepr( data ), copy_in_addr( data ), scopeFrom( scopeName ) )
+        : IPv6Address( copy_in_addr( data ), scopeFrom( scopeName ) )
     {
     }
 
@@ -716,7 +752,44 @@ namespace OddSource::Interfaces
     IPv6Address(
         in6_addr const * data,
         v6Scope const & scope )
-        : IPv6Address( toRepr( data ), copy_in_addr( data ), scope )
+        : IPv6Address( copy_in_addr( data ), scope )
+    {
+    }
+
+    OddSource_Inline
+    IPv6Address::
+    IPv6Address(
+        Bytes const & data )
+        : IPv6Address( to_in6_addr( data ), ::std::nullopt )
+    {
+    }
+
+    OddSource_Inline
+    IPv6Address::
+    IPv6Address(
+        Bytes const & data,
+        ::std::uint32_t const scopeId )
+        : IPv6Address(
+            to_in6_addr( data ),
+            scopeId > 0 ? ::std::optional( scopeFrom( scopeId ) ) : ::std::nullopt )
+    {
+    }
+
+    OddSource_Inline
+    IPv6Address::
+    IPv6Address(
+        Bytes const & data,
+        ::std::string_view const & scopeName )
+        : IPv6Address( to_in6_addr( data ), scopeFrom( scopeName ) )
+    {
+    }
+
+    OddSource_Inline
+    IPv6Address::
+    IPv6Address(
+        Bytes const & data,
+        v6Scope const & scope )
+        : IPv6Address( to_in6_addr( data ), scope )
     {
     }
 
@@ -729,6 +802,15 @@ namespace OddSource::Interfaces
             std::string( reprWithoutScope ),
             fromRepr< in6_addr >( reprWithoutScope ),
             extractScope( reprWithScope ) )
+    {
+    }
+
+    OddSource_Inline
+    IPv6Address::
+    IPv6Address(
+        ::std::unique_ptr< in6_addr const > && data,
+        ::std::optional< v6Scope > && scope )
+        : IPv6Address( toRepr( data.get() ), std::move( data ), std::move( scope ) )
     {
     }
 
@@ -889,6 +971,15 @@ namespace OddSource::Interfaces
     operator in6_addr const *() const
     {
         return this->_data.get();
+    }
+
+    OddSource_Inline
+    IPv6Address::
+    operator Bytes() const
+    {
+        Bytes result{};
+        ::std::memcpy( result.data(), this->_data->s6_addr, 16 );
+        return result;
     }
 
     OddSource_Inline
