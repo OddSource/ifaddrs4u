@@ -32,6 +32,7 @@
 #define EXPAND(x) x
 #define GET_1_OR_2_MACRO(_1,_2,NAME,...) NAME
 #define GET_2_OR_3_MACRO(_1,_2,_3,NAME,...) NAME
+#define GET_3_OR_4_MACRO(_1,_2,_3,_4,NAME,...) NAME
 #define QUOTED_STRINGIFY_ARGUMENT(x) #x
 #define ARGUMENT_TO_QUOTED_STRING(x) QUOTED_STRINGIFY_ARGUMENT(x)
 
@@ -71,80 +72,95 @@ namespace OddSource::Interfaces::Tests
         template< typename V1, typename V2 >
         void
         assert_equal(
-            V1 const &,
-            V2 const &,
-            ::std::optional< ::std::string const >,
-            char const *,
-            int );
+            V1 const & arg1,
+            char const * expression1,
+            V2 const & arg2,
+            char const * expression2,
+            ::std::optional< ::std::string const > message,
+            char const * file,
+            int line );
 
-#define assert_equal_with_message(v1, v2, message) this->assert_equal(v1, v2, message, __FILE__, __LINE__)
-#define assert_equal_without_message(v1, v2) this->assert_equal(v1, v2, ::std::nullopt, __FILE__, __LINE__)
+#define assert_equal_with_message(v1, v2, message) this->assert_equal(v1, ARGUMENT_TO_QUOTED_STRING(v1), v2, ARGUMENT_TO_QUOTED_STRING(v2), message, __FILE__, __LINE__)
+#define assert_equal_without_message(v1, v2) this->assert_equal(v1, ARGUMENT_TO_QUOTED_STRING(v1), v2, ARGUMENT_TO_QUOTED_STRING(v2), ::std::nullopt, __FILE__, __LINE__)
 #define assert_equals(...) EXPAND(GET_2_OR_3_MACRO(__VA_ARGS__, assert_equal_with_message, assert_equal_without_message, UNUSED)(__VA_ARGS__))
 
         template< typename V1, typename V2 >
         void
         assert_not_equal(
-            V1 const &,
-            V2 const &,
-            ::std::optional< ::std::string const >,
-            char const *,
-            int );
+            V1 const & arg1,
+            char const * expression1,
+            V2 const & arg2,
+            char const * expression2,
+            ::std::optional< ::std::string const > message,
+            char const * file,
+            int line );
 
-#define assert_not_equal_with_message(v1, v2, message) this->assert_not_equal(v1, v2, message, __FILE__, __LINE__)
-#define assert_not_equal_without_message(v1, v2) this->assert_not_equal(v1, v2, ::std::nullopt, __FILE__, __LINE__)
+#define assert_not_equal_with_message(v1, v2, message) this->assert_not_equal(v1, ARGUMENT_TO_QUOTED_STRING(v1), v2, ARGUMENT_TO_QUOTED_STRING(v2), message, __FILE__, __LINE__)
+#define assert_not_equal_without_message(v1, v2) this->assert_not_equal(v1, ARGUMENT_TO_QUOTED_STRING(v1), v2, ARGUMENT_TO_QUOTED_STRING(v2), ::std::nullopt, __FILE__, __LINE__)
 #define assert_not_equals(...) EXPAND(GET_2_OR_3_MACRO(__VA_ARGS__, assert_not_equal_with_message, assert_not_equal_without_message, UNUSED)(__VA_ARGS__))
 
         inline
         void
         assert_true(
-            bool,
-            ::std::optional< ::std::string const >,
-            char const *,
-            int );
+            bool test,
+            char const * expression,
+            ::std::optional< ::std::string const > message,
+            char const * file,
+            int line );
 
         inline
         void
         assert_true(
-            ::std::function< bool() > const &,
-            ::std::optional< ::std::string const >,
-            char const *,
-            int );
+            ::std::function< bool() > const & test,
+            char const * expression,
+            ::std::optional< ::std::string const > message,
+            char const * file,
+            int line );
 
-#define assert_that_with_message(v, message) this->assert_true(v, message, __FILE__, __LINE__)
-#define assert_that_without_message(v) this->assert_true(v, ::std::nullopt, __FILE__, __LINE__)
+#define assert_that_with_message(v, message) this->assert_true(v, ARGUMENT_TO_QUOTED_STRING(v), message, __FILE__, __LINE__)
+#define assert_that_without_message(v) this->assert_true(v, ARGUMENT_TO_QUOTED_STRING(v), ::std::nullopt, __FILE__, __LINE__)
 #define assert_that(...) EXPAND(GET_1_OR_2_MACRO(__VA_ARGS__, assert_that_with_message, assert_that_without_message, UNUSED)(__VA_ARGS__))
 
         inline
         void
         assert_false(
-            bool,
-            ::std::optional< ::std::string const >,
-            char const *,
-            int );
+            bool test,
+            char const * expression,
+            ::std::optional< ::std::string const > message,
+            char const * file,
+            int line );
 
         inline
         void
         assert_false(
-            ::std::function< bool() > const &,
-            ::std::optional< ::std::string const >,
-            char const *,
-            int );
+            ::std::function< bool() > const & test,
+            char const * expression,
+            ::std::optional< ::std::string const > message,
+            char const * file,
+            int line );
 
-#define assert_not_that_with_message(v, message) this->assert_false(v, message, __FILE__, __LINE__)
-#define assert_not_that_without_message(v) this->assert_false(v, ::std::nullopt, __FILE__, __LINE__)
+#define assert_not_that_with_message(v, message) this->assert_false(v, ARGUMENT_TO_QUOTED_STRING(v), message, __FILE__, __LINE__)
+#define assert_not_that_without_message(v) this->assert_false(v, ARGUMENT_TO_QUOTED_STRING(v), ::std::nullopt, __FILE__, __LINE__)
 #define assert_not_that(...) EXPAND(GET_1_OR_2_MACRO(__VA_ARGS__, assert_not_that_with_message, assert_not_that_without_message, UNUSED)(__VA_ARGS__))
 
         template< class E >
         void
         assert_except(
-            ::std::function< void() > const &,
-            ::std::optional< ::std::string const >,
-            char const *,
-            int );
+            ::std::function< void() > const & predicate,
+            char const * expression,
+            char const * exceptionType,
+            ::std::optional< ::std::string const > exceptionMessageContains,
+            ::std::optional< ::std::string const > message,
+            char const * file,
+            int line );
 
-#define assert_throws_with_message(p, E, message) this->assert_except<E>([&]() -> void {p;}, message, __FILE__, __LINE__)
-#define assert_throws_without_message(p, E) this->assert_except<E>([&]() -> void {p;}, ::std::nullopt, __FILE__, __LINE__)
+#define assert_throws_with_message(p, E, message) this->assert_except< E >([&]() -> void {p;}, ARGUMENT_TO_QUOTED_STRING(p), ARGUMENT_TO_QUOTED_STRING(E), ::std::nullopt, message, __FILE__, __LINE__)
+#define assert_throws_without_message(p, E) this->assert_except< E >([&]() -> void {p;}, ARGUMENT_TO_QUOTED_STRING(p), ARGUMENT_TO_QUOTED_STRING(E), ::std::nullopt, ::std::nullopt, __FILE__, __LINE__)
 #define assert_throws(...) EXPAND(GET_2_OR_3_MACRO(__VA_ARGS__, assert_throws_with_message, assert_throws_without_message, UNUSED)(__VA_ARGS__))
+
+#define assert_throws_message_contains_with_message(p, E, contains, message) this->assert_except< E >([&]() -> void {p;}, ARGUMENT_TO_QUOTED_STRING(p), ARGUMENT_TO_QUOTED_STRING(E), contains, message, __FILE__, __LINE__)
+#define assert_throws_message_contains_without_message(p, E, contains) this->assert_except< E >([&]() -> void {p;}, ARGUMENT_TO_QUOTED_STRING(p), ARGUMENT_TO_QUOTED_STRING(E), contains, ::std::nullopt, __FILE__, __LINE__)
+#define assert_throws_message_contains(...) EXPAND(GET_3_OR_4_MACRO(__VA_ARGS__, assert_throws_message_contains_with_message, assert_throws_message_contains_without_message, UNUSED)(__VA_ARGS__))
 
 #define fail_test(message) this->assert_true(false, message, __FILE__, __LINE__)
 
@@ -195,14 +211,14 @@ namespace OddSource::Interfaces::Tests
         inline
         void
         failure(
-            ::std::string const &,
-            char const *,
-            int );
+            ::std::string && message,
+            char const * file,
+            int line );
 
         inline
         void
         error(
-            ::std::string const & );
+            ::std::string && message );
 
         uint64_t _assertion_count;
         uint16_t _test_count;

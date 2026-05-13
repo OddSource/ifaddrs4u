@@ -15,29 +15,15 @@
 # limitations under the License.
 #
 
->&2 echo "Wrapping Python command as follows to enable Address Sanitizer:"
+cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -DENABLE_ADDRESS_SANITIZER:BOOL=ON -S . -B ./cmake-build-test-with-asan
+cmake --build ./cmake-build-test-with-asan --config Debug -j 14
 
 if uname -a 2>&1 | grep -i "darwin" > /dev/null
 then
-  DYLD_INSERT_LIBRARIES="$(clang -print-file-name=libclang_rt.asan_osx_dynamic.dylib)"
-  export DYLD_INSERT_LIBRARIES
   export ASAN_OPTIONS=detect_stack_use_after_return=1:verify_asan_link_order=0
   export MallocNanoZone=0
-
-  >&2 echo "export DYLD_INSERT_LIBRARIES='${DYLD_INSERT_LIBRARIES}'"
-  >&2 echo "export MallocNanoZone='${MallocNanoZone}'"
 else
-  LD_PRELOAD="$(realpath "$(gcc -print-file-name=libasan.so)") $(realpath "$(gcc -print-file-name=libstdc++.so)")"
-  export LD_PRELOAD
-  export LSAN_OPTIONS=print_suppressions=1:suppressions=build_tools/lsan-suppressions.txt
   export ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0
-
-  >&2 echo "export LD_PRELOAD='${LD_PRELOAD}'"
-  >&2 echo "export LSAN_OPTIONS='${LSAN_OPTIONS}'"
 fi
 
->&2 echo "export ASAN_OPTIONS='${ASAN_OPTIONS}'"
->&2 echo "exec python" "$@"
->&2 echo
-
-exec python "$@"
+./cmake-build-test-with-asan/ifaddrs4cpp_tests

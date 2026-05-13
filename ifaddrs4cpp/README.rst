@@ -14,14 +14,14 @@ System Requirements
 *******************
 
 When used as a static library, there are no runtime system requirements. When used as a shared library, a
-C++17 Standard Runtime library must be available on the library path applicable to your platform.
+C++17/20/23 Standard Runtime library must be available on the library path applicable to your platform.
 
 Build Requirements
 ******************
 
-- Clang 13 or higher, GCC 8 or higher, or Visual Studio 2019 or higher (on Windows), or any other comparable
-  compiler capable of compiling for the C++17 standard.
-- GNU Make, unless you're on Windows using Visual Studio 2019
+- Clang 17 or higher, GCC 9 or higher, or Visual Studio 2022 or higher (on Windows), or any other comparable
+  compiler capable of compiling for the C++17, C++20, and/or C++23 standards.
+- GNU Make, unless you're on Windows using Visual Studio 2022+
 - CMake 3.22 or newer installed and available on the path
 
 Building
@@ -47,6 +47,10 @@ commands.
 
 To compile the library and tests and run the tests::
 
+    $ ./test
+
+Or more manually::
+
     $ cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-build-test
     $ cmake --build ./cmake-build-test --config Debug -j 14
     $ ctest --test-dir ./cmake-build-test --build-config Debug --verbose --test-action Test --output-on-failure
@@ -54,12 +58,22 @@ To compile the library and tests and run the tests::
 To do the same, but enable Address Sanitizer on macOS and Linux (and Leak Sanitizer on Linux) for analysis
 purposes::
 
+    $ ./test-asan
+
+Or more manually::
+
     $ cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -DENABLE_ADDRESS_SANITIZER:BOOL=ON -S . -B ./cmake-build-test-with-asan
     $ cmake --build ./cmake-build-test-with-asan --config Debug -j 14
     -- on macOS
-    $ ASAN_OPTIONS=detect_stack_use_after_return=1:verify_asan_link_order=0 ./cmake-build-test-with-asan/ifaddrs4cpp_tests
+    $ ASAN_OPTIONS=detect_stack_use_after_return=1:verify_asan_link_order=0 MallocNanoZone=0 ./cmake-build-test-with-asan/ifaddrs4cpp_tests
     -- on Linux
     $ ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0 ./cmake-build-test-with-asan/ifaddrs4cpp_tests
+
+Changing C++ Standard Version
+*****************************
+
+The default C++ version automatically used is C++17. However, you can change the version with :code:`-DCPP_VERSION=20`
+or :code:`-DCPP_VERSION=23`.
 
 Boost Support
 *************

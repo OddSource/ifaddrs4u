@@ -109,24 +109,28 @@ namespace OddSource::Interfaces
         Tentative = IN6_IFF_TENTATIVE
     };
 
+    [[nodiscard]]
     OddSource_Export
     ::std::underlying_type_t< InterfaceIPAddressFlag >
     operator&(
         ::std::underlying_type_t< InterfaceIPAddressFlag > lhs,
         InterfaceIPAddressFlag const & rhs );
 
+    [[nodiscard]]
     OddSource_Export
     ::std::underlying_type_t< InterfaceIPAddressFlag >
     operator|(
         InterfaceIPAddressFlag const & lhs,
         InterfaceIPAddressFlag const & rhs );
 
+    [[nodiscard]]
     OddSource_Export
     ::std::underlying_type_t< InterfaceIPAddressFlag >
     operator|(
         ::std::underlying_type_t< InterfaceIPAddressFlag > lhs,
         InterfaceIPAddressFlag const & rhs );
 
+    [[nodiscard]]
     OddSource_Export
     bool
     operator==(
@@ -143,6 +147,7 @@ namespace OddSource::Interfaces
     InterfaceIPAddressFlag_Names;
 #endif /* !IFADDRS4CPP_INLINE_SOURCE */
 
+    [[nodiscard]]
     OddSource_Export
     ::std::string
     toString(
@@ -198,24 +203,28 @@ namespace OddSource::Interfaces
 #endif /* IFF_OACTIVE */
     };
 
+    [[nodiscard]]
     OddSource_Export
     ::std::underlying_type_t< InterfaceFlag >
     operator&(
         ::std::underlying_type_t< InterfaceFlag > lhs,
         InterfaceFlag const & rhs );
 
+    [[nodiscard]]
     OddSource_Export
     ::std::underlying_type_t< InterfaceFlag >
     operator|(
         InterfaceFlag const & lhs,
         InterfaceFlag const & rhs );
 
+    [[nodiscard]]
     OddSource_Export
     ::std::underlying_type_t< InterfaceFlag >
     operator|(
         ::std::underlying_type_t< InterfaceFlag > lhs,
         InterfaceFlag const & rhs );
 
+    [[nodiscard]]
     OddSource_Export
     bool
     operator==(
@@ -232,6 +241,7 @@ namespace OddSource::Interfaces
     InterfaceFlag_Names;
 #endif /* !IFADDRS4CPP_INLINE_SOURCE */
 
+    [[nodiscard]]
     OddSource_Export
     ::std::string
     toString(
@@ -331,7 +341,8 @@ namespace OddSource::Interfaces
             InterfaceIPAddress< IPAddressT > const & other ) const;
 
         [[nodiscard]]
-        bool operator!=(
+        bool
+        operator!=(
             InterfaceIPAddress< IPAddressT > const & other ) const;
     private:
         IPAddressT const _address;
@@ -348,6 +359,7 @@ namespace OddSource::Interfaces
     typedef InterfaceIPAddress< IPv6Address > InterfaceIPv6Address;
 
     template< class IPAddressT >
+    [[nodiscard]]
     OddSource_Export
     ::std::string
     toString(
@@ -452,6 +464,7 @@ namespace OddSource::Interfaces
         ::std::vector< InterfaceIPv6Address > const &
         ipv6_addresses() const;
 
+        [[nodiscard]]
         static
         OddSource_Inline
         Interface
@@ -480,6 +493,7 @@ namespace OddSource::Interfaces
         ::std::vector< InterfaceIPv6Address > _ipv6Addresses;
     };
 
+    [[nodiscard]]
     OddSource_Export
     ::std::string
     toString(

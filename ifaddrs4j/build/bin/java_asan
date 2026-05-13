@@ -25,8 +25,10 @@ then
   DYLD_INSERT_LIBRARIES="$(clang -print-file-name=libclang_rt.asan_osx_dynamic.dylib)"
   export DYLD_INSERT_LIBRARIES
   export ASAN_OPTIONS=detect_stack_use_after_return=1:verify_asan_link_order=0
+  export MallocNanoZone=0
 
   >&2 echo "export DYLD_INSERT_LIBRARIES='${DYLD_INSERT_LIBRARIES}'"
+  >&2 echo "export MallocNanoZone='${MallocNanoZone}'"
 else
   LD_PRELOAD="$(realpath "$(gcc -print-file-name=libasan.so)") $(realpath "$(gcc -print-file-name=libstdc++.so)")"
   export LD_PRELOAD

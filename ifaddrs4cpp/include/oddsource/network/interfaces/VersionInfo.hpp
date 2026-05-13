@@ -31,36 +31,43 @@ namespace OddSource::Interfaces
     public:
         VersionInfo() = delete;
 
+        [[nodiscard]]
         static
         OddSource_Inline
         ::std::string
         version();
 
+        [[nodiscard]]
         static
         OddSource_Inline
         ::std::uint32_t
         major_version();
 
+        [[nodiscard]]
         static
         OddSource_Inline
         ::std::uint32_t
         minor_version();
 
+        [[nodiscard]]
         static
         OddSource_Inline
         ::std::uint32_t
         patch_version();
 
+        [[nodiscard]]
         static
         OddSource_Inline
         ::std::optional< ::std::string >
         suffix();
 
+        [[nodiscard]]
         static
         OddSource_Inline
         ::std::string
         git_hash();
 
+        [[nodiscard]]
         static
         OddSource_Inline
         ::std::string

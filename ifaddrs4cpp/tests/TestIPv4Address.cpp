@@ -45,6 +45,7 @@ public:
         add_test( test_private_addresses );
         add_test( test_other_reserved_addresses );
         add_test( test_construct_malformed );
+        add_test( test_construct_either_version );
 
 #ifdef ODDSOURCE_INCLUDE_BOOST
         add_test( test_boost_address_conversion );
@@ -269,6 +270,44 @@ public:
         assert_throws( IPv4Address( "192.168.0" ), InvalidIPAddress );
         assert_throws( IPv4Address( "192.168.0.1.2" ), InvalidIPAddress );
         assert_throws( IPv4Address( "192.168.0.256" ), InvalidIPAddress );
+    }
+
+    void
+    test_construct_either_version()
+    {
+        assert_equals( toString( IPAddressVersion::IPv4 ), "4" );
+        assert_equals( toString( IPAddressVersion::IPv6 ), "6" );
+        {
+            ::std::ostringstream oss;
+            oss << IPAddressVersion::IPv4;
+            assert_equals( oss.str(), "4" );
+        }
+        {
+            ::std::ostringstream oss;
+            oss << IPAddressVersion::IPv6;
+            assert_equals( oss.str(), "6" );
+        }
+
+        auto pAddress( IPAddress::create( "43.201.17.9" ) );
+        assert_not_that( !pAddress, "The address should not be null." );
+        assert_equals( pAddress->version(), IPAddressVersion::IPv4, "The IP address should be IPv4." );
+        assert_equals( pAddress->maximum_prefix_length(), 32, "The maximum prefix length should be 32." );
+        assert_equals( toString( *pAddress ), "43.201.17.9" );
+
+        pAddress = IPAddress::create( "2001::faf0:dead:beef:1" );
+        assert_not_that( !pAddress, "The address should not be null." );
+        assert_equals( pAddress->version(), IPAddressVersion::IPv6, "The IP address should be IPv6." );
+        assert_equals( pAddress->maximum_prefix_length(), 128, "The maximum prefix length should be 128." );
+        assert_equals( toString( *pAddress ), "2001::faf0:dead:beef:1" );
+
+        assert_throws_message_contains(
+            std::ignore = IPAddress::create( "192.168.0.1.2" ),
+            InvalidIPAddress,
+            "could not be converted to either an IPv4 or an IPv6 address" );
+        assert_throws_message_contains(
+            std::ignore = IPAddress::create( "2001::faf0:dead:beef::1" ),
+            InvalidIPAddress,
+            "could not be converted to either an IPv4 or an IPv6 address" );
     }
 
 #ifdef ODDSOURCE_INCLUDE_BOOST

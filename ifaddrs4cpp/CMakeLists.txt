@@ -17,14 +17,14 @@ cmake_minimum_required(VERSION 3.22)
 
 project(ifaddrs4cpp
         VERSION 0.1.0
-        DESCRIPTION "A C++17 library for cross-platform access to network interfaces and their addresses"
+        DESCRIPTION "A C++17/20/23 library for cross-platform access to network interfaces and their addresses"
         HOMEPAGE_URL "https://github.com/OddSource/ifaddrs4u"
         LANGUAGES CXX)
 set(PROJECT_VERSION_SUFFIX "alpha0")
 
 option(ENABLE_TESTS
        "If enabled, tests will be build and prepared for running with CTest or ifaddrs4cpp_tests."
-        False)
+       False)
 option(BUILD_STATIC_ONLY
        "If enabled, only a static library will be built, otherwise both static and dynamic will be built."
        False)
@@ -41,6 +41,10 @@ option(SKIP_BOOST
        "If enabled, Boost will not be found and used in the tests."
        False)
 
+set(_CPP_VERSION_OPTIONS "17" "20" "23")
+set(CPP_VERSION "17" CACHE STRING "The C++ version to use, either 17, 20, or 23 (defaults to 17)")
+set_property(CACHE CPP_VERSION PROPERTY STRINGS ${_CPP_VERSION_OPTIONS})
+
 if(${BUILD_STATIC_ONLY} AND ${BUILD_DYNAMIC_ONLY})
     message(FATAL_ERROR
             "Options BUILD_STATIC_ONLY and BUILD_DYNAMIC_ONLY are mutually exclusive. Only one may be specified at a time.")
@@ -48,6 +52,11 @@ endif()
 if(${BUILD_DYNAMIC_ONLY} AND ${ENABLE_TESTS})
     message(FATAL_ERROR
             "Options ENABLE_TESTS and BUILD_DYNAMIC_ONLY are mutually exclusive. Only one may be specified at a time.")
+endif()
+
+if(NOT ${CPP_VERSION} IN_LIST _CPP_VERSION_OPTIONS)
+    message(FATAL_ERROR
+            "Option CPP_VERSION must be one of: ${_CPP_VERSION_OPTIONS}")
 endif()
 
 execute_process(COMMAND git log -1 --format=%H
@@ -110,7 +119,7 @@ configure_file(version.h.in version.h)
 file(COPY ${CMAKE_BINARY_DIR}/version.h DESTINATION ${CMAKE_BINARY_DIR}/include/oddsource/network/interfaces/detail)
 
 add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
-target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE cxx_std_17)
+target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE "cxx_std_${CPP_VERSION}")
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
                        "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3;-WX;-wd4275;-wd4251;-wd4455>>") # -W4? -Wall?
@@ -155,7 +164,9 @@ if(${ENABLE_TESTS})
                    tests/TestVersionInfo.cpp
                    tests/TestInterfaceBrowser.cpp)
 
-    if(NOT ${SKIP_BOOST})
+    if(${SKIP_BOOST})
+        message(STATUS "Boost skipped for tests.")
+    else()
         find_package(Boost CONFIG)
         if(Boost_FOUND)
             message(STATUS "Boost found, enabling Boost::Asio::IP features.")
@@ -164,8 +175,6 @@ if(${ENABLE_TESTS})
         else()
             message(STATUS "Boost not found, building without Boost::Asio::IP features.")
         endif()
-    else()
-        message(STATUS "Boost skipped for tests.")
     endif()
 
     target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}_compiler_flags)

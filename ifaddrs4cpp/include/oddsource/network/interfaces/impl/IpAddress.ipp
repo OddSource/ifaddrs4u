@@ -475,6 +475,34 @@ namespace OddSource::Interfaces
     }
 
     OddSource_Inline
+    ::std::unique_ptr< IPAddress >
+    IPAddress::
+    create(
+        ::std::string_view repr )
+    {
+        try
+        {
+            return ::std::make_unique< IPv4Address >( repr );
+        }
+        catch ( InvalidIPAddress const & e1 )
+        {
+            try
+            {
+                return ::std::make_unique< IPv6Address >( repr );
+            }
+            catch ( InvalidIPAddress const & e2 )
+            {
+                ::std::ostringstream oss;
+                oss << "The address string \"" << repr
+                    << "\" could not be converted to either an IPv4 or an IPv6 address. The reason it could not be "
+                       "converted to an IPv4 address: [" << e1.what()
+                    << "]. The reason it could not be converted to an IPv6 address: [" << e2.what() << "].";
+                throw InvalidIPAddress( oss.str() );
+            }
+        }
+    }
+
+    OddSource_Inline
     IPAddress::
     operator ::std::string() const
     {
@@ -668,14 +696,6 @@ namespace OddSource::Interfaces
     IPv4Address::
     ~IPv4Address() noexcept // NOLINT(*-use-equals-default)
     {
-    }
-
-    OddSource_Inline
-    size_t
-    IPv4Address::
-    data_length() const
-    {
-        return 4;
     }
 
     OddSource_Inline
@@ -956,14 +976,6 @@ namespace OddSource::Interfaces
     IPv6Address::
     ~IPv6Address() noexcept // NOLINT(*-use-equals-default)
     {
-    }
-
-    OddSource_Inline
-    size_t
-    IPv6Address::
-    data_length() const
-    {
-        return 16;
     }
 
     OddSource_Inline

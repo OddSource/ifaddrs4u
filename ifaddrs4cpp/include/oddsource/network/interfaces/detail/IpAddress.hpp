@@ -75,6 +75,9 @@ namespace OddSource::Interfaces
 #endif /* ODDSOURCE_INCLUDE_BOOST */
 
     inline
+#if __cplusplus >= 202002L
+    constexpr
+#endif /* __cplusplus >= 202002L */
     IPAddressVersion
     IPv4Address::
     version() const noexcept
@@ -83,11 +86,25 @@ namespace OddSource::Interfaces
     }
 
     inline
-    ::std::uint8_t
+#if __cplusplus >= 202002L
+    constexpr
+#endif /* __cplusplus >= 202002L */
+    ::std::uint16_t
     IPv4Address::
     maximum_prefix_length() const noexcept
     {
         return 32;
+    }
+
+    inline
+#if __cplusplus >= 202002L
+    constexpr
+#endif /* __cplusplus >= 202002L */
+    size_t
+    IPv4Address::
+    data_length() const noexcept
+    {
+        return 4;
     }
 
 #ifdef ODDSOURCE_INCLUDE_BOOST
@@ -124,6 +141,9 @@ namespace OddSource::Interfaces
 #endif /* ODDSOURCE_INCLUDE_BOOST */
 
     inline
+#if __cplusplus >= 202002L
+    constexpr
+#endif /* __cplusplus >= 202002L */
     IPAddressVersion
     IPv6Address::
     version() const noexcept
@@ -132,11 +152,25 @@ namespace OddSource::Interfaces
     }
 
     inline
-    ::std::uint8_t
+#if __cplusplus >= 202002L
+    constexpr
+#endif /* __cplusplus >= 202002L */
+    ::std::uint16_t
     IPv6Address::
     maximum_prefix_length() const noexcept
     {
         return 128;
+    }
+
+    inline
+#if __cplusplus >= 202002L
+    constexpr
+#endif /* __cplusplus >= 202002L */
+    size_t
+    IPv6Address::
+    data_length() const noexcept
+    {
+        return 16;
     }
 
 #ifdef ODDSOURCE_INCLUDE_BOOST

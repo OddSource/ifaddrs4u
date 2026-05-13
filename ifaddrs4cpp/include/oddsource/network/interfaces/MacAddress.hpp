@@ -124,6 +124,7 @@ namespace OddSource::Interfaces
         ::std::uint8_t const _data_length;
     };
 
+    [[nodiscard]]
     OddSource_Export
     ::std::string
     toString(

@@ -65,12 +65,13 @@ namespace OddSource::Interfaces
         ~InvalidIPAddress() noexcept; // NOLINT(*-use-override)
     };
 
-    enum class OddSource_Export IPAddressVersion : ::std::uint8_t
+    enum class OddSource_Export IPAddressVersion : ::std::uint16_t
     {
         IPv4 = 4,
         IPv6 = 6
     };
 
+    [[nodiscard]]
     OddSource_Export
     ::std::string
     toString(
@@ -105,6 +106,7 @@ namespace OddSource::Interfaces
     MulticastScope_Names;
 #endif /* !IFADDRS4CPP_INLINE_SOURCE */
 
+    [[nodiscard]]
     OddSource_Export
     ::std::string
     toString(
@@ -124,24 +126,28 @@ namespace OddSource::Interfaces
         ReservedFlag = 0b1000 // unused, here for clarity and unit testing
     };
 
+    [[nodiscard]]
     OddSource_Export
     ::std::underlying_type_t< MulticastV6Flag >
     operator&(
         ::std::underlying_type_t< MulticastV6Flag > lhs,
         MulticastV6Flag const & rhs );
 
+    [[nodiscard]]
     OddSource_Export
     ::std::underlying_type_t< MulticastV6Flag >
     operator|(
         MulticastV6Flag const & lhs,
         MulticastV6Flag const & rhs );
 
+    [[nodiscard]]
     OddSource_Export
     ::std::underlying_type_t< MulticastV6Flag >
     operator|(
         ::std::underlying_type_t< MulticastV6Flag > lhs,
         MulticastV6Flag const & rhs );
 
+    [[nodiscard]]
     OddSource_Export
     bool
     operator==(
@@ -154,6 +160,37 @@ namespace OddSource::Interfaces
         virtual
         OddSource_Inline
         ~IPAddress() noexcept;
+
+        [[nodiscard]]
+#if __cplusplus >= 202002L
+        constexpr
+#endif /* __cplusplus >= 202002L */
+        virtual
+        IPAddressVersion
+        version() const noexcept = 0;
+
+        [[nodiscard]]
+#if __cplusplus >= 202002L
+        constexpr
+#endif /* __cplusplus >= 202002L */
+        virtual
+        ::std::uint16_t
+        maximum_prefix_length() const noexcept = 0;
+
+        [[nodiscard]]
+#if __cplusplus >= 202002L
+        constexpr
+#endif /* __cplusplus >= 202002L */
+        virtual
+        size_t
+        data_length() const noexcept = 0;
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+        [[nodiscard]]
+        virtual
+        explicit
+        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const = 0;
+#endif /* ODDSOURCE_INCLUDE_BOOST */
 
         /**
          * Converts the IP address to a C++ string.
@@ -176,13 +213,6 @@ namespace OddSource::Interfaces
         OddSource_Inline
         explicit
         operator char const *() const;
-
-#ifdef ODDSOURCE_INCLUDE_BOOST
-        [[nodiscard]]
-        virtual
-        explicit
-        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const = 0;
-#endif /* ODDSOURCE_INCLUDE_BOOST */
 
         /**
          * Indicates whether this address represents the unspecified address
@@ -267,14 +297,11 @@ namespace OddSource::Interfaces
         multicast_scope() const;
 
         [[nodiscard]]
-        virtual
-        IPAddressVersion
-        version() const noexcept = 0;
-
-        [[nodiscard]]
-        virtual
-        ::std::uint8_t
-        maximum_prefix_length() const noexcept = 0;
+        static
+        OddSource_Inline
+        ::std::unique_ptr< IPAddress >
+        create(
+        ::std::string_view repr );
 
     protected:
         OddSource_Inline
@@ -291,11 +318,6 @@ namespace OddSource::Interfaces
         OddSource_Inline
         IPAddress(
             IPAddress && other ) noexcept;
-
-        [[nodiscard]]
-        virtual
-        size_t
-        data_length() const = 0;
 
         ::std::string _representation;
         bool _is_unspecified = false;
@@ -353,7 +375,44 @@ namespace OddSource::Interfaces
 
         virtual
         OddSource_Inline
-        ~IPv4Address() noexcept; // NOLINT(*-use-override)
+        ~IPv4Address() noexcept; // NOLINT(*-use-override)[[nodiscard]]
+
+        [[nodiscard]]
+        inline
+#if __cplusplus >= 202002L
+        constexpr
+#endif /* __cplusplus >= 202002L */
+        IPAddressVersion
+        version() const noexcept override;
+
+        [[nodiscard]]
+        inline
+#if __cplusplus >= 202002L
+        constexpr
+#endif /* __cplusplus >= 202002L */
+        ::std::uint16_t
+        maximum_prefix_length() const noexcept override;
+
+        [[nodiscard]]
+        inline
+#if __cplusplus >= 202002L
+        constexpr
+#endif /* __cplusplus >= 202002L */
+        size_t
+        data_length() const noexcept override;
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+        [[nodiscard]]
+        virtual
+        inline
+        explicit
+        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const override;
+
+        [[nodiscard]]
+        inline
+        explicit
+        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4() const;
+#endif /* ODDSOURCE_INCLUDE_BOOST */
 
         [[nodiscard]]
         OddSource_Inline
@@ -364,29 +423,6 @@ namespace OddSource::Interfaces
         OddSource_Inline
         explicit
         operator ::std::uint32_t() const;
-
-#ifdef ODDSOURCE_INCLUDE_BOOST
-        [[nodiscard]]
-        virtual
-        inline
-        explicit
-        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const final;
-
-        [[nodiscard]]
-        inline
-        explicit
-        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4() const;
-#endif /* ODDSOURCE_INCLUDE_BOOST */
-
-        [[nodiscard]]
-        inline
-        IPAddressVersion
-        version() const noexcept final;
-
-        [[nodiscard]]
-        inline
-        ::std::uint8_t
-        maximum_prefix_length() const noexcept final;
 
         [[nodiscard]]
         OddSource_Inline
@@ -399,12 +435,6 @@ namespace OddSource::Interfaces
         bool
         operator!=(
             IPv4Address const & ) const;
-
-    protected:
-        [[nodiscard]]
-        OddSource_Inline
-        size_t
-        data_length() const final;
 
     private:
         OddSource_Inline
@@ -502,6 +532,43 @@ namespace OddSource::Interfaces
         ~IPv6Address() noexcept; // NOLINT(*-use-override)
 
         [[nodiscard]]
+        inline
+#if __cplusplus >= 202002L
+        constexpr
+#endif /* __cplusplus >= 202002L */
+        IPAddressVersion
+        version() const noexcept override;
+
+        [[nodiscard]]
+        inline
+#if __cplusplus >= 202002L
+        constexpr
+#endif /* __cplusplus >= 202002L */
+        ::std::uint16_t
+        maximum_prefix_length() const noexcept override;
+
+        [[nodiscard]]
+        inline
+#if __cplusplus >= 202002L
+        constexpr
+#endif /* __cplusplus >= 202002L */
+        size_t
+        data_length() const noexcept override;
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+        [[nodiscard]]
+        virtual
+        inline
+        explicit
+        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const override;
+
+        [[nodiscard]]
+        inline
+        explicit
+        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6() const;
+#endif /* ODDSOURCE_INCLUDE_BOOST */
+
+        [[nodiscard]]
         OddSource_Inline
         explicit
         operator in6_addr const *() const;
@@ -510,19 +577,6 @@ namespace OddSource::Interfaces
         OddSource_Inline
         explicit
         operator Bytes() const;
-
-#ifdef ODDSOURCE_INCLUDE_BOOST
-        [[nodiscard]]
-        virtual
-        inline
-        explicit
-        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const final;
-
-        [[nodiscard]]
-        inline
-        explicit
-        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6() const;
-#endif /* ODDSOURCE_INCLUDE_BOOST */
 
         /**
          * Returns a copy of this address with a normalized string representation.
@@ -645,16 +699,6 @@ namespace OddSource::Interfaces
             MulticastV6Flag const & flag ) const;
 
         [[nodiscard]]
-        inline
-        IPAddressVersion
-        version() const noexcept final;
-
-        [[nodiscard]]
-        inline
-        ::std::uint8_t
-        maximum_prefix_length() const noexcept final;
-
-        [[nodiscard]]
         OddSource_Inline
         bool
         operator==(
@@ -665,12 +709,6 @@ namespace OddSource::Interfaces
         bool
         operator!=(
             IPv6Address const & ) const;
-
-    protected:
-        [[nodiscard]]
-        OddSource_Inline
-        size_t
-        data_length() const final;
 
     private:
         OddSource_Inline
@@ -701,6 +739,7 @@ namespace OddSource::Interfaces
         ::std::optional< ::std::uint8_t > _multicast_flags;
     };
 
+    [[nodiscard]]
     OddSource_Export
     ::std::string
     toString(

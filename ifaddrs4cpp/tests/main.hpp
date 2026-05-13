@@ -16,8 +16,11 @@
 
 #pragma once
 
+#include <oddsource/network/interfaces/detail/config.h>
+
 #include <cassert>
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <sstream>
 
@@ -26,6 +29,11 @@
 #include <errhandlingapi.h>
 #include <crtdbg.h>
 #endif /* ODDSOURCE_IS_WINDOWS */
+
+#ifdef ODDSOURCE_INCLUDE_BOOST
+#  include ODDSOURCE_BOOST_HEADER(exception/exception.hpp)
+#  include ODDSOURCE_BOOST_HEADER(exception/diagnostic_information.hpp)
+#endif /* ODDSOURCE_INCLUDE_BOOST */
 
 // ReSharper disable once CppUnnamedNamespaceInHeaderFile
 namespace
@@ -63,7 +71,11 @@ namespace
         bool disabled;
     };
 
-    PopupDisabler disabler;
+    [[maybe_unused]] PopupDisabler disabler;
+
+#ifdef ODDSOURCE_IS_WINDOWS
+    [[maybe_unused]] auto pWSAHelper( ::std::make_unique< WinSockStartupCleanupHelper >() );
+#endif /* ODDSOURCE_IS_WINDOWS */
 }
 
 template< typename T >
@@ -82,6 +94,9 @@ Registrar(
     ::std::string const & name )
 {
     assert( disabler.disabled );
+#ifdef ODDSOURCE_IS_WINDOWS
+    assert( pWSAHelper );
+#endif /* ODDSOURCE_IS_WINDOWS */
     Test::registrate( name, &T::create );
 }
 
@@ -90,25 +105,27 @@ void
 OddSource::Interfaces::Tests::
 Test::
 assert_equal(
-    V1 const & v1,
-    V2 const & v2,
+    V1 const & arg1,
+    char const * expression1,
+    V2 const & arg2,
+    char const * expression2,
     ::std::optional< ::std::string const > message,
     char const * file,
-    int line )
+    int const line )
 {
     this->_assertion_count++;
-    if ( v1 != v2 )
+    if ( arg1 != arg2 )
     {
         ::std::ostringstream oss;
-        oss << "v1 [" << type_id_string( v1 ) << "(" << v1 << ")] != v2 ["
-                      << type_id_string( v2 ) << "(" << v2 << ")], but they should be equal.";
+        oss << "assert " << expression1 << " == " << expression2 << " has failed ("
+            << arg1 << " [" << type_id_string( arg1 ) << "] != "
+            << arg2 << " [" << type_id_string( arg2 ) << "])";
         if ( message )
         {
-            oss << " " << *message;
+            oss << ": " << *message;
         }
 
         this->failure( oss.str(), file, line );
-        throw TestAssertFailureAbort();
     }
 }
 
@@ -117,25 +134,27 @@ void
 OddSource::Interfaces::Tests::
 Test::
 assert_not_equal(
-    V1 const & v1,
-    V2 const & v2,
+    V1 const & arg1,
+    char const * expression1,
+    V2 const & arg2,
+    char const * expression2,
     ::std::optional< ::std::string const > message,
     char const * file,
-    int line )
+    int const line )
 {
     this->_assertion_count++;
-    if ( v1 == v2 )
+    if ( arg1 == arg2 )
     {
         ::std::ostringstream oss;
-        oss << "v1 [" << type_id_string( v1 ) << "(" << v1 << ")] == v2 ["
-                      << type_id_string( v2 ) << "(" << v2 << ")], but they should not be equal";
+        oss << "assert " << expression1 << " != " << expression2 << " has failed ("
+            << arg1 << " [" << type_id_string( arg1 ) << "] == "
+            << arg2 << " [" << type_id_string( arg2 ) << "])";
         if ( message )
         {
-            oss << " " << *message;
+            oss << ": " << *message;
         }
 
         this->failure( oss.str(), file, line );
-        throw TestAssertFailureAbort();
     }
 }
 
@@ -145,19 +164,22 @@ OddSource::Interfaces::Tests::
 Test::
 assert_true(
     bool test,
+    char const * expression,
     ::std::optional< ::std::string const > message,
     char const * file,
-    int line )
+    int const line )
 {
     this->_assertion_count++;
     if ( !test )
     {
-        if ( !message )
+        ::std::ostringstream oss;
+        oss << "assert " << expression << " has failed (evaluated to false)";
+        if ( message )
         {
-            message.emplace( "The boolean condition was unexpectedly false" );
+            oss << ": " << *message;
         }
-        this->failure( *message, file, line );
-        throw TestAssertFailureAbort();
+
+        this->failure( oss.str(), file, line );
     }
 }
 
@@ -167,20 +189,12 @@ OddSource::Interfaces::Tests::
 Test::
 assert_true(
     ::std::function< bool() > const & test,
+    char const * expression,
     ::std::optional< ::std::string const > message,
     char const * file,
-    int line )
+    int const line )
 {
-    this->_assertion_count++;
-    if ( !test() )
-    {
-        if ( !message )
-        {
-            message.emplace( "The predicate unexpectedly returned false" );
-        }
-        this->failure( *message, file, line );
-        throw TestAssertFailureAbort();
-    }
+    this->assert_true( test(), expression, ::std::move( message ), file, line);
 }
 
 inline
@@ -189,19 +203,22 @@ OddSource::Interfaces::Tests::
 Test::
 assert_false(
     bool test,
+    char const * expression,
     ::std::optional< ::std::string const > message,
     char const * file,
-    int line )
+    int const line )
 {
     this->_assertion_count++;
     if ( test )
     {
-        if ( !message )
+        ::std::ostringstream oss;
+        oss << "assert !" << expression << " has failed (evaluated to true)";
+        if ( message )
         {
-            message.emplace( "The boolean condition was unexpectedly true" );
+            oss << ": " << *message;
         }
-        this->failure( *message, file, line );
-        throw TestAssertFailureAbort();
+
+        this->failure( oss.str(), file, line );
     }
 }
 
@@ -211,21 +228,13 @@ OddSource::Interfaces::Tests::
 Test::
 assert_false(
     ::std::function< bool() > const & test,
+    char const * expression,
     ::std::optional< ::std::string const > message,
     char const * file,
-    int line
+    int const line
     )
 {
-    this->_assertion_count++;
-    if ( test() )
-    {
-        if ( !message )
-        {
-            message.emplace( "The predicate unexpectedly returned true" );
-        }
-        this->failure( *message, file, line );
-        throw TestAssertFailureAbort();
-    }
+    this->assert_false( test(), expression, ::std::move( message ), file, line );
 }
 
 template< class E >
@@ -234,24 +243,104 @@ OddSource::Interfaces::Tests::
 Test::
 assert_except(
     ::std::function< void() > const & predicate,
+    char const * expression,
+    char const * exceptionType,
+    ::std::optional< ::std::string const > exceptionMessageContains,
     ::std::optional< ::std::string const > message,
     char const * file,
-    int line )
+    int const line )
 {
-    using namespace std::string_literals;
+    this->_assertion_count++;
     try
     {
         predicate();
-        if ( !message )
+
+        ::std::ostringstream oss;
+        oss << "assert " << expression << " throws " << exceptionType;
+        if ( exceptionMessageContains )
         {
-            message.emplace(
-                "Expected exception of type "s + demangle( typeid( E ).name() ) + ", but no exception thrown."s );
+            oss << " with a message containing \"" << *exceptionMessageContains << "\"";
         }
-        this->failure( *message, file, line );
+        oss << " has failed (no exception thrown)";
+        if ( message )
+        {
+            oss << ": " << *message;
+        }
+
+        this->failure( oss.str(), file, line );
     }
-    catch( E const & )
+    catch( E const & e )
     {
-        // expected
+        if ( exceptionMessageContains )
+        {
+            if ( ::std::string const what( e.what() ); what.find( *exceptionMessageContains ) == ::std::string::npos )
+            {
+                ::std::ostringstream oss;
+                oss << "assert " << expression << " throws " << exceptionType << " with a message containing \""
+                    << *exceptionMessageContains
+                    << "\" has failed (expected exception was thrown, but exception message \"" << what
+                    << "\" did not contain expected string)";
+                if ( message )
+                {
+                    oss << ": " << *message;
+                }
+
+                this->failure( oss.str(), file, line );
+            }
+        }
+    }
+    catch ( ::std::exception const & e )
+    {
+        ::std::ostringstream oss;
+        oss << "assert " << expression << " throws " << exceptionType;
+        if ( exceptionMessageContains )
+        {
+            oss << " with a message containing \"" << *exceptionMessageContains << "\"";
+        }
+        oss << " has failed (actual exception type: " << demangle( typeid( e ).name() ) << ", exception message: \""
+            << e.what() << "\")";
+        if ( message )
+        {
+            oss << ": " << *message;
+        }
+
+        this->failure( oss.str(), file, line );
+    }
+#ifdef ODDSOURCE_INCLUDE_BOOST
+    catch ( ODDSOURCE_BOOST_NAMESPACE_ROOT::exception const & e )
+    {
+        ::std::ostringstream oss;
+        oss << "assert " << expression << " throws " << exceptionType;
+        if ( exceptionMessageContains )
+        {
+            oss << " with a message containing \"" << *exceptionMessageContains << "\"";
+        }
+        oss << " has failed (actual exception type: " << demangle( typeid( e ).name() )
+            << ", diagnostic information: \""
+            << ODDSOURCE_BOOST_NAMESPACE_ROOT::diagnostic_information( e ) << "\")";
+        if ( message )
+        {
+            oss << ": " << *message;
+        }
+
+        this->failure( oss.str(), file, line );
+    }
+#endif /* ODDSOURCE_INCLUDE_BOOST */
+    catch ( ... )
+    {
+        ::std::ostringstream oss;
+        oss << "assert " << expression << " throws " << exceptionType;
+        if ( exceptionMessageContains )
+        {
+            oss << " with a message containing \"" << *exceptionMessageContains << "\"";
+        }
+        oss << " has failed (unknown exception was caught)";
+        if ( message )
+        {
+            oss << ": " << *message;
+        }
+
+        this->failure( oss.str(), file, line );
     }
 }
 
@@ -260,9 +349,9 @@ void
 OddSource::Interfaces::Tests::
 Test::
 failure(
-    ::std::string const & message,
+    ::std::string && message,
     char const * file,
-    int line )
+    int const line )
 {
     using namespace std::string_literals;
     this->_failures.emplace_back( file + ":"s + ::std::to_string( line ) + " - "s + message );
@@ -273,7 +362,7 @@ void
 OddSource::Interfaces::Tests::
 Test::
 error(
-    ::std::string const & message )
+    ::std::string && message )
 {
     this->_errors.emplace_back( message );
 }
