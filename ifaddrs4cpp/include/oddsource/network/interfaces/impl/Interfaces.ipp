@@ -972,6 +972,7 @@ namespace
         }
 #else /* SIOCGIFAFLAG_IN6 */
         static constexpr ::std::uint32_t const flags{ 0 };
+        ::std::ignore = warnings;
 #endif /* !SIOCGIFAFLAG_IN6 */
 
         if ( scope )

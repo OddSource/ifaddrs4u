@@ -236,9 +236,9 @@ def pre_build(options: Options) -> None:
     cmake_path = extern_cpp_base / CMAKE_BUILD_DIRECTORY
     include_dirs.append(f"{extern_cpp_base / 'include'}")
     include_dirs.append(f"{cmake_path / 'include'}")
-    #library_dirs.append(f"{cmake_path}")
+    # library_dirs.append(f"{cmake_path}")
     print_fast(f"Using extra include dirs: {include_dirs}")
-    #print_fast(f"Using extra library dirs: {library_dirs}")
+    # print_fast(f"Using extra library dirs: {library_dirs}")
 
     if options.clean:
         for d in (cmake_path, BASE_PATH / "build", BASE_PATH / "dist"):
@@ -265,7 +265,7 @@ def pre_build(options: Options) -> None:
     else:
         static_lib_file = cmake_path / f"libifaddrs4cpp-static{suffix}.{STATIC_LIBRARY_EXTENSION}"
         test_executable = cmake_path / "ifaddrs4cpp_tests"
-    #extra_objects.append(f"{static_lib_file}")
+    # extra_objects.append(f"{static_lib_file}")
 
     if not static_lib_file.exists() or (options.cpp_test and not test_executable.exists()):
         extra_args: List[str] = []
