@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::IPv6Address const & address
     IF_NULL_RETURN_NULL(byte_array)
     env->SetByteArrayRegion(byte_array, 0, 16, bytes);
 
-    jobject scope_id(Boxers::Integer(env, address.scope_id()));
+    jobject scopeId(Boxers::Integer(env, address.scopeId()));
     if (env->ExceptionOccurred() != NULL)
     {
         return NULL;
@@ -64,5 +64,5 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::IPv6Address const & address
     IF_NULL_RETURN_NULL(InetAddressHelper)
     auto getIPv6Address(JCache::sm(env, InetAddressHelper, "InetAddressHelper", "getIPv6Address(byte[], Integer)"));
     IF_NULL_RETURN_NULL(getIPv6Address)
-    return env->CallStaticObjectMethod(InetAddressHelper, getIPv6Address, byte_array, scope_id);
+    return env->CallStaticObjectMethod(InetAddressHelper, getIPv6Address, byte_array, scopeId);
 }

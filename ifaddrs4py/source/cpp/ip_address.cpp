@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,18 +62,18 @@ convertToPython(
     }
 
     PyObject * kwargs( NULL );
-    if ( address.has_scope_id() )
+    if ( address.hasScopeId() )
     {
         PyObject * scopeIDPy( Py_None );
-        if ( address.scope_id() )
+        if ( address.scopeId() )
         {
-            scopeIDPy = PyLong_FromUnsignedLong( *address.scope_id() );
+            scopeIDPy = PyLong_FromUnsignedLong( *address.scopeId() );
         }
 
         PyObject * scopeNamePy( Py_None );
-        if ( address.scope_name() )
+        if ( address.scopeName() )
         {
-            ::std::string const scopeName( *address.scope_name() );
+            ::std::string const scopeName( *address.scopeName() );
             scopeNamePy = PyUnicode_FromStringAndSize( scopeName.c_str(), scopeName.length() );
         }
 

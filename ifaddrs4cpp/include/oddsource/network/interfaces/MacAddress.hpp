@@ -119,9 +119,9 @@ namespace OddSource::Interfaces
             ::std::unique_ptr< ::std::uint8_t const[] > && data,
             ::std::uint8_t dataLength );
 
-        ::std::string const _representation;
+        ::std::string _representation;
         ::std::unique_ptr< ::std::uint8_t const[] > _data;
-        ::std::uint8_t const _data_length;
+        ::std::uint8_t _dataLength;
     };
 
     [[nodiscard]]

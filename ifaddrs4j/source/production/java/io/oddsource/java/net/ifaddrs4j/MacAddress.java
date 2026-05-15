@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public final class MacAddress
 
     private final byte[] data;
 
-    private final short data_length;
+    private final short dataLength;
 
     /**
      * Constructs the MAC address / hardware address from the given String representation, which should be
@@ -64,7 +64,7 @@ public final class MacAddress
     {
         this.representation = representation;
         this.data = data;
-        this.data_length = (short) data.length;
+        this.dataLength = (short) data.length;
     }
 
     private static native byte[] getDataFromRepr(String representation);
@@ -89,7 +89,7 @@ public final class MacAddress
      */
     public byte[] getData()
     {
-        return Arrays.copyOf(this.data, this.data_length);
+        return Arrays.copyOf(this.data, this.dataLength);
     }
 
     /**
@@ -100,7 +100,7 @@ public final class MacAddress
      */
     public short getLength()
     {
-        return this.data_length;
+        return this.dataLength;
     }
 
     /**

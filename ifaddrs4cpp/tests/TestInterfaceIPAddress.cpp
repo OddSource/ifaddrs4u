@@ -35,25 +35,25 @@ public:
     {
         InterfaceIPAddress const address( IPv4Address( "201.17.159.33" ), 0, 24 );
         assert_equals( address.address(), IPv4Address( "201.17.159.33" ) );
-        assert_equals( *address.prefix_length(), 24 );
+        assert_equals( *address.prefixLength(), 24 );
         assert_not_that(
-            static_cast< bool >( address.broadcast_address() ),
+            static_cast< bool >( address.broadcastAddress() ),
             "There should be no broadcast address." );
         assert_not_that(
-            static_cast< bool >( address.point_to_point_destination() ),
+            static_cast< bool >( address.pointToPointDestinationAddress() ),
             "There should be no P2P destination." );
 
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Anycast ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::AutoConfigured ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Deprecated ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Detached ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Duplicated ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Dynamic ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::NoDad ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Optimistic ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Secured ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Temporary ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Tentative ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Anycast ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::AutoConfigured ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Deprecated ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Detached ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Duplicated ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Dynamic ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::NoDad ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Optimistic ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Secured ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Temporary ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Tentative ) );
     }
 
     void
@@ -66,23 +66,23 @@ public:
                 Broadcast,
                 IPv4Address( "209.53.255.254" ) );
         assert_equals( address.address(), IPv4Address( "209.53.101.102" ) );
-        assert_equals( *address.prefix_length(), 16 );
-        assert_equals( *address.broadcast_address(), IPv4Address( "209.53.255.254" ) );
+        assert_equals( *address.prefixLength(), 16 );
+        assert_equals( *address.broadcastAddress(), IPv4Address( "209.53.255.254" ) );
         assert_not_that(
-            static_cast< bool >( address.point_to_point_destination() ),
+            static_cast< bool >( address.pointToPointDestinationAddress() ),
             "There should be no P2P destination." );
 
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Anycast ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::AutoConfigured ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Deprecated ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Detached ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Duplicated ) );
-        assert_that( address.is_flag_enabled( InterfaceIPAddressFlag::Dynamic ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::NoDad ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Optimistic ) );
-        assert_that( address.is_flag_enabled( InterfaceIPAddressFlag::Secured ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Temporary ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Tentative ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Anycast ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::AutoConfigured ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Deprecated ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Detached ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Duplicated ) );
+        assert_that( address.isFlagEnabled( InterfaceIPAddressFlag::Dynamic ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::NoDad ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Optimistic ) );
+        assert_that( address.isFlagEnabled( InterfaceIPAddressFlag::Secured ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Temporary ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Tentative ) );
     }
 
     void
@@ -97,24 +97,24 @@ public:
                 IPv4Address( "209.53.255.1" ) );
         assert_equals( address.address(), IPv4Address( "209.53.101.102" ) );
         assert_not_that(
-            static_cast< bool >( address.prefix_length() ),
+            static_cast< bool >( address.prefixLength() ),
             "There should be no prefix length." );
         assert_not_that(
-            static_cast< bool >( address.broadcast_address() ),
+            static_cast< bool >( address.broadcastAddress() ),
             "There should be no broadcast address." );
-        assert_equals( *address.point_to_point_destination(), IPv4Address( "209.53.255.1" ) );
+        assert_equals( *address.pointToPointDestinationAddress(), IPv4Address( "209.53.255.1" ) );
 
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Anycast ) );
-        assert_that( address.is_flag_enabled( InterfaceIPAddressFlag::AutoConfigured ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Deprecated ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Detached ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Duplicated ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Dynamic ) );
-        assert_that( address.is_flag_enabled( InterfaceIPAddressFlag::NoDad ) );
-        assert_that( address.is_flag_enabled( InterfaceIPAddressFlag::Optimistic ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Secured ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Temporary ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Tentative ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Anycast ) );
+        assert_that( address.isFlagEnabled( InterfaceIPAddressFlag::AutoConfigured ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Deprecated ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Detached ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Duplicated ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Dynamic ) );
+        assert_that( address.isFlagEnabled( InterfaceIPAddressFlag::NoDad ) );
+        assert_that( address.isFlagEnabled( InterfaceIPAddressFlag::Optimistic ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Secured ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Temporary ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Tentative ) );
     }
 
     void
@@ -122,25 +122,25 @@ public:
     {
         InterfaceIPAddress address( IPv6Address( "2001::dead:beef" ), 0, 64 );
         assert_equals( address.address(), IPv6Address( "2001::dead:beef" ) );
-        assert_equals( *address.prefix_length(), 64 );
+        assert_equals( *address.prefixLength(), 64 );
         assert_not_that(
-            static_cast< bool >( address.broadcast_address() ),
+            static_cast< bool >( address.broadcastAddress() ),
             "There should be no broadcast address." );
         assert_not_that(
-            static_cast< bool >( address.point_to_point_destination() ),
+            static_cast< bool >( address.pointToPointDestinationAddress() ),
             "There should be no P2P destination." );
 
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Anycast ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::AutoConfigured ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Deprecated ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Detached ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Duplicated ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Dynamic ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::NoDad ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Optimistic ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Secured ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Temporary ) );
-        assert_not_that( address.is_flag_enabled( InterfaceIPAddressFlag::Tentative ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Anycast ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::AutoConfigured ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Deprecated ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Detached ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Duplicated ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Dynamic ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::NoDad ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Optimistic ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Secured ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Temporary ) );
+        assert_not_that( address.isFlagEnabled( InterfaceIPAddressFlag::Tentative ) );
     }
 
     [[maybe_unused]]

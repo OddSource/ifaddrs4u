@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ namespace
     {
         try
         {
-            auto interfaces(browser->get_interfaces());
+            auto interfaces(browser->getInterfaces());
 
             ArrayList interfaces_list(env, (jint) interfaces.size());
 
@@ -333,7 +333,7 @@ Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_forEach
 
     try
     {
-        std::ignore = browser->for_each_interface(do_this);
+        std::ignore = browser->forEachInterface(do_this);
     }
     CATCH_STD_EXCEPTION_THROW_EXCEPTION_IF_NOT_THROWN("RuntimeException"s, return false)
 

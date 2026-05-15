@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,15 +74,15 @@ public final class InetAddressHelper
      * Construct an IPv6 address from the 16 given bytes.
      *
      * @param data Exactly 16 bytes
-     * @param scope_id The numeric scope ID, if the address is scoped, or null otherwise
+     * @param scopeId The numeric scope ID, if the address is scoped, or null otherwise
      * @return the IPv6 address represented by these 16 bytes.
      * @throws UnknownHostException if the bytes are malformed in some way.
      * @throws IllegalArgumentException if more or fewer than 16 bytes are supplied.
      */
-    public static Inet6Address getIPv6Address(final byte[] data, final Integer scope_id) throws UnknownHostException
+    public static Inet6Address getIPv6Address(final byte[] data, final Integer scopeId) throws UnknownHostException
     {
         InetAddressHelper.validateDataLength(data, InetAddressHelper.IPV6_DATA_LENGTH, "IPv6");
-        return Inet6Address.getByAddress(null, data, Objects.requireNonNullElse(scope_id, -1));
+        return Inet6Address.getByAddress(null, data, Objects.requireNonNullElse(scopeId, -1));
     }
 
     /**

@@ -67,12 +67,12 @@ convertToPython(
     {
         address = convertToPython( interfaceAddress.address() );
 
-        broadcastAddress = interfaceAddress.broadcast_address() ?
-            convertToPython( *interfaceAddress.broadcast_address() ) :
+        broadcastAddress = interfaceAddress.broadcastAddress() ?
+            convertToPython( *interfaceAddress.broadcastAddress() ) :
             Py_None;
 
-        pointToPointDestinationAddress = interfaceAddress.point_to_point_destination() ?
-            convertToPython( *interfaceAddress.point_to_point_destination() ) :
+        pointToPointDestinationAddress = interfaceAddress.pointToPointDestinationAddress() ?
+            convertToPython( *interfaceAddress.pointToPointDestinationAddress() ) :
             Py_None;
 
         flags = PyLong_FromUnsignedLong( interfaceAddress.flags() );
@@ -81,8 +81,8 @@ convertToPython(
             throw ::std::runtime_error( "Failed to create flags long" );
         }
 
-        prefixLength = interfaceAddress.prefix_length() ?
-            PyLong_FromUnsignedLong( *interfaceAddress.prefix_length() ) :
+        prefixLength = interfaceAddress.prefixLength() ?
+            PyLong_FromUnsignedLong( *interfaceAddress.prefixLength() ) :
             Py_None;
         if ( prefixLength == NULL )
         {
@@ -170,17 +170,17 @@ convertToPython(
             mtu = Py_None;
         }
 
-        macAddress = rInterface.mac_address() ?
-            convertToPython( *rInterface.mac_address() ) :
+        macAddress = rInterface.macAddress() ?
+            convertToPython( *rInterface.macAddress() ) :
             Py_None;
 
-        ipv4Addresses = PyTuple_New( rInterface.ipv4_addresses().size() );
+        ipv4Addresses = PyTuple_New( rInterface.ipv4Addresses().size() );
         if ( ipv4Addresses == NULL )
         {
             throw ::std::runtime_error( "Unable to create tuple of IPv4 interface addresses" );
         }
         int i{ 0 };
-        for ( auto const & ipv4Address : rInterface.ipv4_addresses() )
+        for ( auto const & ipv4Address : rInterface.ipv4Addresses() )
         {
             PyObject * item = convertToPython( ipv4Address );
             if ( PyTuple_SetItem( ipv4Addresses, i++, item ) != 0 )
@@ -190,13 +190,13 @@ convertToPython(
             }
         }
 
-        ipv6Addresses = PyTuple_New( rInterface.ipv6_addresses().size() );
+        ipv6Addresses = PyTuple_New( rInterface.ipv6Addresses().size() );
         if ( ipv6Addresses == NULL )
         {
             throw ::std::runtime_error( "Unable to create tuple of IPv6 interface addresses" );
         }
         i = 0;
-        for ( auto const & ipv6Address : rInterface.ipv6_addresses() )
+        for ( auto const & ipv6Address : rInterface.ipv6Addresses() )
         {
             PyObject * item = convertToPython( ipv6Address );
             if ( PyTuple_SetItem( ipv6Addresses, i++, item ) != 0 )

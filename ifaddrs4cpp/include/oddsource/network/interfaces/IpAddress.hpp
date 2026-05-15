@@ -175,7 +175,7 @@ namespace OddSource::Interfaces
 #endif /* __cplusplus >= 202002L */
         virtual
         ::std::uint16_t
-        maximum_prefix_length() const noexcept = 0;
+        maximumPrefixLength() const noexcept = 0;
 
         [[nodiscard]]
 #if __cplusplus >= 202002L
@@ -183,7 +183,7 @@ namespace OddSource::Interfaces
 #endif /* __cplusplus >= 202002L */
         virtual
         size_t
-        data_length() const noexcept = 0;
+        dataLength() const noexcept = 0;
 
 #ifdef ODDSOURCE_INCLUDE_BOOST
         [[nodiscard]]
@@ -223,7 +223,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_unspecified() const;
+        isUnspecified() const;
 
         /**
          * Indicates whether this address represents the loopback address
@@ -234,7 +234,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_loopback() const;
+        isLoopback() const;
 
         /**
          * Indicates whether this address represents a link-local address
@@ -245,7 +245,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_link_local() const;
+        isLinkLocal() const;
 
         /**
          * Indicates whether this address represents a "private" address,
@@ -261,7 +261,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_private() const;
+        isPrivate() const;
 
         /**
          * Indicates whether this address represents a multicast address
@@ -272,15 +272,15 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_multicast() const;
+        isMulticast() const;
 
         /**
          * Indicates whether this address represents any IANA-reserved
          * address, which could overlap with other flags, such as
-         * is_link_local, is_private, is_multicast, etc. See
+         * isLinkLocal, isPrivate, isMulticast, etc. See
          * https://en.wikipedia.org/wiki/Reserved_IP_addresses for more
          * information about which other addresses are considered "reserved"
-         * that don't already have their own is_* methods here. Note: An
+         * that don't already have their own is* methods here. Note: An
          * IP address's being reserved does not indicate that it cannot be
          * used.
          *
@@ -289,12 +289,12 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_reserved() const;
+        isReserved() const;
 
         [[nodiscard]]
         OddSource_Inline
-        ::std::optional<MulticastScope> const &
-        multicast_scope() const;
+        ::std::optional< MulticastScope > const &
+        multicastScope() const;
 
         [[nodiscard]]
         static
@@ -320,13 +320,13 @@ namespace OddSource::Interfaces
             IPAddress && other ) noexcept;
 
         ::std::string _representation;
-        bool _is_unspecified = false;
-        bool _is_loopback = false;
-        bool _is_link_local = false;
-        bool _is_private = false;
-        bool _is_multicast = false;
-        bool _is_reserved = false;
-        ::std::optional< MulticastScope > _multicast_scope;
+        bool _isUnspecified = false;
+        bool _isLoopback = false;
+        bool _isLinkLocal = false;
+        bool _isPrivate = false;
+        bool _isMulticast = false;
+        bool _isReserved = false;
+        ::std::optional< MulticastScope > _multicastScope;
     };
 
     class OddSource_Export IPv4Address : public IPAddress
@@ -391,7 +391,7 @@ namespace OddSource::Interfaces
         constexpr
 #endif /* __cplusplus >= 202002L */
         ::std::uint16_t
-        maximum_prefix_length() const noexcept override;
+        maximumPrefixLength() const noexcept override;
 
         [[nodiscard]]
         inline
@@ -399,7 +399,7 @@ namespace OddSource::Interfaces
         constexpr
 #endif /* __cplusplus >= 202002L */
         size_t
-        data_length() const noexcept override;
+        dataLength() const noexcept override;
 
 #ifdef ODDSOURCE_INCLUDE_BOOST
         [[nodiscard]]
@@ -447,8 +447,8 @@ namespace OddSource::Interfaces
 
     struct OddSource_Export v6Scope
     {
-        ::std::optional< ::std::uint32_t > scope_id = ::std::nullopt;
-        ::std::optional< ::std::string > scope_name = ::std::nullopt;
+        ::std::optional< ::std::uint32_t > scopeId = ::std::nullopt;
+        ::std::optional< ::std::string > scopeName = ::std::nullopt;
     };
 
     class OddSource_Export IPv6Address : public IPAddress
@@ -545,7 +545,7 @@ namespace OddSource::Interfaces
         constexpr
 #endif /* __cplusplus >= 202002L */
         ::std::uint16_t
-        maximum_prefix_length() const noexcept override;
+        maximumPrefixLength() const noexcept override;
 
         [[nodiscard]]
         inline
@@ -553,7 +553,7 @@ namespace OddSource::Interfaces
         constexpr
 #endif /* __cplusplus >= 202002L */
         size_t
-        data_length() const noexcept override;
+        dataLength() const noexcept override;
 
 #ifdef ODDSOURCE_INCLUDE_BOOST
         [[nodiscard]]
@@ -603,7 +603,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_unique_local() const;
+        isUniqueLocal() const;
 
         /**
          * Indicates whether this address represents a deprecated site-local
@@ -614,7 +614,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_site_local() const;
+        isSiteLocal() const;
 
         /**
          * Indicates whether this address represents an IPv4-mapped address
@@ -625,7 +625,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_v4_mapped() const;
+        isV4Mapped() const;
 
         /**
          * Indicates whether this address represents an IPv4-translated address
@@ -636,7 +636,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_v4_translated() const;
+        isV4Translated() const;
 
         /**
          * Indicates whether this address represents a deprecated IPv4-compatible
@@ -649,7 +649,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_v4_compatible() const;
+        isV4Compatible() const;
 
         /**
          * Indicates whether this address represents a deprecated 6to4 address
@@ -660,42 +660,42 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_6to4() const;
+        is6to4() const;
 
         [[nodiscard]]
         OddSource_Inline
         bool
-        has_scope_id() const;
+        hasScopeId() const;
 
         [[nodiscard]]
         OddSource_Inline
         ::std::string
-        without_scope_id() const;
+        withoutScopeId() const;
 
         [[nodiscard]]
         OddSource_Inline
         ::std::optional<::std::uint32_t> const &
-        scope_id() const;
+        scopeId() const;
 
         [[nodiscard]]
         OddSource_Inline
         ::std::optional<::std::string> const &
-        scope_name() const;
+        scopeName() const;
 
         [[nodiscard]]
         OddSource_Inline
         ::std::optional<::std::string>
-        scope_name_or_id() const;
+        scopeNameOrId() const;
 
         [[nodiscard]]
         OddSource_Inline
         ::std::optional<::std::string>
-        scope_id_or_name() const;
+        scopeIdOrName() const;
 
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_multicast_flag_enabled(
+        isMulticastFlagEnabled(
             MulticastV6Flag const & flag ) const;
 
         [[nodiscard]]
@@ -728,15 +728,15 @@ namespace OddSource::Interfaces
             ::std::optional< v6Scope > && scope );
 
         ::std::unique_ptr< in6_addr const > _data;
-        ::std::optional< v6Scope > const _scope;
-        ::std::string const _without_scope;
-        bool _is_unique_local = false;
-        bool _is_site_local = false;
-        bool _is_v4_mapped = false;
-        bool _is_v4_compatible = false;
-        bool _is_v4_translated = false;
-        bool _is_6to4 = false;
-        ::std::optional< ::std::uint8_t > _multicast_flags;
+        ::std::optional< v6Scope > _scope;
+        ::std::string _withoutScope;
+        bool _isUniqueLocal = false;
+        bool _isSiteLocal = false;
+        bool _isV4Mapped = false;
+        bool _isV4Compatible = false;
+        bool _isV4Translated = false;
+        bool _is6to4 = false;
+        ::std::optional< ::std::uint8_t > _multicastFlags;
     };
 
     [[nodiscard]]

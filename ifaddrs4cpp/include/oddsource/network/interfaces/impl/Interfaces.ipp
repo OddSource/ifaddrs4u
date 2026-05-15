@@ -157,7 +157,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     bool
     InterfaceBrowser::
-    for_each_interface(
+    forEachInterface(
         ::std::function< bool( Interface const & ) > doThis ) const
     {
         return ::std::all_of(
@@ -171,7 +171,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     ::std::list< ::std::shared_ptr< Interface const > > const &
     InterfaceBrowser::
-    get_interfaces() const
+    getInterfaces() const
     {
         return this->_interfaces;
     }
@@ -179,7 +179,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     ::std::shared_ptr< Interface const >
     InterfaceBrowser::
-    get_interface(
+    getInterface(
         ::std::uint32_t index ) const
     {
         if ( auto const found( this->_indexToInterface.find( index ) ); found != this->_indexToInterface.end() )
@@ -206,7 +206,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     ::std::shared_ptr< Interface const >
     InterfaceBrowser::
-    get_interface(
+    getInterface(
         ::std::string_view name ) const
     {
         if ( auto const found( this->_nameToInterface.find( std::string( name ) ) );
@@ -871,7 +871,7 @@ namespace
         }
 
         static constexpr ::std::uint32_t const flags{ 0 };
-        if ( rInterface.is_flag_enabled( InterfaceFlag::BroadcastAddressSet ) && pIfAddr->ifa_broadaddr )
+        if ( rInterface.isFlagEnabled( InterfaceFlag::BroadcastAddressSet ) && pIfAddr->ifa_broadaddr )
         {
             auto broadcastAddress( reinterpret_cast< sockaddr_in * >( pIfAddr->ifa_broadaddr ) );
             addIPv4Address( rInterface, InterfaceIPv4Address(
@@ -881,7 +881,7 @@ namespace
                 Broadcast,
                 IPv4Address( &broadcastAddress->sin_addr ) ) );
         }
-        else if( rInterface.is_flag_enabled( InterfaceFlag::IsPointToPoint ) && pIfAddr->ifa_dstaddr )
+        else if( rInterface.isFlagEnabled( InterfaceFlag::IsPointToPoint ) && pIfAddr->ifa_dstaddr )
         {
             auto pointToPointDestination( reinterpret_cast< sockaddr_in * >( pIfAddr->ifa_dstaddr ) );
             addIPv4Address( rInterface, InterfaceIPv4Address(

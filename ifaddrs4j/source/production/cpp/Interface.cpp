@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,23 +106,23 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::InterfaceIPAddress<IPAddres
 
     jint flags(interface_address.flags());
 
-    jobject prefix_length(Boxers::Short(env, interface_address.prefix_length()));
+    jobject prefixLength(Boxers::Short(env, interface_address.prefixLength()));
     if (env->ExceptionOccurred() != NULL)
     {
         return NULL;
     }
 
     jobject broadcast = NULL;
-    if (interface_address.broadcast_address())
+    if (interface_address.broadcastAddress())
     {
-        broadcast = convert_to_java(env, *interface_address.broadcast_address());
+        broadcast = convert_to_java(env, *interface_address.broadcastAddress());
         IF_NULL_RETURN_NULL(broadcast)
     }
 
     jobject point_to_point = NULL;
-    if (interface_address.point_to_point_destination())
+    if (interface_address.pointToPointDestinationAddress())
     {
-        point_to_point = convert_to_java(env, *interface_address.point_to_point_destination());
+        point_to_point = convert_to_java(env, *interface_address.pointToPointDestinationAddress());
         IF_NULL_RETURN_NULL(point_to_point)
     }
 
@@ -130,7 +130,7 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::InterfaceIPAddress<IPAddres
     IF_NULL_RETURN_NULL(JInterfaceIPAddress)
     auto constructor(JCache::m(env, JInterfaceIPAddress, "InterfaceIPAddress", "InterfaceIPAddress(...)"));
     IF_NULL_RETURN_NULL(constructor)
-    return env->NewObject(JInterfaceIPAddress, constructor, address, flags, prefix_length, broadcast, point_to_point);
+    return env->NewObject(JInterfaceIPAddress, constructor, address, flags, prefixLength, broadcast, point_to_point);
 }
 
 /**
@@ -160,33 +160,33 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & iface)
         return NULL;
     }
 
-    jobject mac_address = NULL;
-    if (iface.mac_address())
+    jobject macAddress = NULL;
+    if (iface.macAddress())
     {
-        mac_address = convert_to_java(env, *iface.mac_address());
-        IF_NULL_RETURN_NULL(mac_address)
+        macAddress = convert_to_java(env, *iface.macAddress());
+        IF_NULL_RETURN_NULL(macAddress)
     }
 
-    ArrayList ipv4_addresses(env, (jint) iface.ipv4_addresses().size());
-    ArrayList ipv6_addresses(env, (jint) iface.ipv6_addresses().size());
+    ArrayList ipv4Addresses(env, (jint) iface.ipv4Addresses().size());
+    ArrayList ipv6Addresses(env, (jint) iface.ipv6Addresses().size());
 
-    auto v4(iface.ipv4_addresses());
+    auto v4(iface.ipv4Addresses());
     for (auto const & address : v4)
     {
         auto converted(convert_to_java(env, address));
         IF_NULL_RETURN_NULL(converted);
-        if (!ipv4_addresses.add(converted))
+        if (!ipv4Addresses.add(converted))
         {
             return NULL;
         }
     }
 
-    auto v6(iface.ipv6_addresses());
+    auto v6(iface.ipv6Addresses());
     for (auto const & address : v6)
     {
         auto converted(convert_to_java(env, address));
         IF_NULL_RETURN_NULL(converted);
-        if (!ipv6_addresses.add(converted))
+        if (!ipv6Addresses.add(converted))
         {
             return NULL;
         }
@@ -203,5 +203,5 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & iface)
 #ifdef ODDSOURCE_IS_WINDOWS
         windows_uuid,
 #endif /* ODDSOURCE_IS_WINDOWS */
-        flags, mtu, mac_address, ipv4_addresses.unwrap(), ipv6_addresses.unwrap());
+        flags, mtu, macAddress, ipv4Addresses.unwrap(), ipv6Addresses.unwrap());
 }

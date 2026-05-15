@@ -245,7 +245,7 @@ namespace OddSource::Interfaces
     OddSource_Export
     ::std::string
     toString(
-        InterfaceFlag const & version );
+        InterfaceFlag const & flag );
 
     OddSource_Export
     ::std::ostream &
@@ -271,7 +271,7 @@ namespace OddSource::Interfaces
     class OddSource_Export InterfaceIPAddress
     {
         static_assert( ::std::is_base_of_v< IPAddress, IPAddressT >,
-                       "the template parameter IPAddressT must derive from IPAddress.");
+                       "the template parameter IPAddressT must derive from IPAddress." );
 
     public:
         InterfaceIPAddress(
@@ -316,19 +316,19 @@ namespace OddSource::Interfaces
 
         [[nodiscard]]
         ::std::optional< ::std::uint8_t >
-        prefix_length() const;
+        prefixLength() const;
 
         [[nodiscard]]
         ::std::optional< IPAddressT const > const &
-        broadcast_address() const;
+        broadcastAddress() const;
 
         [[nodiscard]]
         ::std::optional< IPAddressT const > const &
-        point_to_point_destination() const;
+        pointToPointDestinationAddress() const;
 
         [[nodiscard]]
         bool
-        is_flag_enabled(
+        isFlagEnabled(
             InterfaceIPAddressFlag flag ) const;
 
         [[nodiscard]]
@@ -345,11 +345,11 @@ namespace OddSource::Interfaces
         operator!=(
             InterfaceIPAddress< IPAddressT > const & other ) const;
     private:
-        IPAddressT const _address;
-        ::std::optional< ::std::uint8_t > const _prefixLength;
-        ::std::optional< IPAddressT const > const _broadcast;
-        ::std::optional< IPAddressT const > const _pointToPointDestination;
-        ::std::uint16_t const _flags;
+        IPAddressT _address;
+        ::std::optional< ::std::uint8_t > _prefixLength;
+        ::std::optional< IPAddressT const > _broadcast;
+        ::std::optional< IPAddressT const > _pointToPointDestination;
+        ::std::uint16_t _flags;
     };
 
     template class OddSource_Export InterfaceIPAddress< IPv4Address >;
@@ -421,17 +421,17 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_up() const;
+        isUp() const;
 
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_loopback() const;
+        isLoopback() const;
 
         [[nodiscard]]
         OddSource_Inline
         bool
-        is_flag_enabled(
+        isFlagEnabled(
             InterfaceFlag const & flag ) const;
 
         [[nodiscard]]
@@ -447,22 +447,22 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        has_mac_address() const;
+        hasMacAddress() const;
 
         [[nodiscard]]
         OddSource_Inline
         ::std::optional< MacAddress const > const &
-        mac_address() const;
+        macAddress() const;
 
         [[nodiscard]]
         OddSource_Inline
         ::std::vector< InterfaceIPv4Address > const &
-        ipv4_addresses() const;
+        ipv4Addresses() const;
 
         [[nodiscard]]
         OddSource_Inline
         ::std::vector< InterfaceIPv6Address > const &
-        ipv6_addresses() const;
+        ipv6Addresses() const;
 
         [[nodiscard]]
         static

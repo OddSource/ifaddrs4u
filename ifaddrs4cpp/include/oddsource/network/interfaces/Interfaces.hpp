@@ -86,18 +86,18 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         bool
-        for_each_interface(
+        forEachInterface(
             ::std::function< bool( Interface const & ) > doThis ) const;
 
         [[nodiscard]]
         OddSource_Inline
         ::std::list< ::std::shared_ptr< Interface const > > const &
-        get_interfaces() const;
+        getInterfaces() const;
 
         [[nodiscard]]
         OddSource_Inline
         ::std::shared_ptr< Interface const >
-        get_interface(
+        getInterface(
             ::std::uint32_t index ) const;
 
         [[nodiscard]]
@@ -109,7 +109,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         OddSource_Inline
         ::std::shared_ptr< Interface const >
-        get_interface(
+        getInterface(
             ::std::string_view name ) const;
 
         [[nodiscard]]

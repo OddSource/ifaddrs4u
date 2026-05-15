@@ -91,7 +91,7 @@ namespace OddSource::Interfaces
 #endif /* __cplusplus >= 202002L */
     ::std::uint16_t
     IPv4Address::
-    maximum_prefix_length() const noexcept
+    maximumPrefixLength() const noexcept
     {
         return 32;
     }
@@ -102,7 +102,7 @@ namespace OddSource::Interfaces
 #endif /* __cplusplus >= 202002L */
     size_t
     IPv4Address::
-    data_length() const noexcept
+    dataLength() const noexcept
     {
         return 4;
     }
@@ -157,7 +157,7 @@ namespace OddSource::Interfaces
 #endif /* __cplusplus >= 202002L */
     ::std::uint16_t
     IPv6Address::
-    maximum_prefix_length() const noexcept
+    maximumPrefixLength() const noexcept
     {
         return 128;
     }
@@ -168,7 +168,7 @@ namespace OddSource::Interfaces
 #endif /* __cplusplus >= 202002L */
     size_t
     IPv6Address::
-    data_length() const noexcept
+    dataLength() const noexcept
     {
         return 16;
     }

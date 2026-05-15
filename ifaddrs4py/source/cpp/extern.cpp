@@ -111,7 +111,7 @@ _get_interfaces(
 {
     try
     {
-        auto const interfaces( browser.get_interfaces() );
+        auto const interfaces( browser.getInterfaces() );
 
         PyObject * tuple = PyTuple_New( interfaces.size() );
         if( tuple == NULL )
@@ -249,7 +249,7 @@ namespace
             return !returnError;
         };
 
-        std::ignore = self->browser->for_each_interface( doThis );
+        std::ignore = self->browser->forEachInterface( doThis );
 
         if ( !returnError && self->interfaces == NULL )
         {
@@ -350,7 +350,7 @@ InterfaceBrowser___len__(
 
     try
     {
-        return self->browser->get_interfaces().size();
+        return self->browser->getInterfaces().size();
     }
     CATCH_STD_EXCEPTION_SET_ERROR_IF_NOT_SET( PyExc_RuntimeError, return -1 )
 }

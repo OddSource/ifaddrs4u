@@ -87,7 +87,7 @@ public:
         assert_equals( static_cast< ::std::string >( address ), "192.0.2.33" );
 
         assert_equals( address.version(), IPAddressVersion::IPv4 );
-        assert_equals( address.maximum_prefix_length(), 32 );
+        assert_equals( address.maximumPrefixLength(), 32 );
 
         auto owned( static_cast< in_addr const * >( address ) );
         auto bytes1( reinterpret_cast< uint8_t const * >( owned ) );
@@ -111,130 +111,130 @@ public:
     test_unspecified_address()
     {
         IPv4Address const address( "0.0.0.0" );
-        assert_that( address.is_unspecified(), "0.0.0.0 should be unspecified." );
-        assert_that( address.is_reserved(), "0.0.0.0 should be reserved." );
-        assert_that( !address.is_private(), "0.0.0.0 should not be private." );
-        assert_that( !address.is_loopback(), "0.0.0.0 should not be a loopback." );
-        assert_that( !address.is_link_local(), "0.0.0.0 should not be link-local." );
-        assert_that( !address.is_multicast(), "0.0.0.0 should not be multicast." );
+        assert_that( address.isUnspecified(), "0.0.0.0 should be unspecified." );
+        assert_that( address.isReserved(), "0.0.0.0 should be reserved." );
+        assert_that( !address.isPrivate(), "0.0.0.0 should not be private." );
+        assert_that( !address.isLoopback(), "0.0.0.0 should not be a loopback." );
+        assert_that( !address.isLinkLocal(), "0.0.0.0 should not be link-local." );
+        assert_that( !address.isMulticast(), "0.0.0.0 should not be multicast." );
 
-        assert_that( !IPv4Address( "0.0.0.1" ).is_unspecified(), "0.0.0.1 should not be unspecified." );
+        assert_that( !IPv4Address( "0.0.0.1" ).isUnspecified(), "0.0.0.1 should not be unspecified." );
     }
 
     void
     test_loopback_addresses()
     {
         IPv4Address const address( "127.0.0.0" );
-        assert_that( address.is_loopback(), "127.0.0.0 should be a loopback." );
-        assert_that( address.is_reserved(), "127.0.0.0 should be reserved." );
-        assert_that( !address.is_private(), "127.0.0.0 should not be private." );
-        assert_that( !address.is_unspecified(), "127.0.0.0 should not be a unspecified." );
-        assert_that( !address.is_link_local(), "127.0.0.0 should not be link-local." );
-        assert_that( !address.is_multicast(), "127.0.0.0 should not be multicast." );
+        assert_that( address.isLoopback(), "127.0.0.0 should be a loopback." );
+        assert_that( address.isReserved(), "127.0.0.0 should be reserved." );
+        assert_that( !address.isPrivate(), "127.0.0.0 should not be private." );
+        assert_that( !address.isUnspecified(), "127.0.0.0 should not be a unspecified." );
+        assert_that( !address.isLinkLocal(), "127.0.0.0 should not be link-local." );
+        assert_that( !address.isMulticast(), "127.0.0.0 should not be multicast." );
 
-        assert_that( IPv4Address( "127.0.0.1" ).is_loopback(), "127.0.0.1 should be a loopback." );
-        assert_that( IPv4Address( "127.0.0.124" ).is_loopback(), "127.0.0.124 should be a loopback." );
-        assert_that( IPv4Address( "127.0.0.255" ).is_loopback(), "127.0.0.255 should be a loopback." );
-        assert_that( IPv4Address( "127.255.255.255" ).is_loopback(), "127.255.255.255 should be a loopback." );
+        assert_that( IPv4Address( "127.0.0.1" ).isLoopback(), "127.0.0.1 should be a loopback." );
+        assert_that( IPv4Address( "127.0.0.124" ).isLoopback(), "127.0.0.124 should be a loopback." );
+        assert_that( IPv4Address( "127.0.0.255" ).isLoopback(), "127.0.0.255 should be a loopback." );
+        assert_that( IPv4Address( "127.255.255.255" ).isLoopback(), "127.255.255.255 should be a loopback." );
     }
 
     void
     test_link_local_addresses()
     {
         IPv4Address const address( "169.254.0.0" );
-        assert_that( address.is_link_local(), "169.254.0.0 should be link-local." );
-        assert_that( address.is_reserved(), "169.254.0.0 should be reserved." );
-        assert_that( !address.is_private(), "169.254.0.0 should not be private." );
-        assert_that( !address.is_unspecified(), "169.254.0.0 should not be unspecified." );
-        assert_that( !address.is_loopback(), "169.254.0.0 should not be a loopback." );
-        assert_that( !address.is_multicast(), "169.254.0.0 should not be multicast." );
+        assert_that( address.isLinkLocal(), "169.254.0.0 should be link-local." );
+        assert_that( address.isReserved(), "169.254.0.0 should be reserved." );
+        assert_that( !address.isPrivate(), "169.254.0.0 should not be private." );
+        assert_that( !address.isUnspecified(), "169.254.0.0 should not be unspecified." );
+        assert_that( !address.isLoopback(), "169.254.0.0 should not be a loopback." );
+        assert_that( !address.isMulticast(), "169.254.0.0 should not be multicast." );
 
-        assert_that( IPv4Address( "169.254.0.1" ).is_link_local(), "169.254.0.1 should be link-local." );
-        assert_that( IPv4Address( "169.254.0.124" ).is_link_local(), "169.254.0.124 should be link-local." );
-        assert_that( IPv4Address( "169.254.0.255" ).is_link_local(), "169.254.0.255 should be link-local." );
-        assert_that( IPv4Address( "169.254.255.255" ).is_link_local(), "169.254.255.255 should be link-local." );
+        assert_that( IPv4Address( "169.254.0.1" ).isLinkLocal(), "169.254.0.1 should be link-local." );
+        assert_that( IPv4Address( "169.254.0.124" ).isLinkLocal(), "169.254.0.124 should be link-local." );
+        assert_that( IPv4Address( "169.254.0.255" ).isLinkLocal(), "169.254.0.255 should be link-local." );
+        assert_that( IPv4Address( "169.254.255.255" ).isLinkLocal(), "169.254.255.255 should be link-local." );
     }
 
     void
     test_multicast_addresses()
     {
         IPv4Address const address( "224.0.0.0" );
-        assert_that( address.is_multicast(), "224.0.0.0 should be multicast." );
-        assert_that( address.is_reserved(), "224.0.0.0 should be reserved." );
-        assert_that( !address.is_private(), "224.0.0.0 should not be private." );
-        assert_that( !address.is_unspecified(), "224.0.0.0 should not be unspecified." );
-        assert_that( !address.is_loopback(), "224.0.0.0 should not be a loopback." );
-        assert_that( !address.is_link_local(), "224.0.0.0 should not be link-local." );
+        assert_that( address.isMulticast(), "224.0.0.0 should be multicast." );
+        assert_that( address.isReserved(), "224.0.0.0 should be reserved." );
+        assert_that( !address.isPrivate(), "224.0.0.0 should not be private." );
+        assert_that( !address.isUnspecified(), "224.0.0.0 should not be unspecified." );
+        assert_that( !address.isLoopback(), "224.0.0.0 should not be a loopback." );
+        assert_that( !address.isLinkLocal(), "224.0.0.0 should not be link-local." );
 
-        assert_that( IPv4Address( "224.0.0.1" ).is_multicast(), "224.0.0.1 should be multicast." );
-        assert_that( IPv4Address( "224.0.0.124" ).is_multicast(), "224.0.0.124 should be multicast." );
-        assert_that( IPv4Address( "224.0.0.255" ).is_multicast(), "224.0.0.255 should be multicast." );
-        assert_that( IPv4Address( "239.0.0.1" ).is_multicast(), "239.0.0.1 should be multicast." );
-        assert_that( IPv4Address( "239.255.255.255" ).is_multicast(), "239.255.255.255 should be multicast." );
+        assert_that( IPv4Address( "224.0.0.1" ).isMulticast(), "224.0.0.1 should be multicast." );
+        assert_that( IPv4Address( "224.0.0.124" ).isMulticast(), "224.0.0.124 should be multicast." );
+        assert_that( IPv4Address( "224.0.0.255" ).isMulticast(), "224.0.0.255 should be multicast." );
+        assert_that( IPv4Address( "239.0.0.1" ).isMulticast(), "239.0.0.1 should be multicast." );
+        assert_that( IPv4Address( "239.255.255.255" ).isMulticast(), "239.255.255.255 should be multicast." );
 
         assert_that(
-            !IPv4Address( "192.168.0.1" ).multicast_scope(),
+            !IPv4Address( "192.168.0.1" ).multicastScope(),
             "192.168.0.1 should not have a multicast scope." );
-        assert_equals( *IPv4Address( "224.0.0.0" ).multicast_scope(), MulticastScope::LinkLocal );
-        assert_equals( *IPv4Address( "224.0.0.255" ).multicast_scope(), MulticastScope::LinkLocal );
-        assert_equals( *IPv4Address( "224.0.1.0" ).multicast_scope(), MulticastScope::Global );
-        assert_equals( *IPv4Address( "238.255.255.255" ).multicast_scope(), MulticastScope::Global );
-        assert_equals( *IPv4Address( "239.0.0.0" ).multicast_scope(), MulticastScope::Unassigned );
-        assert_equals( *IPv4Address( "239.191.255.255" ).multicast_scope(), MulticastScope::Unassigned );
-        assert_equals( *IPv4Address( "239.192.0.0" ).multicast_scope(), MulticastScope::OrganizationLocal );
-        assert_equals( *IPv4Address( "239.192.255.255" ).multicast_scope(), MulticastScope::OrganizationLocal );
-        assert_equals( *IPv4Address( "239.195.255.255" ).multicast_scope(), MulticastScope::OrganizationLocal );
-        assert_equals( *IPv4Address( "239.196.0.0" ).multicast_scope(), MulticastScope::Unassigned );
-        assert_equals( *IPv4Address( "239.254.255.255" ).multicast_scope(), MulticastScope::Unassigned );
-        assert_equals( *IPv4Address( "239.255.0.0" ).multicast_scope(), MulticastScope::RealmLocal );
-        assert_equals( *IPv4Address( "239.255.255.255" ).multicast_scope(), MulticastScope::RealmLocal );
+        assert_equals( *IPv4Address( "224.0.0.0" ).multicastScope(), MulticastScope::LinkLocal );
+        assert_equals( *IPv4Address( "224.0.0.255" ).multicastScope(), MulticastScope::LinkLocal );
+        assert_equals( *IPv4Address( "224.0.1.0" ).multicastScope(), MulticastScope::Global );
+        assert_equals( *IPv4Address( "238.255.255.255" ).multicastScope(), MulticastScope::Global );
+        assert_equals( *IPv4Address( "239.0.0.0" ).multicastScope(), MulticastScope::Unassigned );
+        assert_equals( *IPv4Address( "239.191.255.255" ).multicastScope(), MulticastScope::Unassigned );
+        assert_equals( *IPv4Address( "239.192.0.0" ).multicastScope(), MulticastScope::OrganizationLocal );
+        assert_equals( *IPv4Address( "239.192.255.255" ).multicastScope(), MulticastScope::OrganizationLocal );
+        assert_equals( *IPv4Address( "239.195.255.255" ).multicastScope(), MulticastScope::OrganizationLocal );
+        assert_equals( *IPv4Address( "239.196.0.0" ).multicastScope(), MulticastScope::Unassigned );
+        assert_equals( *IPv4Address( "239.254.255.255" ).multicastScope(), MulticastScope::Unassigned );
+        assert_equals( *IPv4Address( "239.255.0.0" ).multicastScope(), MulticastScope::RealmLocal );
+        assert_equals( *IPv4Address( "239.255.255.255" ).multicastScope(), MulticastScope::RealmLocal );
     }
 
     void
     test_private_addresses()
     {
         IPv4Address const address( "10.0.0.0" );
-        assert_that( address.is_private(), "10.0.0.0 should be private" );
-        assert_that( address.is_reserved(), "10.0.0.0 should be reserved." );
-        assert_that( !address.is_multicast(), "10.0.0.0 should not be multicast." );
-        assert_that( !address.is_unspecified(), "10.0.0.0 should not be unspecified." );
-        assert_that( !address.is_loopback(), "10.0.0.0 should not be a loopback." );
-        assert_that( !address.is_link_local(), "10.0.0.0 should not be link-local." );
+        assert_that( address.isPrivate(), "10.0.0.0 should be private" );
+        assert_that( address.isReserved(), "10.0.0.0 should be reserved." );
+        assert_that( !address.isMulticast(), "10.0.0.0 should not be multicast." );
+        assert_that( !address.isUnspecified(), "10.0.0.0 should not be unspecified." );
+        assert_that( !address.isLoopback(), "10.0.0.0 should not be a loopback." );
+        assert_that( !address.isLinkLocal(), "10.0.0.0 should not be link-local." );
 
-        assert_that( !IPv4Address( "9.255.255.255" ).is_private(), "9.255.255.255 should not be private." );
-        assert_that( IPv4Address( "10.0.0.1" ).is_private(), "10.0.0.1 should be private." );
-        assert_that( IPv4Address( "10.20.30.75" ).is_private(), "10.20.30.75 should be private." );
-        assert_that( IPv4Address( "10.255.255.255" ).is_private(), "10.255.255.255 should be private." );
-        assert_that( !IPv4Address( "11.0.0.0" ).is_private(), "11.0.0.0 should be not private." );
+        assert_that( !IPv4Address( "9.255.255.255" ).isPrivate(), "9.255.255.255 should not be private." );
+        assert_that( IPv4Address( "10.0.0.1" ).isPrivate(), "10.0.0.1 should be private." );
+        assert_that( IPv4Address( "10.20.30.75" ).isPrivate(), "10.20.30.75 should be private." );
+        assert_that( IPv4Address( "10.255.255.255" ).isPrivate(), "10.255.255.255 should be private." );
+        assert_that( !IPv4Address( "11.0.0.0" ).isPrivate(), "11.0.0.0 should be not private." );
 
-        assert_that( !IPv4Address( "100.63.255.255" ).is_private(), "100.63.255.255 should not be private." );
-        assert_that( IPv4Address( "100.64.0.0" ).is_private(), "100.64.0.0 should be private." );
-        assert_that( IPv4Address( "100.99.30.15" ).is_private(), "100.99.30.15 should be private." );
-        assert_that( IPv4Address( "100.127.255.255" ).is_private(), "100.127.255.255 should be private." );
-        assert_that( !IPv4Address( "100.128.0.0" ).is_private(), "100.128.0.0 should not be private." );
+        assert_that( !IPv4Address( "100.63.255.255" ).isPrivate(), "100.63.255.255 should not be private." );
+        assert_that( IPv4Address( "100.64.0.0" ).isPrivate(), "100.64.0.0 should be private." );
+        assert_that( IPv4Address( "100.99.30.15" ).isPrivate(), "100.99.30.15 should be private." );
+        assert_that( IPv4Address( "100.127.255.255" ).isPrivate(), "100.127.255.255 should be private." );
+        assert_that( !IPv4Address( "100.128.0.0" ).isPrivate(), "100.128.0.0 should not be private." );
 
-        assert_that( !IPv4Address( "172.15.255.255" ).is_private(), "172.15.255.255 should not be private." );
-        assert_that( IPv4Address( "172.16.0.0" ).is_private(), "172.16.0.0 should be private." );
-        assert_that( IPv4Address( "172.24.5.5" ).is_private(), "172.24.5.5 should be private." );
-        assert_that( IPv4Address( "172.31.255.255" ).is_private(), "172.31.255.255 should be private." );
-        assert_that( !IPv4Address( "172.32.0.0" ).is_private(), "172.32.0.0 should not be private." );
+        assert_that( !IPv4Address( "172.15.255.255" ).isPrivate(), "172.15.255.255 should not be private." );
+        assert_that( IPv4Address( "172.16.0.0" ).isPrivate(), "172.16.0.0 should be private." );
+        assert_that( IPv4Address( "172.24.5.5" ).isPrivate(), "172.24.5.5 should be private." );
+        assert_that( IPv4Address( "172.31.255.255" ).isPrivate(), "172.31.255.255 should be private." );
+        assert_that( !IPv4Address( "172.32.0.0" ).isPrivate(), "172.32.0.0 should not be private." );
 
-        assert_that( !IPv4Address( "191.255.255.255" ).is_private(), "191.255.255.255 should not be private." );
-        assert_that( IPv4Address( "192.0.0.0" ).is_private(), "192.0.0.0 should be private." );
-        assert_that( IPv4Address( "192.0.0.255" ).is_private(), "192.0.0.255 should be private." );
-        assert_that( !IPv4Address( "192.0.1.0" ).is_private(), "192.0.1.0 should not be private." );
+        assert_that( !IPv4Address( "191.255.255.255" ).isPrivate(), "191.255.255.255 should not be private." );
+        assert_that( IPv4Address( "192.0.0.0" ).isPrivate(), "192.0.0.0 should be private." );
+        assert_that( IPv4Address( "192.0.0.255" ).isPrivate(), "192.0.0.255 should be private." );
+        assert_that( !IPv4Address( "192.0.1.0" ).isPrivate(), "192.0.1.0 should not be private." );
 
-        assert_that( !IPv4Address( "192.167.255.255" ).is_private(), "192.167.255.255 should not be private." );
-        assert_that( IPv4Address( "192.168.0.0" ).is_private(), "192.168.0.0 should be private." );
-        assert_that( IPv4Address( "192.168.255.255" ).is_private(), "192.168.255.255 should be private." );
-        assert_that( !IPv4Address( "192.169.0.0" ).is_private(), "192.169.0.0 should not be private." );
+        assert_that( !IPv4Address( "192.167.255.255" ).isPrivate(), "192.167.255.255 should not be private." );
+        assert_that( IPv4Address( "192.168.0.0" ).isPrivate(), "192.168.0.0 should be private." );
+        assert_that( IPv4Address( "192.168.255.255" ).isPrivate(), "192.168.255.255 should be private." );
+        assert_that( !IPv4Address( "192.169.0.0" ).isPrivate(), "192.169.0.0 should not be private." );
 
-        assert_that( !IPv4Address( "198.17.255.255" ).is_private(), "198.17.255.255 should not be private." );
-        assert_that( IPv4Address( "198.18.0.0" ).is_private(), "198.18.0.0 should be private." );
-        assert_that( IPv4Address( "198.18.255.255" ).is_private(), "198.18.255.255 should be private." );
-        assert_that( IPv4Address( "198.19.0.0" ).is_private(), "198.19.0.0 should be private." );
-        assert_that( IPv4Address( "198.19.255.255" ).is_private(), "198.19.255.255 should be private." );
-        assert_that( !IPv4Address( "198.20.0.0" ).is_private(), "198.20.0.0 should not be private." );
+        assert_that( !IPv4Address( "198.17.255.255" ).isPrivate(), "198.17.255.255 should not be private." );
+        assert_that( IPv4Address( "198.18.0.0" ).isPrivate(), "198.18.0.0 should be private." );
+        assert_that( IPv4Address( "198.18.255.255" ).isPrivate(), "198.18.255.255 should be private." );
+        assert_that( IPv4Address( "198.19.0.0" ).isPrivate(), "198.19.0.0 should be private." );
+        assert_that( IPv4Address( "198.19.255.255" ).isPrivate(), "198.19.255.255 should be private." );
+        assert_that( !IPv4Address( "198.20.0.0" ).isPrivate(), "198.20.0.0 should not be private." );
     }
 
     void
@@ -252,12 +252,12 @@ public:
         for ( auto const & test : tests )
         {
             IPv4Address const address( test );
-            assert_that( address.is_reserved(), test + " should be reserved." );
-            assert_that( !address.is_private(), test + " should not be private" );
-            assert_that( !address.is_multicast(), test + " should not be multicast." );
-            assert_that( !address.is_unspecified(), test + " should not be unspecified." );
-            assert_that( !address.is_loopback(), test + " should not be a loopback." );
-            assert_that( !address.is_link_local(), test + " should not be link-local." );
+            assert_that( address.isReserved(), test + " should be reserved." );
+            assert_that( !address.isPrivate(), test + " should not be private" );
+            assert_that( !address.isMulticast(), test + " should not be multicast." );
+            assert_that( !address.isUnspecified(), test + " should not be unspecified." );
+            assert_that( !address.isLoopback(), test + " should not be a loopback." );
+            assert_that( !address.isLinkLocal(), test + " should not be link-local." );
         }
     }
 
@@ -291,13 +291,13 @@ public:
         auto pAddress( IPAddress::create( "43.201.17.9" ) );
         assert_not_that( !pAddress, "The address should not be null." );
         assert_equals( pAddress->version(), IPAddressVersion::IPv4, "The IP address should be IPv4." );
-        assert_equals( pAddress->maximum_prefix_length(), 32, "The maximum prefix length should be 32." );
+        assert_equals( pAddress->maximumPrefixLength(), 32, "The maximum prefix length should be 32." );
         assert_equals( toString( *pAddress ), "43.201.17.9" );
 
         pAddress = IPAddress::create( "2001::faf0:dead:beef:1" );
         assert_not_that( !pAddress, "The address should not be null." );
         assert_equals( pAddress->version(), IPAddressVersion::IPv6, "The IP address should be IPv6." );
-        assert_equals( pAddress->maximum_prefix_length(), 128, "The maximum prefix length should be 128." );
+        assert_equals( pAddress->maximumPrefixLength(), 128, "The maximum prefix length should be 128." );
         assert_equals( toString( *pAddress ), "2001::faf0:dead:beef:1" );
 
         assert_throws_message_contains(

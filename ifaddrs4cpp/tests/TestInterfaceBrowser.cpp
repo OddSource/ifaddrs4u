@@ -40,12 +40,12 @@ public:
         bool nonLoopbackFound{ false };
 
         ::std::cout << "Interface browser output below: " << ::std::endl;
-        assert_that( this->_browser.for_each_interface(
+        assert_that( this->_browser.forEachInterface(
             [ this, &interfacesFound, &loopbackFound, &nonLoopbackFound ]
             ( Interface const & rInterface )
             {
                 ++interfacesFound;
-                if ( rInterface.is_loopback() )
+                if ( rInterface.isLoopback() )
                 {
                     loopbackFound = true;
                 }
@@ -79,7 +79,7 @@ public:
 
 #elif ODDSOURCE_IS_MACOS /* ODDSOURCE_IS_WINDOWS */
 
-        auto const pLo( this->_browser.get_interface( "lo0" ) );
+        auto const pLo( this->_browser.getInterface( "lo0" ) );
         assert_equals( pLo->name(), "lo0" );
         assert_not_that( pLo->friendlyName().empty() );
         assert_not_that( pLo->description().empty() );
@@ -93,7 +93,7 @@ public:
         assert_equals( pLo->description(), lo.description() );
         assert_equals( pLo->index(), lo.index() );
 
-        auto const pEn( this->_browser.get_interface( "en0" ) );
+        auto const pEn( this->_browser.getInterface( "en0" ) );
         assert_equals( pEn->name(), "en0" );
         assert_not_that( pEn->friendlyName().empty() );
         assert_not_that( pEn->description().empty() );
@@ -114,7 +114,7 @@ public:
 #endif /* !ODDSOURCE_IS_WINDOWS && !ODDSOURCE_IS_MACOS */
 
         assert_throws( std::ignore = this->_browser[ "fooBar42" ], ::std::out_of_range );
-        assert_equals( this->_browser.get_interface( "fooBar42" ), nullptr );
+        assert_equals( this->_browser.getInterface( "fooBar42" ), nullptr );
     }
 
     void
@@ -126,7 +126,7 @@ public:
 
 #elif ODDSOURCE_IS_MACOS /* ODDSOURCE_IS_WINDOWS */
 
-        auto const pIf0( this->_browser.get_interface( 1 ) );
+        auto const pIf0( this->_browser.getInterface( 1 ) );
         assert_not_that( pIf0->name().empty() );
         assert_not_that( pIf0->friendlyName().empty() );
         assert_not_that( pIf0->description().empty() );
@@ -139,7 +139,7 @@ public:
         assert_equals( pIf0->friendlyName(), if0.friendlyName() );
         assert_equals( pIf0->description(), if0.description() );
 
-        auto const pIf1( this->_browser.get_interface( 2 ) );
+        auto const pIf1( this->_browser.getInterface( 2 ) );
         assert_not_that( pIf1->name().empty() );
         assert_not_that( pIf1->friendlyName().empty() );
         assert_not_that( pIf1->description().empty() );
@@ -159,7 +159,7 @@ public:
 #endif /* !ODDSOURCE_IS_WINDOWS && !ODDSOURCE_IS_MACOS */
 
         assert_throws( std::ignore = this->_browser[ 4'294'967'294 ], ::std::out_of_range );
-        assert_equals( this->_browser.get_interface( 4'294'967'294 ), nullptr );
+        assert_equals( this->_browser.getInterface( 4'294'967'294 ), nullptr );
     }
 
     void
@@ -170,10 +170,10 @@ public:
         uint32_t interfacesFound{ 0 };
         bool loopbackFound{ false };
         bool nonLoopbackFound{ false };
-        for ( auto const & pInterface : this->_browser.get_interfaces() )
+        for ( auto const & pInterface : this->_browser.getInterfaces() )
         {
             ++interfacesFound;
-            if ( pInterface->is_loopback() )
+            if ( pInterface->isLoopback() )
             {
                 loopbackFound = true;
             }

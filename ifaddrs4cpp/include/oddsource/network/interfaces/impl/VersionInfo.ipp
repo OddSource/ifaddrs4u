@@ -37,7 +37,7 @@ version()
 OddSource_Inline
 ::std::uint32_t
 OddSource::Interfaces::VersionInfo::
-major_version()
+majorVersion()
 {
     return IFADDRS4CPP_VERSION_MAJOR;
 }
@@ -45,7 +45,7 @@ major_version()
 OddSource_Inline
 ::std::uint32_t
 OddSource::Interfaces::VersionInfo::
-minor_version()
+minorVersion()
 {
     return IFADDRS4CPP_VERSION_MINOR;
 }
@@ -53,13 +53,13 @@ minor_version()
 OddSource_Inline
 ::std::uint32_t
 OddSource::Interfaces::VersionInfo::
-patch_version()
+patchVersion()
 {
     return IFADDRS4CPP_VERSION_PATCH;
 }
 
 OddSource_Inline
-::std::optional<::std::string>
+::std::optional< ::std::string >
 OddSource::Interfaces::VersionInfo::
 suffix()
 {
@@ -75,7 +75,7 @@ suffix()
 OddSource_Inline
 ::std::string
 OddSource::Interfaces::VersionInfo::
-git_hash()
+gitHash()
 {
     return IFADDRS4CPP_GIT_HASH;
 }
@@ -83,7 +83,7 @@ git_hash()
 OddSource_Inline
 ::std::string
 OddSource::Interfaces::VersionInfo::
-git_hash_short()
+gitHashShort()
 {
     return IFADDRS4CPP_GIT_HASH_SHORT;
 }

@@ -41,19 +41,19 @@ namespace OddSource::Interfaces
         static
         OddSource_Inline
         ::std::uint32_t
-        major_version();
+        majorVersion();
 
         [[nodiscard]]
         static
         OddSource_Inline
         ::std::uint32_t
-        minor_version();
+        minorVersion();
 
         [[nodiscard]]
         static
         OddSource_Inline
         ::std::uint32_t
-        patch_version();
+        patchVersion();
 
         [[nodiscard]]
         static
@@ -65,13 +65,13 @@ namespace OddSource::Interfaces
         static
         OddSource_Inline
         ::std::string
-        git_hash();
+        gitHash();
 
         [[nodiscard]]
         static
         OddSource_Inline
         ::std::string
-        git_hash_short();
+        gitHashShort();
     };
 }
 

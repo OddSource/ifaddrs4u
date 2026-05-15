@@ -129,7 +129,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     ::std::underlying_type_t< InterfaceIPAddressFlag >
     operator&(
-        ::std::underlying_type_t< InterfaceIPAddressFlag > lhs,
+        ::std::underlying_type_t< InterfaceIPAddressFlag > const lhs,
         InterfaceIPAddressFlag const & rhs )
     {
         return lhs & static_cast< ::std::underlying_type_t< InterfaceIPAddressFlag > >( rhs );
@@ -148,7 +148,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     ::std::underlying_type_t< InterfaceIPAddressFlag >
     operator|(
-        ::std::underlying_type_t< InterfaceIPAddressFlag > lhs,
+        ::std::underlying_type_t< InterfaceIPAddressFlag > const lhs,
         InterfaceIPAddressFlag const & rhs )
     {
         return lhs | static_cast< ::std::underlying_type_t< InterfaceIPAddressFlag > >( rhs );
@@ -157,7 +157,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     bool
     operator==(
-        ::std::underlying_type_t< InterfaceIPAddressFlag > lhs,
+        ::std::underlying_type_t< InterfaceIPAddressFlag > const lhs,
         InterfaceIPAddressFlag const & rhs )
     {
         return lhs == static_cast< ::std::underlying_type_t< InterfaceIPAddressFlag > >( rhs );
@@ -166,7 +166,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     ::std::underlying_type_t< InterfaceFlag >
     operator&(
-        ::std::underlying_type_t< InterfaceFlag > lhs,
+        ::std::underlying_type_t< InterfaceFlag > const lhs,
         InterfaceFlag const & rhs )
     {
         return lhs & static_cast< ::std::underlying_type_t< InterfaceFlag > >( rhs );
@@ -185,7 +185,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     ::std::underlying_type_t< InterfaceFlag >
     operator|(
-        ::std::underlying_type_t< InterfaceFlag > lhs,
+        ::std::underlying_type_t< InterfaceFlag > const lhs,
         InterfaceFlag const & rhs )
     {
         return lhs | static_cast< ::std::underlying_type_t< InterfaceFlag > >( rhs );
@@ -194,7 +194,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     bool
     operator==(
-        ::std::underlying_type_t< InterfaceFlag > lhs,
+        ::std::underlying_type_t< InterfaceFlag > const lhs,
         InterfaceFlag const & rhs )
     {
         return lhs == static_cast< ::std::underlying_type_t< InterfaceFlag > >( rhs );
@@ -203,12 +203,12 @@ namespace OddSource::Interfaces
     OddSource_Inline
     Interface::
     Interface(
-        ::std::uint32_t index,
+        ::std::uint32_t const index,
         ::std::string_view const & name,
         ::std::string_view const & friendlyName,
         ::std::string_view const & description,
-        ::std::uint32_t flags,
-        ::std::optional<::std::uint64_t const> const & mtu)
+        ::std::uint32_t const flags,
+        ::std::optional< ::std::uint64_t const > const & mtu )
         : _index( index ),
           _name( name ),
           _friendlyName( friendlyName ),
@@ -293,23 +293,23 @@ namespace OddSource::Interfaces
     OddSource_Inline
     bool
     Interface::
-    is_up() const
+    isUp() const
     {
-        return this->is_flag_enabled( InterfaceFlag::IsUp );
+        return this->isFlagEnabled( InterfaceFlag::IsUp );
     }
 
     OddSource_Inline
     bool
     Interface::
-    is_loopback() const
+    isLoopback() const
     {
-        return this->is_flag_enabled( InterfaceFlag::IsLoopback );
+        return this->isFlagEnabled( InterfaceFlag::IsLoopback );
     }
 
     OddSource_Inline
     bool
     Interface::
-    is_flag_enabled(
+    isFlagEnabled(
         InterfaceFlag const & flag ) const
     {
         return ( this->_flags & flag ) == flag;
@@ -334,15 +334,15 @@ namespace OddSource::Interfaces
     OddSource_Inline
     bool
     Interface::
-    has_mac_address() const
+    hasMacAddress() const
     {
-        return static_cast<bool>(this->_macAddress);
+        return static_cast< bool >( this->_macAddress );
     }
 
     OddSource_Inline
     ::std::optional< MacAddress const > const &
     Interface::
-    mac_address() const
+    macAddress() const
     {
         return this->_macAddress;
     }
@@ -350,7 +350,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     ::std::vector< InterfaceIPv4Address > const &
     Interface::
-    ipv4_addresses() const
+    ipv4Addresses() const
     {
         return this->_ipv4Addresses;
     }
@@ -358,7 +358,7 @@ namespace OddSource::Interfaces
     OddSource_Inline
     ::std::vector< InterfaceIPv6Address > const &
     Interface::
-    ipv6_addresses() const
+    ipv6Addresses() const
     {
         return this->_ipv6Addresses;
     }

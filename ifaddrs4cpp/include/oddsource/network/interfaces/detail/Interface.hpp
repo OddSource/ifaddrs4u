@@ -29,18 +29,18 @@ namespace
     ::std::optional< ::std::uint8_t >
     sanitizePrefixLength(
         IPAddressT const & address,
-        ::std::uint8_t prefix_length )
+        ::std::uint8_t const prefixLength )
     {
         using namespace ::std::string_literals;
         static_assert( ::std::is_base_of_v< IPAddress, IPAddressT >,
                        "the template parameter IPAddressT must derive from IPAddress." );
-        if ( prefix_length > address.maximum_prefix_length() )
+        if ( prefixLength > address.maximumPrefixLength() )
         {
             throw ::std::invalid_argument(
-                "Invalid prefix length "s + ::std::to_string( prefix_length ) +
+                "Invalid prefix length "s + ::std::to_string( prefixLength ) +
                 " for IPv" + toString( address.version() ) );
         }
-        return prefix_length == 0 ? ::std::nullopt : ::std::optional<::std::uint8_t>(prefix_length);
+        return prefixLength == 0 ? ::std::nullopt : ::std::optional( prefixLength );
     }
 
     struct InterfaceIPFlagDisplayInfo
@@ -56,8 +56,8 @@ namespace OddSource::Interfaces
     InterfaceIPAddress< IPAddressT >::
     InterfaceIPAddress(
         IPAddressT const & address,
-        ::std::uint16_t flags,
-        ::std::uint8_t prefixLength )
+        ::std::uint16_t const flags,
+        ::std::uint8_t const prefixLength )
         : _address( address ),
           _prefixLength( sanitizePrefixLength( address, prefixLength ) ),
           _broadcast( ::std::nullopt ),
@@ -70,8 +70,8 @@ namespace OddSource::Interfaces
     InterfaceIPAddress< IPAddressT >::
     InterfaceIPAddress(
         IPAddressT const & address,
-        ::std::uint16_t flags,
-        ::std::uint8_t prefixLength,
+        ::std::uint16_t const flags,
+        ::std::uint8_t const prefixLength,
         Broadcast_t,
         IPAddressT const & broadcastAddress )
         : _address( address ),
@@ -85,8 +85,8 @@ namespace OddSource::Interfaces
     InterfaceIPAddress< IPAddressT >::
     InterfaceIPAddress(
         IPAddressT const & address,
-        ::std::uint16_t flags,
-        ::std::uint8_t prefixLength,
+        ::std::uint16_t const flags,
+        ::std::uint8_t const prefixLength,
         PointToPoint_t,
         IPAddressT const & pointToPointDestination )
         : _address( address ),
@@ -118,6 +118,7 @@ namespace OddSource::Interfaces
           _pointToPointDestination( ::std::move( other._pointToPointDestination ) ),
           _flags( other._flags )
     {
+        other._flags = 0;
     }
 
     template< class IPAddressT >
@@ -153,7 +154,7 @@ namespace OddSource::Interfaces
     template< class IPAddressT >
     ::std::optional< ::std::uint8_t >
     InterfaceIPAddress< IPAddressT >::
-    prefix_length() const
+    prefixLength() const
     {
         return this->_prefixLength;
     }
@@ -161,7 +162,7 @@ namespace OddSource::Interfaces
     template< class IPAddressT >
     ::std::optional< IPAddressT const > const &
     InterfaceIPAddress< IPAddressT >::
-    broadcast_address() const
+    broadcastAddress() const
     {
         return this->_broadcast;
     }
@@ -169,7 +170,7 @@ namespace OddSource::Interfaces
     template< class IPAddressT >
     ::std::optional< IPAddressT const > const &
     InterfaceIPAddress< IPAddressT >::
-    point_to_point_destination() const
+    pointToPointDestinationAddress() const
     {
         return this->_pointToPointDestination;
     }
@@ -177,7 +178,7 @@ namespace OddSource::Interfaces
     template< class IPAddressT >
     bool
     InterfaceIPAddress< IPAddressT >::
-    is_flag_enabled(
+    isFlagEnabled(
         InterfaceIPAddressFlag flag ) const
     {
         return ( this->_flags & flag ) == flag;
@@ -258,14 +259,14 @@ namespace OddSource::Interfaces
         auto const & ipAddress( address.address() );
         os << ipAddress;
 
-        auto const prefixLength( address.prefix_length() );
+        auto const prefixLength( address.prefixLength() );
         if ( prefixLength )
         {
             os << "/" << ::std::to_string( *prefixLength );
         }
 
-        auto const & broadcast( address.broadcast_address() );
-        auto const & pointToPoint( address.point_to_point_destination() );
+        auto const & broadcast( address.broadcastAddress() );
+        auto const & pointToPoint( address.pointToPointDestinationAddress() );
         if ( broadcast )
         {
             os << " broadcast " << *broadcast;
@@ -278,27 +279,26 @@ namespace OddSource::Interfaces
         auto const flags( address.flags() );
         if ( flags )
         {
-            for ( auto const & flag_display : FLAG_DISPLAYS )
+            for ( const auto & [ display, flag ] : FLAG_DISPLAYS )
             {
-                if ( ( flags & flag_display.flag ) == flag_display.flag )
+                if ( ( flags & flag ) == flag )
                 {
-                    os << " " << flag_display.display;
+                    os << " " << display;
                 }
             }
         }
         if constexpr ( ::std::is_same_v< IPAddressT, IPv6Address > )
         {
-            auto & v6( static_cast< IPv6Address const & >( ipAddress ) );
-            if ( v6.has_scope_id() )
+            if ( auto & v6( static_cast< IPv6Address const & >( ipAddress ) ); v6.hasScopeId() )
             {
                 os << " scopeid ";
-                if ( v6.scope_id() )
+                if ( v6.scopeId() )
                 {
-                    os << *v6.scope_id();
+                    os << *v6.scopeId();
                 }
                 else
                 {
-                    os << *v6.scope_name();
+                    os << *v6.scopeName();
                 }
             }
         }

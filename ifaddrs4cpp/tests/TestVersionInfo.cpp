@@ -32,9 +32,9 @@ public:
     void
     test_version_info()
     {
-        assert_equals( VersionInfo::major_version(), IFADDRS4CPP_VERSION_MAJOR );
-        assert_equals( VersionInfo::minor_version(), IFADDRS4CPP_VERSION_MINOR );
-        assert_equals( VersionInfo::patch_version(), IFADDRS4CPP_VERSION_PATCH );
+        assert_equals( VersionInfo::majorVersion(), IFADDRS4CPP_VERSION_MAJOR );
+        assert_equals( VersionInfo::minorVersion(), IFADDRS4CPP_VERSION_MINOR );
+        assert_equals( VersionInfo::patchVersion(), IFADDRS4CPP_VERSION_PATCH );
 
         if ( strlen( IFADDRS4CPP_VERSION_SUFFIX ) > 0 )
         {
@@ -49,8 +49,8 @@ public:
             assert_not_that( static_cast< bool >( VersionInfo::suffix() ) );
         }
 
-        assert_equals( VersionInfo::git_hash(), IFADDRS4CPP_GIT_HASH );
-        assert_equals( VersionInfo::git_hash_short(), IFADDRS4CPP_GIT_HASH_SHORT );
+        assert_equals( VersionInfo::gitHash(), IFADDRS4CPP_GIT_HASH );
+        assert_equals( VersionInfo::gitHashShort(), IFADDRS4CPP_GIT_HASH_SHORT );
     }
 
     [[maybe_unused]]

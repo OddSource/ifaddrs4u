@@ -48,24 +48,24 @@ namespace OddSource::Interfaces
             assert_equals( iface.description(), "Intel(R) Adapter" );
 
             assert_not_that( static_cast< bool >( iface.mtu() ) );
-            assert_not_that( iface.is_up() );
-            assert_not_that( iface.is_loopback() );
+            assert_not_that( iface.isUp() );
+            assert_not_that( iface.isLoopback() );
 
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::BroadcastAddressSet ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::DebugEnabled ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::IsLoopback ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::IsPointToPoint ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::IsRunning ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::IsUp ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::NoARP ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::PromiscuousModeEnabled ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::ReceiveAllMulticastPackets ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::SupportsMulticast ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::BroadcastAddressSet ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::DebugEnabled ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::IsLoopback ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::IsPointToPoint ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::IsRunning ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::IsUp ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::NoARP ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::PromiscuousModeEnabled ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::ReceiveAllMulticastPackets ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::SupportsMulticast ) );
 
-            assert_not_that( iface.has_mac_address() );
-            assert_not_that( static_cast< bool >( iface.mac_address() ) );
-            assert_equals( iface.ipv4_addresses().size(), 0u );
-            assert_equals( iface.ipv6_addresses().size(), 0u );
+            assert_not_that( iface.hasMacAddress() );
+            assert_not_that( static_cast< bool >( iface.macAddress() ) );
+            assert_equals( iface.ipv4Addresses().size(), 0u );
+            assert_equals( iface.ipv6Addresses().size(), 0u );
         }
 
         void
@@ -86,24 +86,24 @@ namespace OddSource::Interfaces
             assert_equals( iface.description(), "lo0" );
 
             assert_equals( *iface.mtu(), 1750u );
-            assert_not_that( iface.is_up() );
-            assert_that( iface.is_loopback() );
+            assert_not_that( iface.isUp() );
+            assert_that( iface.isLoopback() );
 
-            assert_that( iface.is_flag_enabled( InterfaceFlag::BroadcastAddressSet ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::DebugEnabled ) );
-            assert_that( iface.is_flag_enabled( InterfaceFlag::IsLoopback ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::IsPointToPoint ) );
-            assert_that( iface.is_flag_enabled( InterfaceFlag::IsRunning ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::IsUp ) );
-            assert_that( iface.is_flag_enabled( InterfaceFlag::NoARP ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::PromiscuousModeEnabled ) );
-            assert_that( iface.is_flag_enabled( InterfaceFlag::ReceiveAllMulticastPackets ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::SupportsMulticast ) );
+            assert_that( iface.isFlagEnabled( InterfaceFlag::BroadcastAddressSet ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::DebugEnabled ) );
+            assert_that( iface.isFlagEnabled( InterfaceFlag::IsLoopback ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::IsPointToPoint ) );
+            assert_that( iface.isFlagEnabled( InterfaceFlag::IsRunning ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::IsUp ) );
+            assert_that( iface.isFlagEnabled( InterfaceFlag::NoARP ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::PromiscuousModeEnabled ) );
+            assert_that( iface.isFlagEnabled( InterfaceFlag::ReceiveAllMulticastPackets ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::SupportsMulticast ) );
 
-            assert_not_that( iface.has_mac_address() );
-            assert_not_that( static_cast< bool >( iface.mac_address() ) );
-            assert_equals( iface.ipv4_addresses().size(), 0u );
-            assert_equals( iface.ipv6_addresses().size(), 0u );
+            assert_not_that( iface.hasMacAddress() );
+            assert_not_that( static_cast< bool >( iface.macAddress() ) );
+            assert_equals( iface.ipv4Addresses().size(), 0u );
+            assert_equals( iface.ipv6Addresses().size(), 0u );
         }
 
         void
@@ -123,24 +123,24 @@ namespace OddSource::Interfaces
             assert_equals( iface.description(), "en0" );
 
             assert_not_that( static_cast< bool >( iface.mtu() ) );
-            assert_that( iface.is_up() );
-            assert_not_that( iface.is_loopback() );
+            assert_that( iface.isUp() );
+            assert_not_that( iface.isLoopback() );
 
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::BroadcastAddressSet ) );
-            assert_that( iface.is_flag_enabled( InterfaceFlag::DebugEnabled ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::IsLoopback ) );
-            assert_that( iface.is_flag_enabled( InterfaceFlag::IsPointToPoint ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::IsRunning ) );
-            assert_that( iface.is_flag_enabled( InterfaceFlag::IsUp ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::NoARP ) );
-            assert_that( iface.is_flag_enabled( InterfaceFlag::PromiscuousModeEnabled ) );
-            assert_not_that( iface.is_flag_enabled( InterfaceFlag::ReceiveAllMulticastPackets ) );
-            assert_that( iface.is_flag_enabled( InterfaceFlag::SupportsMulticast ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::BroadcastAddressSet ) );
+            assert_that( iface.isFlagEnabled( InterfaceFlag::DebugEnabled ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::IsLoopback ) );
+            assert_that( iface.isFlagEnabled( InterfaceFlag::IsPointToPoint ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::IsRunning ) );
+            assert_that( iface.isFlagEnabled( InterfaceFlag::IsUp ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::NoARP ) );
+            assert_that( iface.isFlagEnabled( InterfaceFlag::PromiscuousModeEnabled ) );
+            assert_not_that( iface.isFlagEnabled( InterfaceFlag::ReceiveAllMulticastPackets ) );
+            assert_that( iface.isFlagEnabled( InterfaceFlag::SupportsMulticast ) );
 
-            assert_not_that( iface.has_mac_address() );
-            assert_not_that( static_cast< bool >( iface.mac_address() ) );
-            assert_equals( iface.ipv4_addresses().size(), 0u );
-            assert_equals( iface.ipv6_addresses().size(), 0u );
+            assert_not_that( iface.hasMacAddress() );
+            assert_not_that( static_cast< bool >( iface.macAddress() ) );
+            assert_equals( iface.ipv4Addresses().size(), 0u );
+            assert_equals( iface.ipv6Addresses().size(), 0u );
         }
 
         void
@@ -148,17 +148,17 @@ namespace OddSource::Interfaces
         {
             Interface iface( 12, "eth1", "eth1", "eth1", 0 );
 
-            assert_not_that( iface.has_mac_address() );
-            assert_not_that( static_cast< bool >( iface.mac_address() ) );
-            assert_equals( iface.ipv4_addresses().size(), 0u );
-            assert_equals( iface.ipv6_addresses().size(), 0u );
+            assert_not_that( iface.hasMacAddress() );
+            assert_not_that( static_cast< bool >( iface.macAddress() ) );
+            assert_equals( iface.ipv4Addresses().size(), 0u );
+            assert_equals( iface.ipv6Addresses().size(), 0u );
 
             iface._macAddress.emplace( "82:1c:78:44:5c:01" );
 
-            assert_that( iface.has_mac_address() );
-            assert_equals( *iface.mac_address(), MacAddress( "82:1c:78:44:5c:01" ) );
-            assert_equals( iface.ipv4_addresses().size(), 0u );
-            assert_equals( iface.ipv6_addresses().size(), 0u );
+            assert_that( iface.hasMacAddress() );
+            assert_equals( *iface.macAddress(), MacAddress( "82:1c:78:44:5c:01" ) );
+            assert_equals( iface.ipv4Addresses().size(), 0u );
+            assert_equals( iface.ipv6Addresses().size(), 0u );
         }
 
         void
@@ -166,24 +166,24 @@ namespace OddSource::Interfaces
         {
             Interface iface( 12, "eth1", "eth1", "eth1", 0 );
 
-            assert_not_that( iface.has_mac_address() );
-            assert_not_that( static_cast< bool >( iface.mac_address() ) );
-            assert_equals( iface.ipv4_addresses().size(), 0u );
-            assert_equals( iface.ipv6_addresses().size(), 0u );
+            assert_not_that( iface.hasMacAddress() );
+            assert_not_that( static_cast< bool >( iface.macAddress() ) );
+            assert_equals( iface.ipv4Addresses().size(), 0u );
+            assert_equals( iface.ipv6Addresses().size(), 0u );
 
             iface._ipv4Addresses.emplace_back( IPv4Address( "192.168.0.52" ), 0, 24 );
             iface._ipv4Addresses.emplace_back( IPv4Address( "192.168.0.53" ), 0, 24 );
 
-            assert_not_that( iface.has_mac_address() );
-            assert_not_that( static_cast< bool >( iface.mac_address() ) );
-            assert_equals( iface.ipv4_addresses().size(), 2u );
-            assert_equals( iface.ipv6_addresses().size(), 0u );
+            assert_not_that( iface.hasMacAddress() );
+            assert_not_that( static_cast< bool >( iface.macAddress() ) );
+            assert_equals( iface.ipv4Addresses().size(), 2u );
+            assert_equals( iface.ipv6Addresses().size(), 0u );
 
             assert_equals(
-                iface.ipv4_addresses()[ 0 ],
+                iface.ipv4Addresses()[ 0 ],
                 InterfaceIPAddress( IPv4Address( "192.168.0.52" ), 0, 24 ) );
             assert_equals(
-                iface.ipv4_addresses()[ 1 ],
+                iface.ipv4Addresses()[ 1 ],
                 InterfaceIPAddress( IPv4Address( "192.168.0.53" ), 0, 24 ) );
         }
 
@@ -192,28 +192,28 @@ namespace OddSource::Interfaces
         {
             Interface iface( 12, "eth1", "eth1", "eth1", 0 );
 
-            assert_not_that( iface.has_mac_address() );
-            assert_not_that( static_cast< bool >( iface.mac_address() ) );
-            assert_equals( iface.ipv4_addresses().size(), 0u );
-            assert_equals( iface.ipv6_addresses().size(), 0u );
+            assert_not_that( iface.hasMacAddress() );
+            assert_not_that( static_cast< bool >( iface.macAddress() ) );
+            assert_equals( iface.ipv4Addresses().size(), 0u );
+            assert_equals( iface.ipv6Addresses().size(), 0u );
 
             iface._ipv6Addresses.emplace_back( IPv6Address( "2001::dead:beef" ), 0, 64 );
             iface._ipv6Addresses.emplace_back( IPv6Address( "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" ), 0, 64 );
             iface._ipv6Addresses.emplace_back( IPv6Address( "fe80::f1:1612:447b:70c5%en0" ), 0, 64 );
 
-            assert_not_that( iface.has_mac_address() );
-            assert_not_that( static_cast< bool >( iface.mac_address() ) );
-            assert_equals( iface.ipv4_addresses().size(), 0u );
-            assert_equals( iface.ipv6_addresses().size(), 3u );
+            assert_not_that( iface.hasMacAddress() );
+            assert_not_that( static_cast< bool >( iface.macAddress() ) );
+            assert_equals( iface.ipv4Addresses().size(), 0u );
+            assert_equals( iface.ipv6Addresses().size(), 3u );
 
             assert_equals(
-                iface.ipv6_addresses()[0],
+                iface.ipv6Addresses()[0],
                 InterfaceIPAddress( IPv6Address( "2001::dead:beef" ), 0, 64 ) );
             assert_equals(
-                iface.ipv6_addresses()[1],
+                iface.ipv6Addresses()[1],
                 InterfaceIPAddress( IPv6Address( "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" ), 0, 64 ) );
             assert_equals(
-                iface.ipv6_addresses()[2],
+                iface.ipv6Addresses()[2],
                 InterfaceIPAddress( IPv6Address( "fe80::f1:1612:447b:70c5%en0" ), 0, 64 ) );
         }
 

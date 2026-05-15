@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+ * Copyright © 2010-2026 OddSource Code (license@oddsource.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,10 +156,10 @@ public final class InterfaceIPAddress<IPAddressT extends InetAddress>
         }
         if(this.address instanceof Inet6Address)
         {
-            final int scope_id = ((Inet6Address) this.address).getScopeId();
-            if(scope_id > 0)
+            final int scopeId = ((Inet6Address) this.address).getScopeId();
+            if(scopeId > 0)
             {
-                builder.append(" scopeid 0x").append(Long.toHexString(scope_id));
+                builder.append(" scopeid 0x").append(Long.toHexString(scopeId));
             }
         }
         return builder.toString();

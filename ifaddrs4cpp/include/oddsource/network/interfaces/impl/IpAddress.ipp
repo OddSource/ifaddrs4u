@@ -50,10 +50,10 @@ namespace
     using namespace OddSource::Interfaces;
 
     template< typename Addr >
-    using Enable_If_Addr = ::std::enable_if_t< ::std::is_same_v<Addr, in_addr> ||
-                                               ::std::is_same_v<Addr, in6_addr> >;
+    using Enable_If_Addr = ::std::enable_if_t< ::std::is_same_v< Addr, in_addr > ||
+                                               ::std::is_same_v< Addr, in6_addr > >;
 
-    template< typename Addr, typename = Enable_If_Addr<Addr> >
+    template< typename Addr, typename = Enable_If_Addr< Addr > >
     ::std::unique_ptr< Addr >
     fromRepr(
         ::std::string_view const & repr )
@@ -61,67 +61,68 @@ namespace
         using namespace ::std::string_literals;
         if ( repr.empty() )
         {
-            throw InvalidIPAddress("Invalid empty IP address string.");
+            throw InvalidIPAddress( "Invalid empty IP address string." );
         }
 
-        ::std::string repr_str(repr);
-        auto data = ::std::make_unique<Addr>();
+        ::std::string const reprStr( repr );
+        auto data( ::std::make_unique< Addr >() );
         int success;
-        if constexpr (::std::is_same_v<Addr, in6_addr>)
+        if constexpr ( ::std::is_same_v< Addr, in6_addr > )
         {
             // inet_pton can also handle IPv4 addresses, but only in dotted-decimal format
             // (1.2.3.4), not in octal, hexadecimal, or any other valid IPv4 format.
-            success = inet_pton(AF_INET6, repr_str.c_str(), data.get());
+            success = inet_pton( AF_INET6, reprStr.c_str(), data.get() );
         }
         else
         {
-            int num_dots(0);
-            for (char c : repr)
+            int numDots{ 0 };
+            for (char const c : repr)
             {
                 if (c == '.')
                 {
-                    num_dots++;
+                    numDots++;
                 }
             }
-            if (num_dots != 3)
+            if (numDots != 3)
             {
                 // some implementations of inet_aton tolerate incomplete addresses, but we do not
                 throw InvalidIPAddress(
-                        "Malformed IPv4 address string '"s + repr_str + "' with "s +
-                        ::std::to_string(num_dots + 1) + " parts instead of 4"s);
+                        "Malformed IPv4 address string '"s + reprStr + "' with "s +
+                        ::std::to_string( numDots + 1 ) + " parts instead of 4"s );
             }
             // inet_aton/RtlIpv4StringToAddress, however, can handle IPv4 addresses in all valid formats.
 #ifdef ODDSOURCE_IS_WINDOWS
             char const * end = nullptr;
-            success = RtlIpv4StringToAddress(repr_str.c_str(), false, &end, data.get());
-            if (success == STATUS_INVALID_PARAMETER)
+            success = RtlIpv4StringToAddress( reprStr.c_str(), false, &end, data.get() );
+            if ( success == STATUS_INVALID_PARAMETER )
             {
                 throw InvalidIPAddress(
                     "An invalid parameter was passed to RtlIpv4StringToAddress while converting '"s +
-                    repr_str + "'"s);
+                    reprStr + "'"s );
             }
-            else if (success != 0)
+            else if ( success != 0 )
             {
                 char * s = nullptr;
                 ::FormatMessage(
                     FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                     nullptr, success,
-                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                    (LPTSTR)&s, 0, nullptr);
-                ::std::string err(s == nullptr ? "" : s);
-                LocalFree(s);
+                    MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+                    (LPTSTR)&s, 0, nullptr );
+                ::std::string const err( s == nullptr ? "" : s );
+                LocalFree( s );
                 throw InvalidIPAddress(
-                    "Malformed IP address string '"s + repr_str + "' or unknown RtlIpv4StringToAddress error ("s +
-                    ::std::to_string(success) + "): "s + err);
+                    "Malformed IP address string '"s + reprStr + "' or unknown RtlIpv4StringToAddress error ("s +
+                    ::std::to_string( success ) + "): "s + err );
             }
             success = 1;
 #else /* ODDSOURCE_IS_WINDOWS */
-            success = inet_aton(repr_str.c_str(), data.get());
+            success = inet_aton( reprStr.c_str(), data.get() );
 #endif /* !ODDSOURCE_IS_WINDOWS */
         }
         if (success != 1)
         {
-            throw InvalidIPAddress("Malformed IP address string '"s + repr_str + "' or unknown inet_*ton error."s);
+            throw InvalidIPAddress(
+                "Malformed IP address string '"s + reprStr + "' or unknown inet_*ton error."s );
         }
 
         return data;
@@ -130,11 +131,10 @@ namespace
     template< typename Addr, typename = Enable_If_Addr< Addr > >
     ::std::string
     toRepr(
-        Addr const * data )
-    {
+        Addr const * data ) {
         using namespace ::std::string_literals;
         AddressFamily family;
-        if constexpr (::std::is_same_v<Addr, in6_addr>)
+        if constexpr ( ::std::is_same_v< Addr, in6_addr > )
         {
             family = AF_INET6;
         }
@@ -143,33 +143,32 @@ namespace
             family = AF_INET;
         }
 
-        static constexpr size_t host_length(100);
-        char host_chars[host_length];
-        auto ptr = ::inet_ntop(family, data, host_chars, host_length);
-        if (ptr == nullptr)
+        static constexpr size_t HOST_LENGTH{ 100 };
+        char hostChars[ HOST_LENGTH ];
+        auto ptr( ::inet_ntop( family, data, hostChars, HOST_LENGTH ) );
+        if ( ptr == nullptr )
         {
 #ifdef ODDSOURCE_IS_WINDOWS
-            auto err_no(::WSAGetLastError());
+            auto errorCode( ::WSAGetLastError() );
             char * s = nullptr;
             ::FormatMessage(
                 FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                nullptr, err_no,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPTSTR)&s, 0, nullptr);
-            ::std::string err(s == nullptr ? "" : s);
-            LocalFree(s);
+                nullptr, errorCode,
+                MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+                (LPTSTR)&s, 0, nullptr );
+            ::std::string const err( s == nullptr ? "" : s );
+            LocalFree( s );
 #else /* ODDSOURCE_IS_WINDOWS */
-            auto err_no(errno);
+            auto const errorCode{ errno };
             char const * err(
-                    err_no == EAFNOSUPPORT ? "Address family not supported" :
-                    (err_no == ENOSPC ? "Converted address would exceed string size" :
-                     ::gai_strerror(errno)));
+                errorCode == EAFNOSUPPORT ? "Address family not supported" :
+                ( errorCode == ENOSPC ? "Converted address would exceed string size" : ::gai_strerror( errorCode ) ) );
 #endif /* !ODDSOURCE_IS_WINDOWS */
             throw InvalidIPAddress(
                 "Malformed in_addr data or inet_ntop system error: "s +
-                ::std::to_string(err_no) + " ('"s + err + "')"s);
+                ::std::to_string( errorCode ) + " ('"s + err + "')"s );
         }
-        return host_chars;
+        return hostChars;
     }
 
     template< typename Addr, typename = Enable_If_Addr< Addr > >
@@ -177,7 +176,7 @@ namespace
     toRepr(
         ::std::unique_ptr< Addr const > const & data )
     {
-        return toRepr(data.get());
+        return toRepr( data.get() );
     }
 
     template< typename Addr, typename = Enable_If_Addr< Addr > >
@@ -185,9 +184,9 @@ namespace
     copy_in_addr(
         Addr const * data )
     {
-        auto new_data = ::std::make_unique< Addr >();
-        ::std::memcpy(new_data.get(), data, sizeof(Addr));
-        return new_data;
+        auto newData( ::std::make_unique< Addr >() );
+        ::std::memcpy( newData.get(), data, sizeof( Addr ) );
+        return newData;
     }
 
     template< typename Addr, typename = Enable_If_Addr< Addr > >
@@ -195,7 +194,7 @@ namespace
     copy_in_addr(
         ::std::unique_ptr< Addr const > const & data )
     {
-        return copy_in_addr(data.get());
+        return copy_in_addr( data.get() );
     }
 
     ::std::unique_ptr< in_addr >
@@ -220,20 +219,19 @@ namespace
     fillOutScope(
         v6Scope && scope )
     {
-        if (scope.scope_id && !scope.scope_name)
+        if ( scope.scopeId && !scope.scopeName )
         {
-            char buffer[IF_NAMESIZE];
-            if (::if_indextoname(*scope.scope_id, buffer) != nullptr)
+            char buffer[ IF_NAMESIZE ];
+            if ( ::if_indextoname( *scope.scopeId, buffer ) != nullptr )
             {
-                scope.scope_name = ::std::string(buffer);
+                scope.scopeName = ::std::string( buffer );
             }
         }
-        else if(scope.scope_name && !scope.scope_id)
+        else if( scope.scopeName && !scope.scopeId )
         {
-            ::std::uint32_t scope_id = ::if_nametoindex(scope.scope_name->c_str());
-            if (scope_id > 0)
+            if ( ::std::uint32_t const scopeId{ ::if_nametoindex( scope.scopeName->c_str() ) }; scopeId > 0 )
             {
-                scope.scope_id = scope_id;
+                scope.scopeId = scopeId;
             }
         }
         return std::move( scope );
@@ -241,32 +239,31 @@ namespace
 
     v6Scope
     scopeFrom(
-        ::std::uint32_t scope_id )
+        ::std::uint32_t const scopeId )
     {
-        if (scope_id == 0)
+        if ( scopeId == 0 )
         {
-            throw ::std::invalid_argument("IPv6 address scope ID must be greater than 0.");
+            throw ::std::invalid_argument( "IPv6 address scope ID must be greater than 0." );
         }
-        return fillOutScope( { scope_id } );
+        return fillOutScope( { scopeId } );
     }
 
     v6Scope
     scopeFrom(
-        ::std::string_view const & scope_name )
+        ::std::string_view const & scopeName )
     {
-        if (scope_name.empty())
+        if ( scopeName.empty() )
         {
-            throw ::std::invalid_argument("IPv6 address scope name must not be an empty string.");
+            throw ::std::invalid_argument( "IPv6 address scope name must not be an empty string." );
         }
-        return fillOutScope( { ::std::nullopt, ::std::string(scope_name) } );
+        return fillOutScope( { ::std::nullopt, ::std::string( scopeName ) } );
     }
 
     ::std::string_view
     stripScope(
         ::std::string_view const & repr )
     {
-        size_t const i = repr.find('%');
-        if (i != ::std::string_view::npos)
+        if ( auto const i{ repr.find( '%' ) }; i != ::std::string_view::npos )
         {
             return repr.substr(0, i);
         }
@@ -277,23 +274,22 @@ namespace
     extractScope(
         ::std::string_view const & repr )
     {
-        size_t const i = repr.find('%');
-        if (i != ::std::string_view::npos)
+        if ( auto const i{ repr.find( '%' ) }; i != ::std::string_view::npos )
         {
-            ::std::string const scope(repr.substr(i + 1));
-            if (!scope.empty())
+            ::std::string const scope( repr.substr( i + 1 ) );
+            if ( !scope.empty() )
             {
-                if (scope.find_first_not_of("0123456789") == std::string::npos)
+                if ( scope.find_first_not_of( "0123456789" ) == std::string::npos )
                 {
                     try
                     {
-                        return scopeFrom(::std::stoul(scope));
+                        return scopeFrom( ::std::stoul( scope ) );
                     }
-                    catch (::std::invalid_argument const &)
+                    catch ( ::std::invalid_argument const & )
                     {
                     }
                 }
-                return scopeFrom(scope);
+                return scopeFrom( scope );
             }
         }
         return ::std::nullopt;
@@ -304,11 +300,11 @@ namespace
         ::std::string const & repr,
         ::std::optional< v6Scope > const & scope )
     {
-        if (!scope)
+        if ( !scope )
         {
             return repr;
         }
-        return repr + "%" + (scope->scope_name ? *scope->scope_name : ::std::to_string(*scope->scope_id));
+        return repr + "%" + ( scope->scopeName ? *scope->scopeName : ::std::to_string( *scope->scopeId ) );
     }
 }
 
@@ -437,13 +433,13 @@ namespace OddSource::Interfaces
     IPAddress( // NOLINT(*-use-equals-default)
         IPAddress const & other )
         : _representation( other._representation ),
-          _is_unspecified( other._is_unspecified ),
-          _is_loopback( other._is_loopback ),
-          _is_link_local( other._is_link_local ),
-          _is_private( other._is_private ),
-          _is_multicast( other._is_multicast ),
-          _is_reserved( other._is_reserved ),
-          _multicast_scope( other._multicast_scope )
+          _isUnspecified( other._isUnspecified ),
+          _isLoopback( other._isLoopback ),
+          _isLinkLocal( other._isLinkLocal ),
+          _isPrivate( other._isPrivate ),
+          _isMulticast( other._isMulticast ),
+          _isReserved( other._isReserved ),
+          _multicastScope( other._multicastScope )
     {
     }
 
@@ -452,20 +448,20 @@ namespace OddSource::Interfaces
     IPAddress(
         IPAddress && other ) noexcept
         : _representation( std::move( other._representation ) ),
-          _is_unspecified(other._is_unspecified),
-          _is_loopback(other._is_loopback),
-          _is_link_local(other._is_link_local),
-          _is_private(other._is_private),
-          _is_multicast(other._is_multicast),
-          _is_reserved(other._is_reserved),
-          _multicast_scope( ::std::move( other._multicast_scope ) ) // NOLINT(*-move-const-arg)
+          _isUnspecified( other._isUnspecified ),
+          _isLoopback( other._isLoopback ),
+          _isLinkLocal( other._isLinkLocal ),
+          _isPrivate( other._isPrivate ),
+          _isMulticast( other._isMulticast ),
+          _isReserved( other._isReserved ),
+          _multicastScope( ::std::move( other._multicastScope ) ) // NOLINT(*-move-const-arg)
     {
-        other._is_unspecified = false;
-        other._is_loopback = false;
-        other._is_link_local = false;
-        other._is_private = false;
-        other._is_multicast = false;
-        other._is_reserved = false;
+        other._isUnspecified = false;
+        other._isLoopback = false;
+        other._isLinkLocal = false;
+        other._isPrivate = false;
+        other._isMulticast = false;
+        other._isReserved = false;
     }
 
     OddSource_Inline
@@ -519,57 +515,57 @@ namespace OddSource::Interfaces
     OddSource_Inline
     bool
     IPAddress::
-    is_unspecified() const
+    isUnspecified() const
     {
-        return this->_is_unspecified;
+        return this->_isUnspecified;
     }
 
     OddSource_Inline
     bool
     IPAddress::
-    is_loopback() const
+    isLoopback() const
     {
-        return this->_is_loopback;
+        return this->_isLoopback;
     }
 
     OddSource_Inline
     bool
     IPAddress::
-    is_link_local() const
+    isLinkLocal() const
     {
-        return this->_is_link_local;
+        return this->_isLinkLocal;
     }
 
     OddSource_Inline
     bool
     IPAddress::
-    is_private() const
+    isPrivate() const
     {
-        return this->_is_private;
+        return this->_isPrivate;
     }
 
     OddSource_Inline
     bool
     IPAddress::
-    is_multicast() const
+    isMulticast() const
     {
-        return this->_is_multicast;
+        return this->_isMulticast;
     }
 
     OddSource_Inline
     bool
     IPAddress::
-    is_reserved() const
+    isReserved() const
     {
-        return this->_is_reserved;
+        return this->_isReserved;
     }
 
     OddSource_Inline
     ::std::optional< MulticastScope > const &
     IPAddress::
-    multicast_scope() const
+    multicastScope() const
     {
-        return this->_multicast_scope;
+        return this->_multicastScope;
     }
 
     OddSource_Inline
@@ -605,71 +601,73 @@ namespace OddSource::Interfaces
     {
         auto const bytes = BYTES;
 
-        if (*reinterpret_cast<::std::uint32_t const *>(this->_data.get()) == 0)
+        if ( *reinterpret_cast< ::std::uint32_t const * >( this->_data.get() ) == 0)
         {
-            this->_is_unspecified = true;
-            this->_is_reserved = true;
+            this->_isUnspecified = true;
+            this->_isReserved = true;
         }
-        else if (bytes[0] == 127) // 127.0.0.0/8
+        else if ( bytes[ 0 ] == 127 ) // 127.0.0.0/8
         {
-            this->_is_loopback = true;
-            this->_is_reserved = true;
+            this->_isLoopback = true;
+            this->_isReserved = true;
         }
-        else if (bytes[0] == 169 && bytes[1] == 254) // 169.254.0.0/16
+        else if ( bytes[ 0 ] == 169 && bytes[ 1 ] == 254 ) // 169.254.0.0/16
         {
-            this->_is_link_local = true;
-            this->_is_reserved = true;
+            this->_isLinkLocal = true;
+            this->_isReserved = true;
         }
-        else if (bytes[0] == 10 || // 10.0.0.0/8
-                 (bytes[0] == 100 && bytes[1] >= 64 && bytes[1] <= 127) || // 100.64.0.0/10
-                 (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) || // 172.16.0.0/12
-                 (bytes[0] == 192 && bytes[1] == 0 && bytes[2] == 0) || // 192.0.0.0/24
-                 (bytes[0] == 192 && bytes[1] == 168) || // 192.168.0.0/16
-                 (bytes[0] == 198 && bytes[1] >= 18 && bytes[1] <= 19) // 198.18.0.0/15
-                )
+        else if (
+            bytes[ 0 ] == 10 || // 10.0.0.0/8
+            ( bytes[ 0 ] == 100 && bytes[ 1 ] >= 64 && bytes[ 1 ] <= 127 ) || // 100.64.0.0/10
+            ( bytes[ 0 ] == 172 && bytes[ 1 ] >= 16 && bytes[ 1 ] <= 31 ) || // 172.16.0.0/12
+            ( bytes[ 0 ] == 192 && bytes[ 1 ] == 0 && bytes[ 2 ] == 0 ) || // 192.0.0.0/24
+            ( bytes[ 0 ] == 192 && bytes[ 1 ] == 168 ) || // 192.168.0.0/16
+            ( bytes[ 0 ] == 198 && bytes[ 1 ] >= 18 && bytes[ 1 ] <= 19 ) // 198.18.0.0/15
+        )
         {
-            this->_is_private = true;
-            this->_is_reserved = true;
+            this->_isPrivate = true;
+            this->_isReserved = true;
         }
-        else if (bytes[0] >= 224 && bytes[0] <= 239) // 224.0.0.0/4
+        else if ( bytes[ 0 ] >= 224 && bytes[ 0 ] <= 239 ) // 224.0.0.0/4
         {
-            this->_is_multicast = true;
-            this->_is_reserved = true;
+            this->_isMulticast = true;
+            this->_isReserved = true;
         }
         // various other reserved ranges, see https://en.wikipedia.org/wiki/Reserved_IP_addresses
-        else if (bytes[0] == 0 || // 0.0.0.0/8
-                 (bytes[0] == 192 && bytes[1] == 0 && bytes[2] == 2) || // 192.0.2.0/24
-                 (bytes[0] == 192 && bytes[1] == 88 && bytes[2] == 99) || // 192.88.99.0/24
-                 (bytes[0] == 198 && bytes[1] == 51 && bytes[2] == 100) || // 198.51.100.0/24
-                 (bytes[0] == 203 && bytes[1] == 0 && bytes[2] == 113) || // 203.0.113.0/24
-                 (bytes[0] == 233 && bytes[1] == 252 && bytes[2] == 0) || // 233.252.0.0/24
-                 bytes[0] >= 240 // 240.0.0.0/4
-                )
+        else if (
+            bytes[ 0 ] == 0 || // 0.0.0.0/8
+            (bytes[ 0 ] == 192 && bytes[ 1 ] == 0 && bytes[ 2 ] == 2) || // 192.0.2.0/24
+            (bytes[ 0 ] == 192 && bytes[ 1 ] == 88 && bytes[ 2 ] == 99) || // 192.88.99.0/24
+            (bytes[ 0 ] == 198 && bytes[ 1 ] == 51 && bytes[ 2 ] == 100) || // 198.51.100.0/24
+            (bytes[ 0 ] == 203 && bytes[ 1 ] == 0 && bytes[ 2 ] == 113) || // 203.0.113.0/24
+            (bytes[ 0 ] == 233 && bytes[ 1 ] == 252 && bytes[ 2 ] == 0) || // 233.252.0.0/24
+            bytes[ 0 ] >= 240 // 240.0.0.0/4
+        )
         {
-            this->_is_reserved = true;
+            this->_isReserved = true;
         }
 
-        if (this->is_multicast())
+        if ( this->isMulticast() )
         {
-            if (bytes[0] == 224 && bytes[1] == 0 && bytes[2] == 0) // 224.0.0.0/24
+            if ( bytes[ 0 ] == 224 && bytes[ 1 ] == 0 && bytes[ 2 ] == 0 ) // 224.0.0.0/24
             {
-                this->_multicast_scope = MulticastScope::LinkLocal;
+                this->_multicastScope = MulticastScope::LinkLocal;
             }
-            else if (bytes[0] == 239 && bytes[1] == 255) // 239.255.0.0/16
+            else if ( bytes[ 0 ] == 239 && bytes[ 1 ] == 255 ) // 239.255.0.0/16
             {
-                this->_multicast_scope = MulticastScope::RealmLocal;
+                this->_multicastScope = MulticastScope::RealmLocal;
             }
-            else if (bytes[0] == 239 && bytes[1] >= 192 && bytes[1] <= 195) // 239.192.0.0/14
+            else if ( bytes[ 0 ] == 239 && bytes[ 1 ] >= 192 && bytes[ 1 ] <= 195 ) // 239.192.0.0/14
             {
-                this->_multicast_scope = MulticastScope::OrganizationLocal;
+                this->_multicastScope = MulticastScope::OrganizationLocal;
             }
-            else if (bytes[0] != 239) // // 224.0.1.0-238.255.255.255
+            else if ( bytes[ 0 ] != 239 ) // // 224.0.1.0-238.255.255.255
             {
-                this->_multicast_scope = MulticastScope::Global;
+                this->_multicastScope = MulticastScope::Global;
             }
             else
             {
-                this->_multicast_scope = MulticastScope::Unassigned;
+                this->_multicastScope = MulticastScope::Unassigned;
             }
         }
     }
@@ -718,8 +716,7 @@ namespace OddSource::Interfaces
     operator==(
         IPv4Address const & other ) const
     {
-        return (*reinterpret_cast<::std::uint32_t const *>(this->_data.get()) ==
-                *reinterpret_cast<::std::uint32_t const *>(other._data.get()));
+        return static_cast< ::std::uint32_t >( *this ) == static_cast< ::std::uint32_t >( other );
     }
 
     OddSource_Inline
@@ -728,7 +725,7 @@ namespace OddSource::Interfaces
     operator!=(
         IPv4Address const & other ) const
     {
-        return !this->operator==(other);
+        return !this->operator==( other );
     }
 
     OddSource_Inline
@@ -843,95 +840,96 @@ namespace OddSource::Interfaces
         : IPAddress( addScope( reprWithoutScope, scope ) ),
           _data( ::std::move( data ) ),
           _scope( std::move( scope ) ),
-          _without_scope( reprWithoutScope )
+          _withoutScope( reprWithoutScope )
     {
         auto const bytes = BYTES;
         auto const words = WORDS;
         auto const doublewords = DOUBLEWORDS;
 
-        if (IN6_IS_ADDR_UNSPECIFIED(this->_data.get()))
+        if ( IN6_IS_ADDR_UNSPECIFIED( this->_data.get() ) )
         {
-            this->_is_unspecified = true;
-            this->_is_reserved = true;
+            this->_isUnspecified = true;
+            this->_isReserved = true;
         }
-        else if(IN6_IS_ADDR_LOOPBACK(this->_data.get()))
+        else if( IN6_IS_ADDR_LOOPBACK( this->_data.get() ) )
         {
-            this->_is_loopback = true;
-            this->_is_reserved = true;
+            this->_isLoopback = true;
+            this->_isReserved = true;
         }
-        else if(IN6_IS_ADDR_LINKLOCAL(this->_data.get()) && // some impls erroneously check *only* fe80
-                words[1] == 0 && words[2] == 0 && words[3] == 0)
+        else if( IN6_IS_ADDR_LINKLOCAL( this->_data.get() ) && // some impls erroneously check *only* fe80
+                 words[ 1 ] == 0 && words[ 2 ] == 0 && words[ 3 ] == 0 )
         {
-            this->_is_link_local = true;
-            this->_is_reserved = true;
+            this->_isLinkLocal = true;
+            this->_isReserved = true;
         }
         // IN6_IS_ADDR_UNIQUE_LOCAL is available only on BSD-based systems like macOS
-        else if(bytes[0] == 0xfc || bytes[0] == 0xfd)
+        else if( bytes[ 0 ] == 0xfc || bytes[ 0 ] == 0xfd )
         {
-            this->_is_unique_local = true;
-            this->_is_private = true;
-            this->_is_reserved = true;
+            this->_isUniqueLocal = true;
+            this->_isPrivate = true;
+            this->_isReserved = true;
         }
-        else if(IN6_IS_ADDR_SITELOCAL(this->_data.get()))
+        else if( IN6_IS_ADDR_SITELOCAL( this->_data.get() ) )
         {
-            this->_is_site_local = true;
-            this->_is_private = true;
-            this->_is_reserved = true;
+            this->_isSiteLocal = true;
+            this->_isPrivate = true;
+            this->_isReserved = true;
         }
-        else if(IN6_IS_ADDR_MULTICAST(this->_data.get()))
+        else if( IN6_IS_ADDR_MULTICAST( this->_data.get() ) )
         {
-            this->_is_multicast = true;
-            this->_is_reserved = true;
+            this->_isMulticast = true;
+            this->_isReserved = true;
         }
-        else if(IN6_IS_ADDR_V4MAPPED(this->_data.get()))
+        else if( IN6_IS_ADDR_V4MAPPED( this->_data.get() ) )
         {
-            this->_is_v4_mapped = true;
-            this->_is_reserved = true;
+            this->_isV4Mapped = true;
+            this->_isReserved = true;
         }
-        else if(IN6_IS_ADDR_V4COMPAT(this->_data.get()))
+        else if( IN6_IS_ADDR_V4COMPAT( this->_data.get() ) )
         {
-            this->_is_v4_compatible = true;
-            this->_is_reserved = true;
+            this->_isV4Compatible = true;
+            this->_isReserved = true;
         }
         // IN6_IS_ADDR_V4TRANSLATED is available only on Windows SDK / Winsock 2
-        else if(doublewords[0] == 0 && doublewords[1] == 0 && words[4] == 0xffff && words[5] == 0)
+        else if( doublewords[ 0 ] == 0 && doublewords[ 1 ] == 0 && words[ 4 ] == 0xffff && words[ 5 ] == 0 )
         {
-            this->_is_v4_translated = true;
-            this->_is_reserved = true;
+            this->_isV4Translated = true;
+            this->_isReserved = true;
         }
         // IN6_IS_ADDR_6TO4 is available only on BSD-based systems like macOS
-        else if(ntohs(words[0]) == 0x2002)
+        else if( ntohs( words[ 0 ] ) == 0x2002 )
         {
-            this->_is_6to4 = true;
-            this->_is_reserved = true;
+            this->_is6to4 = true;
+            this->_isReserved = true;
         }
         // various other reserved ranges, see https://en.wikipedia.org/wiki/Reserved_IP_addresses
-        else if((ntohs(words[0]) == 0x64 && ntohs(words[1]) == 0xff9b && doublewords[1] == 0 && doublewords[2] == 0) || // 64:ff9b::/96
-                (ntohs(words[0]) == 0x64 && ntohs(words[1]) == 0xff9b && doublewords[1] == 1) || // 64:ff9b:1::/48
-                (ntohs(words[0]) == 0x100 && words[1] == 0 && doublewords[1] == 0) || // 100::/64
-                (ntohs(words[0]) == 0x2001 && words[1] == 0) || // 2001:0000::/32
-                (ntohs(words[0]) == 0x2001 && ntohs(words[1]) >= 0x20 && ntohs(words[1]) <= 0x2f) || // 2001:20::/28
-                (ntohs(words[0]) == 0x2001 && ntohs(words[1]) == 0xdb8) // 2001:db8::/32
-               )
+        else if(
+            ( ntohs( words[ 0 ] ) == 0x64 && ntohs( words[1] ) == 0xff9b && doublewords[ 1 ] == 0 && doublewords[ 2 ] == 0 ) || // 64:ff9b::/96
+            ( ntohs( words[ 0 ] ) == 0x64 && ntohs( words[1] ) == 0xff9b && doublewords[1] == 1 ) || // 64:ff9b:1::/48
+            ( ntohs( words[ 0 ] ) == 0x100 && words[ 1 ] == 0 && doublewords[ 1 ] == 0 ) || // 100::/64
+            ( ntohs( words[ 0 ] ) == 0x2001 && words[ 1 ] == 0 ) || // 2001:0000::/32
+            ( ntohs( words[ 0 ] ) == 0x2001 && ntohs( words[1] ) >= 0x20 && ntohs( words[ 1 ] ) <= 0x2f ) || // 2001:20::/28
+            ( ntohs( words[ 0 ] ) == 0x2001 && ntohs( words[1] ) == 0xdb8 ) // 2001:db8::/32
+        )
         {
-            this->_is_reserved = true;
+            this->_isReserved = true;
         }
 
-        if (this->is_multicast())
+        if ( this->isMulticast() )
         {
-            this->_multicast_flags = (bytes[1] & 0b11110000) >> 4;
-            switch (bytes[1] & 0b1111)
+            this->_multicastFlags = ( bytes[ 1 ] & 0b11110000 ) >> 4;
+            switch ( bytes[ 1 ] & 0b1111 )
             {
                 case 0x0:
-                case 0xf: this->_multicast_scope = MulticastScope::Reserved; break;
-                case 0x1: this->_multicast_scope = MulticastScope::InterfaceLocal; break;
-                case 0x2: this->_multicast_scope = MulticastScope::LinkLocal; break;
-                case 0x3: this->_multicast_scope = MulticastScope::RealmLocal; break;
-                case 0x4: this->_multicast_scope = MulticastScope::AdminLocal; break;
-                case 0x5: this->_multicast_scope = MulticastScope::SiteLocal; break;
-                case 0x8: this->_multicast_scope = MulticastScope::OrganizationLocal; break;
-                case 0xe: this->_multicast_scope = MulticastScope::Global; break;
-                default: this->_multicast_scope = MulticastScope::Unassigned; break;
+                case 0xf: this->_multicastScope = MulticastScope::Reserved; break;
+                case 0x1: this->_multicastScope = MulticastScope::InterfaceLocal; break;
+                case 0x2: this->_multicastScope = MulticastScope::LinkLocal; break;
+                case 0x3: this->_multicastScope = MulticastScope::RealmLocal; break;
+                case 0x4: this->_multicastScope = MulticastScope::AdminLocal; break;
+                case 0x5: this->_multicastScope = MulticastScope::SiteLocal; break;
+                case 0x8: this->_multicastScope = MulticastScope::OrganizationLocal; break;
+                case 0xe: this->_multicastScope = MulticastScope::Global; break;
+                default: this->_multicastScope = MulticastScope::Unassigned; break;
             }
         }
     }
@@ -943,14 +941,14 @@ namespace OddSource::Interfaces
         : IPAddress( other ),
           _data( copy_in_addr( other._data ) ),
           _scope( other._scope ),
-          _without_scope( other._without_scope ),
-          _is_unique_local( other._is_unique_local ),
-          _is_site_local( other._is_site_local ),
-          _is_v4_mapped( other._is_v4_mapped ),
-          _is_v4_compatible( other._is_v4_compatible ),
-          _is_v4_translated( other._is_v4_translated ),
-          _is_6to4( other._is_6to4 ),
-          _multicast_flags( other._multicast_flags )
+          _withoutScope( other._withoutScope ),
+          _isUniqueLocal( other._isUniqueLocal ),
+          _isSiteLocal( other._isSiteLocal ),
+          _isV4Mapped( other._isV4Mapped ),
+          _isV4Compatible( other._isV4Compatible ),
+          _isV4Translated( other._isV4Translated ),
+          _is6to4( other._is6to4 ),
+          _multicastFlags( other._multicastFlags )
     {
     }
 
@@ -959,17 +957,24 @@ namespace OddSource::Interfaces
     IPv6Address(
         IPv6Address && other ) noexcept
         : IPAddress( std::move( other ) ),
-          _data( copy_in_addr( other._data ) ),
-          _scope( other._scope ),
-          _without_scope( other._without_scope ),
-          _is_unique_local( other._is_unique_local ),
-          _is_site_local( other._is_site_local ),
-          _is_v4_mapped( other._is_v4_mapped ),
-          _is_v4_compatible( other._is_v4_compatible ),
-          _is_v4_translated( other._is_v4_translated ),
-          _is_6to4( other._is_6to4 ),
-          _multicast_flags( other._multicast_flags )
+          _data( std::move( other._data ) ),
+          _scope( std::move( other._scope ) ),
+          _withoutScope( std::move( other._withoutScope ) ),
+          _isUniqueLocal( other._isUniqueLocal ),
+          _isSiteLocal( other._isSiteLocal ),
+          _isV4Mapped( other._isV4Mapped ),
+          _isV4Compatible( other._isV4Compatible ),
+          _isV4Translated( other._isV4Translated ),
+          _is6to4( other._is6to4 ),
+          _multicastFlags( other._multicastFlags )
     {
+        other._isUniqueLocal = false;
+        other._isSiteLocal = false;
+        other._isV4Mapped = false;
+        other._isV4Compatible = false;
+        other._isV4Translated = false;
+        other._is6to4 = false;
+        other._multicastFlags = 0;
     }
 
     OddSource_Inline
@@ -999,7 +1004,7 @@ namespace OddSource::Interfaces
     IPv6Address::
     normalize() const
     {
-        if (this->_scope)
+        if ( this->_scope )
         {
             return { this->_data.get(), *this->_scope };
         }
@@ -1009,55 +1014,55 @@ namespace OddSource::Interfaces
     OddSource_Inline
     bool
     IPv6Address::
-    is_unique_local() const
+    isUniqueLocal() const
     {
-        return this->_is_unique_local;
+        return this->_isUniqueLocal;
     }
 
     OddSource_Inline
     bool
     IPv6Address::
-    is_site_local() const
+    isSiteLocal() const
     {
-        return this->_is_site_local;
+        return this->_isSiteLocal;
     }
 
     OddSource_Inline
     bool
     IPv6Address::
-    is_v4_mapped() const
+    isV4Mapped() const
     {
-        return this->_is_v4_mapped;
+        return this->_isV4Mapped;
     }
 
     OddSource_Inline
     bool
     IPv6Address::
-    is_v4_translated() const
+    isV4Translated() const
     {
-        return this->_is_v4_translated;
+        return this->_isV4Translated;
     }
 
     OddSource_Inline
     bool
     IPv6Address::
-    is_v4_compatible() const
+    isV4Compatible() const
     {
-        return this->_is_v4_compatible;
+        return this->_isV4Compatible;
     }
 
     OddSource_Inline
     bool
     IPv6Address::
-    is_6to4() const
+    is6to4() const
     {
-        return this->_is_6to4;
+        return this->_is6to4;
     }
 
     OddSource_Inline
     bool
     IPv6Address::
-    has_scope_id() const
+    hasScopeId() const
     {
         return static_cast< bool >( this->_scope );
     }
@@ -1065,60 +1070,60 @@ namespace OddSource::Interfaces
     OddSource_Inline
     ::std::string
     IPv6Address::
-    without_scope_id() const
+    withoutScopeId() const
     {
-        return this->_without_scope;
+        return this->_withoutScope;
     }
 
     OddSource_Inline
     ::std::optional< ::std::uint32_t > const &
     IPv6Address::
-    scope_id() const
+    scopeId() const
     {
         static constexpr ::std::optional< ::std::uint32_t > nil; // prevent "returning ref to temp local"
-        return this->_scope ? this->_scope->scope_id : nil;
+        return this->_scope ? this->_scope->scopeId : nil;
     }
 
     OddSource_Inline
     ::std::optional< ::std::string > const &
     IPv6Address::
-    scope_name() const
+    scopeName() const
     {
-        static ::std::optional<::std::string> const nil; // prevent "returning ref to temp local"
-        return this->_scope ? this->_scope->scope_name : nil;
+        static ::std::optional< ::std::string > const nil; // prevent "returning ref to temp local"
+        return this->_scope ? this->_scope->scopeName : nil;
     }
 
     OddSource_Inline
     ::std::optional< ::std::string >
     IPv6Address::
-    scope_name_or_id() const
+    scopeNameOrId() const
     {
-        if (!this->_scope)
+        if ( !this->_scope )
         {
             return ::std::nullopt;
         }
-        return this->_scope->scope_name ? this->_scope->scope_name : ::std::to_string(*this->_scope->scope_id);
+        return this->_scope->scopeName ? this->_scope->scopeName : ::std::to_string( *this->_scope->scopeId );
     }
 
     OddSource_Inline
     ::std::optional< ::std::string >
     IPv6Address::
-    scope_id_or_name() const
+    scopeIdOrName() const
     {
-        if (!this->_scope)
+        if ( !this->_scope )
         {
             return ::std::nullopt;
         }
-        return this->_scope->scope_id ? ::std::to_string(*this->_scope->scope_id) : this->_scope->scope_name;
+        return this->_scope->scopeId ? ::std::to_string( *this->_scope->scopeId ) : this->_scope->scopeName;
     }
 
     OddSource_Inline
     bool
     IPv6Address::
-    is_multicast_flag_enabled(
+    isMulticastFlagEnabled(
         MulticastV6Flag const & flag ) const
     {
-        return this->_multicast_flags && ( *this->_multicast_flags & flag ) == flag;
+        return this->_multicastFlags && ( *this->_multicastFlags & flag ) == flag;
     }
 
     OddSource_Inline
@@ -1127,12 +1132,12 @@ namespace OddSource::Interfaces
     operator==(
         IPv6Address const & other ) const
     {
-        auto data1 = reinterpret_cast<::std::uint8_t const *>(this->_data.get());
-        auto data2 = reinterpret_cast<::std::uint8_t const *>(other._data.get());
-        auto length = this->data_length();
-        for(size_t i(0); i < length; i++)
+        auto const data1( reinterpret_cast< ::std::uint8_t const * >( this->_data.get() ) );
+        auto const data2( reinterpret_cast< ::std::uint8_t const * >( other._data.get() ) );
+        auto const length = this->dataLength();
+        for( size_t i{ 0 }; i < length; ++i)
         {
-            if (data1[i] != data2[i])
+            if ( data1[ i ] != data2[ i ] )
             {
                 return false;
             }
@@ -1144,7 +1149,7 @@ namespace OddSource::Interfaces
     bool
     IPv6Address::
     operator!=(
-        IPv6Address const & other) const
+        IPv6Address const & other ) const
     {
         return !this->operator==(other);
     }

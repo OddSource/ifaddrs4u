@@ -1,5 +1,5 @@
 #
-# Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+# Copyright © 2010-2026 OddSource Code (license@oddsource.io)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,24 +39,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, ubuntu-20.04, ubuntu-22.04]
-        java: ["17", "21"]
+        os: [macos-15, ubuntu-22.04, ubuntu-24.04]
+        java: ["17", "25"]
         include:
           - java: "17"
-            python: "3.11"
-          - java: "21"
-            python: "3.12"
-          - os: macos-13
+            python: "3.10"
+          - java: "25"
+            python: "3.14"
+          - os: macos-15
             asan_options: detect_stack_use_after_return=1:verify_asan_link_order=0
-          - os: ubuntu-20.04
-            asan_options: detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0
           - os: ubuntu-22.04
+            asan_options: detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0
+          - os: ubuntu-24.04
             asan_options: detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0
     runs-on: ${{ matrix.os }}
     name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
       - name: Checkout ifaddrs4u
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Installing CMake
         uses: lukka/get-cmake@latest
@@ -79,17 +79,17 @@ jobs:
         run: ./cmake-debug-test-build/ifaddrs4cpp_tests
 
       - name: Installing Java ${{ matrix.java }}
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v5
         with:
           distribution: "temurin" # See 'Supported distributions' for available options
           java-version: "${{ matrix.java }}"
           java-package: "jdk"
           cache: "maven"
 
-      - name: Installing Maven 3.9.5
-        uses: stCarolas/setup-maven@v4.5
+      - name: Installing Maven 3.9.15
+        uses: stCarolas/setup-maven@v5
         with:
-          maven-version: 3.9.5
+          maven-version: 3.9.15
 
       - name: Build ifaddrs4j with Maven
         working-directory: ifaddrs4j
@@ -100,7 +100,7 @@ jobs:
              mvn -B -P cpp-asan -P cpp-debug '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' help:active-profiles install
 
       - name: Installing Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: "${{ matrix.python }}"
           cache: "pip" # caching pip dependencies

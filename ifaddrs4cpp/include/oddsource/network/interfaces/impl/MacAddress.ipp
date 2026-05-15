@@ -25,7 +25,6 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cstdio>
 #include <cstring>
-#include <iostream>
 #include <memory>
 #include <sstream>
 #include <utility>
@@ -38,11 +37,11 @@ namespace
     ::std::unique_ptr< ::std::uint8_t[] >
     copyHardwareAddress(
         ::std::uint8_t const data[ MAX_ADAPTER_ADDRESS_LENGTH ],
-        ::std::uint8_t dataLength )
+        ::std::uint8_t const dataLength )
     {
-        auto new_data = ::std::make_unique< ::std::uint8_t[] >( dataLength );
-        ::std::memcpy( new_data.get(), data, dataLength );
-        return new_data;
+        auto newData( ::std::make_unique< ::std::uint8_t[] >( dataLength ) );
+        ::std::memcpy( newData.get(), data, dataLength );
+        return newData;
     }
 
     ::std::uint8_t
@@ -70,68 +69,67 @@ namespace
         // GNUC has ether_aton_r, which is thread-safe, but BSD systems have
         // ether_aton, which is not thread safe and basically cannot safely be used.
         // Windows has no built-in method until C#. So ... let's try something simple-ish.
-        auto predicted_length( static_cast< size_t >( predictReprLength( repr ) ) );
-        if (predicted_length > MAX_ADAPTER_ADDRESS_LENGTH)
+        auto predictedLength( static_cast< size_t >( predictReprLength( repr ) ) );
+        if ( predictedLength > MAX_ADAPTER_ADDRESS_LENGTH )
         {
             ::std::ostringstream oss;
-            oss << "MAC address length (" << ::std::to_string(predicted_length)
-                << " bytes) too long (max " << ::std::to_string(MAX_ADAPTER_ADDRESS_LENGTH)
+            oss << "MAC address length (" << ::std::to_string( predictedLength )
+                << " bytes) too long (max " << ::std::to_string( MAX_ADAPTER_ADDRESS_LENGTH )
                 << " bytes).";
-            throw InvalidMacAddress(oss.str());
+            throw InvalidMacAddress( oss.str() );
         }
-        if (predicted_length < MIN_ADAPTER_ADDRESS_LENGTH)
+        if ( predictedLength < MIN_ADAPTER_ADDRESS_LENGTH )
         {
             ::std::ostringstream oss;
-            oss << "MAC address length (" << ::std::to_string(predicted_length)
-                 << " bytes) too short (min " << ::std::to_string(MIN_ADAPTER_ADDRESS_LENGTH)
+            oss << "MAC address length (" << ::std::to_string( predictedLength )
+                 << " bytes) too short (min " << ::std::to_string( MIN_ADAPTER_ADDRESS_LENGTH )
                  << " bytes).";
-            throw InvalidMacAddress(oss.str());
+            throw InvalidMacAddress( oss.str() );
         }
 
-        auto data = ::std::make_unique<::std::uint8_t[]>(MAX_ADAPTER_ADDRESS_LENGTH);
-        size_t size(0), position(0);
-        ::std::uint8_t byte(0), chars_in_byte(0);
-        for (char c : repr)
+        auto data( ::std::make_unique< ::std::uint8_t[] >( MAX_ADAPTER_ADDRESS_LENGTH ) );
+        size_t size{ 0 }, position{ 0 };
+        ::std::uint8_t byte{ 0 }, charsInByte{ 0 };
+        for ( char c : repr )
         {
-            char ch = (char)::std::tolower(c);
-            if (ch == ':' || ch == '-')
+            if ( auto const ch{ static_cast< char >( ::std::tolower( c ) ) }; ch == ':' || ch == '-' )
             {
-                if (chars_in_byte != 2)
+                if ( charsInByte != 2 )
                 {
-                    throw InvalidMacAddress("Unexpected separator in MAC address '"s + MAC_ADDR_REPR_POS);
+                    throw InvalidMacAddress( "Unexpected separator in MAC address '"s + MAC_ADDR_REPR_POS );
                 }
-                data[size++] = byte;
-                byte = chars_in_byte = 0;
+                data[ size++ ] = byte;
+                byte = charsInByte = 0;
             }
-            else if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'))
+            else if ( ( ch >= '0' && ch <= '9' ) || ( ch >= 'a' && ch <= 'f' ) )
             {
-                chars_in_byte++;
-                if (chars_in_byte > 2)
+                charsInByte++;
+                if ( charsInByte > 2 )
                 {
                     throw InvalidMacAddress(
-                        "Invalid number of characters "s + ::std::to_string(chars_in_byte) +
-                        " between separators in MAC address '"s + MAC_ADDR_REPR_POS);
+                        "Invalid number of characters "s + ::std::to_string( charsInByte ) +
+                        " between separators in MAC address '"s + MAC_ADDR_REPR_POS );
                 }
                 byte <<= 4;
-                byte += ::std::isdigit(ch) ? (ch - '0') : (ch - 'a' + 10);
+                byte += ::std::isdigit( ch ) ? ch - '0' : ch - 'a' + 10;
             }
             else
             {
-                throw InvalidMacAddress("Invalid character '"s + ch + "' in MAC address "s + MAC_ADDR_REPR_POS);
+                throw InvalidMacAddress( "Invalid character '"s + ch + "' in MAC address "s + MAC_ADDR_REPR_POS );
             }
 
             position++;
         }
-        if (chars_in_byte != 2)
+        if ( charsInByte != 2 )
         {
-            throw InvalidMacAddress("Unexpected separator in MAC address '"s + MAC_ADDR_REPR_POS);
+            throw InvalidMacAddress( "Unexpected separator in MAC address '"s + MAC_ADDR_REPR_POS );
         }
-        data[size++] = byte;
-        if(size != predicted_length)
+        data[ size++ ] = byte;
+        if( size != predictedLength )
         {
             throw InvalidMacAddress(
-                "Malformed MAC address '"s + ::std::string(repr) + "' did not match expected length "s +
-                ::std::to_string(predicted_length) + "."s);
+                "Malformed MAC address '"s + ::std::string( repr ) + "' did not match expected length "s +
+                ::std::to_string( predictedLength ) + "."s);
         }
 
         return data;
@@ -141,36 +139,35 @@ namespace
 
     ::std::string
     toRepr(
-        ::std::uint8_t const data[MAX_ADAPTER_ADDRESS_LENGTH],
-        ::std::uint8_t data_length )
+        ::std::uint8_t const data[ MAX_ADAPTER_ADDRESS_LENGTH ],
+        ::std::uint8_t const dataLength )
     {
         ::std::ostringstream oss;
-        if (data_length > MAX_ADAPTER_ADDRESS_LENGTH)
+        if ( dataLength > MAX_ADAPTER_ADDRESS_LENGTH )
         {
-            oss << "MAC address length (" << ::std::to_string(data_length)
-                << ") greater than allowed length " << ::std::to_string(MAX_ADAPTER_ADDRESS_LENGTH);
-            throw InvalidMacAddress(oss.str());
+            oss << "MAC address length (" << ::std::to_string( dataLength )
+                << ") greater than allowed length " << ::std::to_string( MAX_ADAPTER_ADDRESS_LENGTH );
+            throw InvalidMacAddress( oss.str() );
         }
-        if (data_length < MIN_ADAPTER_ADDRESS_LENGTH)
+        if ( dataLength < MIN_ADAPTER_ADDRESS_LENGTH )
         {
-            oss << "MAC address length (" << ::std::to_string(data_length)
-                << " bytes) too short (min " << ::std::to_string(MIN_ADAPTER_ADDRESS_LENGTH) << " bytes).";
-            throw InvalidMacAddress(oss.str());
+            oss << "MAC address length (" << ::std::to_string( dataLength )
+                << " bytes) too short (min " << ::std::to_string( MIN_ADAPTER_ADDRESS_LENGTH ) << " bytes).";
+            throw InvalidMacAddress( oss.str() );
         }
 
-        static const ::std::uint8_t formatted_byte_size(3);
+        static constexpr size_t FORMATTED_BYTE_SIZE{ 3 };
 
-        auto buffer = new char[formatted_byte_size];
-        for(::std::uint8_t i(0); i < data_length; i++)
+        auto const buffer( std::make_unique< char[] >( FORMATTED_BYTE_SIZE ) );
+        for( ::std::uint8_t i{ 0 }; i < dataLength; i++ )
         {
-            ::std::snprintf( buffer, formatted_byte_size, "%02x", data[i] );
-            if (i > 0)
+            ::std::snprintf( buffer.get(), FORMATTED_BYTE_SIZE, "%02x", data[ i ] );
+            if ( i > 0 )
             {
                 oss << ':';
             }
             oss << buffer;
         }
-        delete[] buffer;
 
         return oss.str();
     }
@@ -181,14 +178,14 @@ namespace OddSource::Interfaces
     OddSource_Inline
     InvalidMacAddress::
     InvalidMacAddress(
-    ::std::string_view const & what )
-    : ::std::invalid_argument( ::std::string( what ) )
+        ::std::string_view const & what )
+        : ::std::invalid_argument( ::std::string( what ) )
     {
     }
 
     OddSource_Inline
     InvalidMacAddress::
-    InvalidMacAddress(
+    InvalidMacAddress( // NOLINT(*-use-equals-default)
         InvalidMacAddress const & other )
         : ::std::invalid_argument( other )
     {
@@ -196,7 +193,7 @@ namespace OddSource::Interfaces
 
     OddSource_Inline
     InvalidMacAddress::
-    ~InvalidMacAddress() noexcept
+    ~InvalidMacAddress() noexcept // NOLINT(*-use-equals-default)
     {
     }
 
@@ -204,16 +201,16 @@ namespace OddSource::Interfaces
     MacAddress::
     MacAddress(
         ::std::string_view const & repr )
-        : MacAddress( std::string( repr ), fromRepr(repr), predictReprLength(repr) )
+        : MacAddress( std::string( repr ), fromRepr( repr ), predictReprLength( repr ) )
     {
     }
 
     OddSource_Inline
     MacAddress::
     MacAddress(
-        ::std::uint8_t const data[MAX_ADAPTER_ADDRESS_LENGTH],
-        ::std::uint8_t dataLength )
-        : MacAddress( toRepr(data, dataLength), copyHardwareAddress(data, dataLength), dataLength )
+        ::std::uint8_t const data[ MAX_ADAPTER_ADDRESS_LENGTH ],
+        ::std::uint8_t const dataLength )
+        : MacAddress( toRepr( data, dataLength ), copyHardwareAddress( data, dataLength ), dataLength )
     {
     }
 
@@ -222,10 +219,10 @@ namespace OddSource::Interfaces
     MacAddress(
         ::std::string && repr,
         ::std::unique_ptr< ::std::uint8_t const[] > && data,
-        ::std::uint8_t dataLength )
+        ::std::uint8_t const dataLength )
         : _representation( std::move( repr ) ),
           _data( ::std::move( data ) ),
-          _data_length( dataLength )
+          _dataLength( dataLength )
     {
     }
 
@@ -233,9 +230,9 @@ namespace OddSource::Interfaces
     MacAddress::
     MacAddress(
         MacAddress const & other )
-        : _representation(other._representation),
-          _data(copyHardwareAddress(other._data.get(), other._data_length)),
-          _data_length(other._data_length)
+        : _representation( other._representation ),
+          _data( copyHardwareAddress( other._data.get(), other._dataLength ) ),
+          _dataLength( other._dataLength )
     {
     }
 
@@ -245,13 +242,13 @@ namespace OddSource::Interfaces
         MacAddress && other ) noexcept
         : _representation( std::move( other._representation ) ),
           _data( std::move( other._data ) ),
-          _data_length( other._data_length )
+          _dataLength( other._dataLength )
     {
     }
 
     OddSource_Inline
     MacAddress::
-    ~MacAddress() noexcept
+    ~MacAddress() noexcept // NOLINT(*-use-equals-default)
     {
     }
 
@@ -281,7 +278,7 @@ namespace OddSource::Interfaces
     MacAddress::
     length() const
     {
-        return this->_data_length;
+        return this->_dataLength;
     }
 
     OddSource_Inline
@@ -290,11 +287,11 @@ namespace OddSource::Interfaces
     operator==(
         MacAddress const & other ) const
     {
-        if (this->_data_length != other._data_length)
+        if (this->_dataLength != other._dataLength)
         {
             return false;
         }
-        for (::std::uint8_t i(0); i < this->_data_length; i++)
+        for (::std::uint8_t i(0); i < this->_dataLength; i++)
         {
             if (this->_data[i] != other._data[i])
             {

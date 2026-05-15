@@ -1,5 +1,5 @@
 #
-# Copyright © 2010-2023 OddSource Code (license@oddsource.io)
+# Copyright © 2010-2026 OddSource Code (license@oddsource.io)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,20 +39,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-11, macos-13, ubuntu-20.04, windows-2019, windows-2022]
-        java: ["11", "17", "21"]
+        os: [macos-13, macos-26, ubuntu-22.04, windows-2022, windows-2025]
+        java: ["17", "21", "25"]
         include:
-          - java: "11"
-            python: "3.8"
           - java: "17"
             python: "3.10"
           - java: "21"
             python: "3.12"
+          - java: "25"
+            python: "3.14"
     runs-on: ${{ matrix.os }}
     name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
     steps:
       - name: Checkout ifaddrs4u
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Installing CMake
         uses: lukka/get-cmake@latest
@@ -80,17 +80,17 @@ jobs:
 #        run: cmake --build ./cmake-external-build --config Release -j 14
 
       - name: Installing Java ${{ matrix.java }}
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v5
         with:
           distribution: "temurin" # See 'Supported distributions' for available options
           java-version: "${{ matrix.java }}"
           java-package: "jdk"
           cache: "maven"
 
-      - name: Installing Maven 3.9.5
-        uses: stCarolas/setup-maven@v4.5
+      - name: Installing Maven 3.9.15
+        uses: stCarolas/setup-maven@v5
         with:
-          maven-version: 3.9.5
+          maven-version: 3.9.15
 
 #             ls -al "$JAVA_HOME/lib"
 #             ls -al "$JAVA_HOME/include"
@@ -104,7 +104,7 @@ jobs:
              mvn -B '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' help:active-profiles install || (ls -al && cat hs_err*.log && cat ~/Library/Logs/DiagnosticReports/java-*.ips && false)
 
       - name: Installing Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: "${{ matrix.python }}"
           cache: "pip" # caching pip dependencies
