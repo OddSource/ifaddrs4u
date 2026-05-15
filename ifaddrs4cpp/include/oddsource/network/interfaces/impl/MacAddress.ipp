@@ -166,7 +166,7 @@ namespace
             {
                 oss << ':';
             }
-            oss << buffer;
+            oss << buffer.get();
         }
 
         return oss.str();
