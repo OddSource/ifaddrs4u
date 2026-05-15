@@ -28,7 +28,7 @@ public final class MacAddress
         if(!Loader.LOADED)
         {
             // this will never actually happen, but we need to ensure that Loader initializes
-            throw new RuntimeException("Not possible!");
+            throw new LibraryNotLoadedException("Not possible!");
         }
     }
 

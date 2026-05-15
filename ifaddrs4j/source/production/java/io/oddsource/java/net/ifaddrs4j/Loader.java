@@ -118,7 +118,7 @@ final class Loader
             catch(final RuntimeException e)
             {
                 LOADED = false;
-                throw new RuntimeException(
+                throw new UnsupportedOperatingSystemException(
                     "Unsupported operating system " + OS_NAME + SPC + OS_VERSION + SPC + OS_ARCH + ". File an issue " +
                     "at https://github.com/OddSource/ifaddrs4u/issues if you believe this is a bug or you would " +
                     "like to support additional operating systems.", e
@@ -250,7 +250,7 @@ final class Loader
 
         if(file == null || !file.exists())
         {
-            throw new RuntimeException(
+            throw new ResourceNotFoundException(
                 "Unable to find any shared library file through the classloader or on java.library.path matching " +
                 "any of the following options: " + Arrays.toString(options) +
                 (file == null ? DOT : (" (extra: " + file + ")"))

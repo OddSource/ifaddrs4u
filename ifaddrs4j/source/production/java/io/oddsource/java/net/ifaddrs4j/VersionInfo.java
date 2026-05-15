@@ -32,7 +32,7 @@ public final class VersionInfo
         if(!Loader.LOADED)
         {
             // this will never actually happen, but we need to ensure that Loader initializes
-            throw new RuntimeException("Not possible!");
+            throw new LibraryNotLoadedException("Not possible!");
         }
     }
 
@@ -62,7 +62,7 @@ public final class VersionInfo
             {
                 if(stream == null)
                 {
-                    throw new RuntimeException("Unable to find version.properties on the classpath.");
+                    throw new ResourceNotFoundException("Unable to find version.properties on the classpath.");
                 }
                 final var properties = new Properties();
                 properties.load(stream);
