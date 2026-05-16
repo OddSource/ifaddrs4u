@@ -348,6 +348,37 @@ namespace
         return errorMessage.empty() ? "Unknown error"s : errorMessage;
     }
 
+    LPVOID
+    allocateAdapterAddresses(
+        HANDLE & heap,
+        ULONG const bufferLength,
+        bool & errorOccurred,
+        ::std::ostringstream & errorStream )
+    {
+        __try
+        {
+            return ::HeapAlloc( heap, HEAP_GENERATE_EXCEPTIONS | HEAP_ZERO_MEMORY, bufferLength );
+        }
+        __except ( EXCEPTION_EXECUTE_HANDLER )
+        {
+            DWORD const errorCode{ GetExceptionCode() };
+            errorOccurred = true;
+            errorStream << "Failed to allocate " << bufferLength << " bytes for adapter addresses ";
+            if ( errorCode == STATUS_NO_MEMORY )
+            {
+                errorStream << "due to a lack of sufficient memory resources.";
+            }
+            else if ( errorCode == STATUS_ACCESS_VIOLATION )
+            {
+                errorStream << "due to heap corruption or invalid access.";
+            }
+            else
+            {
+                errorStream << "due to unknown error code: 0x" << ::std::hex << errorCode << ::std::dec << ".";
+            }
+        }
+    }
+
     PIP_ADAPTER_ADDRESSES
     allocateAdapterAddresses(
         ULONG const bufferLength )
@@ -362,35 +393,13 @@ namespace
             throw InterfaceBrowserSystemError( oss.str() );
         }
 
-        ::std::string errorMessage;
-        LPVOID allocation( nullptr );
-        __try
-        {
-            allocation = ::HeapAlloc( heap, HEAP_GENERATE_EXCEPTIONS | HEAP_ZERO_MEMORY, bufferLength );
-        }
-        __except ( EXCEPTION_EXECUTE_HANDLER )
-        {
-            DWORD const errorCode{ GetExceptionCode() };
-            ::std::ostringstream oss;
-            oss << "Failed to allocate " << bufferLength << " bytes for adapter addresses ";
-            if ( errorCode == STATUS_NO_MEMORY )
-            {
-                oss << "due to a lack of sufficient memory resources.";
-            }
-            else if ( errorCode == STATUS_ACCESS_VIOLATION )
-            {
-                oss << "due to heap corruption or invalid access.";
-            }
-            else
-            {
-                oss << "due to unknown error code: 0x" << ::std::hex << errorCode << ::std::dec << ".";
-            }
-            errorMessage = oss.str();
-        }
+        bool errorOccurred;
+        ::std::ostringstream errorStream;
+        LPVOID allocation( allocateAdapterAddresses( heap, bufferLength, errorOccurred, errorStream ) );
 
-        if ( !errorMessage.empty() )
+        if ( errorOccurred )
         {
-            throw InterfaceBrowserSystemError( errorMessage );
+            throw InterfaceBrowserSystemError( errorStream.str() );
         }
         else if ( allocation == nullptr )
         {
