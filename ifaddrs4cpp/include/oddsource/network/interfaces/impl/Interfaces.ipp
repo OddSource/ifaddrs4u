@@ -387,6 +387,7 @@ namespace
                 errorStream << "due to unknown error code: 0x" << ::std::hex << errorCode << ::std::dec << ".";
             }
         }
+        return nullptr;
     }
 
     PIP_ADAPTER_ADDRESSES

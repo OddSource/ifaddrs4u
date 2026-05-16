@@ -122,8 +122,7 @@ add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE "cxx_std_${CPP_VERSION}")
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
-                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-diagnostics:caret;-W3;-WX;-wd4275;-wd4251;-wd4455>>") # -W4? -Wall?
-target_compile_definitions(${PROJECT_NAME}_compiler_flags INTERFACE ODDSOURCE_BUILDING_LIBRARY=1)
+                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-diagnostics:caret;-external:W0;-external:I'c:/Program Files/Microsoft Visual Studio';-external:I'c:/Program Files (x86)/Windows Kits';-W4;-Wall;-WX;-wd4275;-wd4251>>")
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
                       CXX_STANDARD_REQUIRED ON
@@ -132,11 +131,11 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
 # Windows compiler warnings disablement explanations:
 # - C4275: Docs say this can be ignored if your class is derived from a type in the C++ Standard
 # - C4251: Docs say this can be ignored if your class is exposing a type in the C++ Standard
-# - C4455: "literal suffix identifiers that do not start with an underscore" when using std ""s
 
 if(NOT ${BUILD_STATIC_ONLY})
     add_library(${PROJECT_NAME}-shared SHARED ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-shared PUBLIC ${PROJECT_NAME}_compiler_flags)
+    target_compile_definitions(${PROJECT_NAME}-shared PRIVATE ODDSOURCE_BUILDING_LIBRARY=1)
     target_include_directories(${PROJECT_NAME}-shared PUBLIC "${CMAKE_SOURCE_DIR}/include")
     target_include_directories(${PROJECT_NAME}-shared PUBLIC "${PROJECT_BINARY_DIR}/include")
     set_target_properties(${PROJECT_NAME}-shared PROPERTIES
@@ -146,6 +145,7 @@ endif()
 if(NOT ${BUILD_DYNAMIC_ONLY})
     add_library(${PROJECT_NAME}-static STATIC ${${PROJECT_NAME}_sources})
     target_link_libraries(${PROJECT_NAME}-static PUBLIC ${PROJECT_NAME}_compiler_flags)
+    target_compile_definitions(${PROJECT_NAME}-static PRIVATE ODDSOURCE_BUILDING_LIBRARY=1)
     target_include_directories(${PROJECT_NAME}-static PUBLIC "${CMAKE_SOURCE_DIR}/include")
     target_include_directories(${PROJECT_NAME}-static PUBLIC "${PROJECT_BINARY_DIR}/include")
     set_target_properties(${PROJECT_NAME}-static PROPERTIES
