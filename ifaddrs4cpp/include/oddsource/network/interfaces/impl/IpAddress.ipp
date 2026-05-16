@@ -21,17 +21,18 @@
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
 #include "../detail/flip.hpp"
+#include "../detail/winsock_includes.h"
 
-#ifdef ODDSOURCE_IS_WINDOWS
-#include "winsock_includes.h"
-#else /* ODDSOURCE_IS_WINDOWS */
+#ifndef ODDSOURCE_IS_WINDOWS
+
 #include <arpa/inet.h>
 #include <cerrno>
 #include <netdb.h>
 #include <net/if.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#endif /* ODDSOURCE_IS_WINDOWS */
+
+#endif /* !ODDSOURCE_IS_WINDOWS */
 
 #include <array>
 #include <cstring>

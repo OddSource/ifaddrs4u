@@ -122,7 +122,7 @@ add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE "cxx_std_${CPP_VERSION}")
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
-                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3;-WX;-wd4275;-wd4251;-wd4455>>") # -W4? -Wall?
+                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3;-WX;-wd4275;-wd4251;-wd4455;-diagnostics:caret>>") # -W4? -Wall?
 target_compile_definitions(${PROJECT_NAME}_compiler_flags INTERFACE ODDSOURCE_BUILDING_LIBRARY=1)
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}

@@ -20,11 +20,9 @@
 #include "../Interfaces.hpp"
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
-#ifdef ODDSOURCE_IS_WINDOWS
+#include "../detail/winsock_includes.h"
 
-#include "winsock_includes.h"
-
-#else /* ODDSOURCE_IS_WINDOWS */
+#ifndef ODDSOURCE_IS_WINDOWS
 
 #include <cerrno>
 #include <cstring>
