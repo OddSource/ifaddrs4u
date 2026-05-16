@@ -19,6 +19,8 @@
 #ifndef ODDSOURCE_NETWORK_INTERFACES_DETAIL_BITWISE_ENUM_H
 #define ODDSOURCE_NETWORK_INTERFACES_DETAIL_BITWISE_ENUM_H
 
+#include "config.h"
+
 #include <type_traits>
 
 #define ODDSOURCE_BITWISE_ENUM_OPERATORS_DECL(Enum) \
@@ -43,7 +45,6 @@
         Enum const & lhs, \
         ::std::underlying_type_t< Enum > rhs ) noexcept; \
     \
-    [[nodiscard]] \
     OddSource_Export \
     ::std::underlying_type_t< Enum > & \
     operator&=( \
@@ -71,7 +72,6 @@
         Enum const & lhs, \
         ::std::underlying_type_t< Enum > rhs ) noexcept; \
     \
-    [[nodiscard]] \
     OddSource_Export \
     ::std::underlying_type_t< Enum > & \
     operator|=( \
@@ -99,7 +99,6 @@
         Enum const & lhs, \
         ::std::underlying_type_t< Enum > rhs ) noexcept; \
     \
-    [[nodiscard]] \
     OddSource_Export \
     ::std::underlying_type_t< Enum > & \
     operator^=( \

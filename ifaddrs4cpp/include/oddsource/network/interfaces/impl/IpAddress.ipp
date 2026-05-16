@@ -74,7 +74,7 @@ namespace
         {
             // inet_pton can also handle IPv4 addresses, but only in dotted-decimal format
             // (1.2.3.4), not in octal, hexadecimal, or any other valid IPv4 format.
-            success = inet_pton( AF_INET6, reprStr.c_str(), data.get() );
+            success = ::inet_pton( AF_INET6, reprStr.c_str(), data.get() );
         }
         else
         {

@@ -127,11 +127,21 @@ namespace OddSource::Interfaces
             this->_warnings,
             this->_interfaces,
             []( Interface & rInterface, MacAddress && macAddress )
-            { rInterface._macAddress.emplace( std::move( macAddress ) ); },
+            {
+                rInterface._macAddress.emplace( std::move( macAddress ) );
+            },
             []( Interface & rInterface, InterfaceIPv4Address && ipAddress )
-            { rInterface._ipv4Addresses.push_back( std::move( ipAddress ) ); },
+            {
+                if ( ipAddress.broadcastAddress() )
+                {
+                    rInterface._flags |= InterfaceFlag::BroadcastAddressSet;
+                }
+                rInterface._ipv4Addresses.push_back( std::move( ipAddress ) );
+            },
             []( Interface & rInterface, InterfaceIPv6Address && ipAddress )
-            { rInterface._ipv6Addresses.push_back( std::move( ipAddress ) ); } );
+            {
+                rInterface._ipv6Addresses.push_back( std::move( ipAddress ) );
+            } );
 
         for ( auto const & pInterface : this->_interfaces )
         {
@@ -437,7 +447,6 @@ namespace
         ::std::list< ::std::string > & /* warnings */,
         ::std::function< void( Interface &, InterfaceIPv4Address && ) > addIPv4Address,
         Interface & rInterface,
-        bool & isBroadcast,
         LPSOCKADDR sa,
         PIP_ADAPTER_PREFIX pre,
         ::std::uint8_t const prefixLength = 0 )
@@ -476,7 +485,6 @@ namespace
                     if ( !unmatch )
                     {
                         broadcast = cand;
-                        isBroadcast = true;
                         break;
                     }
                 }
@@ -485,7 +493,7 @@ namespace
             pre = pre->Next;
         }
 
-        static constexpr ::std::uint32_t const flags{ 0 };
+        static constexpr ::std::uint16_t const flags{ 0 };
         if ( broadcast )
         {
             addIPv4Address( rInterface, InterfaceIPv4Address(
@@ -620,7 +628,7 @@ namespace
 
             if ( pIfAddr->PhysicalAddress && pIfAddr->PhysicalAddressLength > 0 )
             {
-                setMacAddress( pInterface, MacAddress(
+                setMacAddress( *pInterface, MacAddress(
                     pIfAddr->PhysicalAddress,
                     static_cast< ::std::uint8_t >( pIfAddr->PhysicalAddressLength ) ) );
             }
@@ -633,20 +641,13 @@ namespace
                 LPSOCKADDR sa( pUnicastAddr->Address.lpSockaddr );
                 if ( sa->sa_family == AF_INET )
                 {
-                    bool isBroadcast{ false };
                     _addIPv4Address(
                         warnings,
                         addIPv4Address,
                         *pInterface,
-                        isBroadcast,
                         sa,
                         pIfAddr->FirstPrefix,
                         pUnicastAddr->OnLinkPrefixLength );
-
-                    if ( isBroadcast )
-                    {
-                        pInterface->_flags |= InterfaceFlag::BroadcastAddressSet;
-                    }
                 }
                 else if ( sa->sa_family == AF_INET6 )
                 {
@@ -660,7 +661,7 @@ namespace
                         addIPv6Address,
                         *pInterface,
                         sa,
-                        unicast->OnLinkPrefixLength,
+                        pUnicastAddr->OnLinkPrefixLength,
                         flags );
                 }
                 else
@@ -682,16 +683,12 @@ namespace
                 {
                     // Extremely unlikely, as IPv4 doesn't natively support Anycast
                     // (works only with BGP), but it's Windows, so there's no telling.
-                    bool isBroadcast{ false };
                     _addIPv4Address(
                         warnings,
                         addIPv4Address,
                         *pInterface,
-                        isBroadcast,
                         sa,
                         pIfAddr->FirstPrefix );
-
-                    ::std::ignore = isBroadcast;
                 }
                 else if ( sa->sa_family == AF_INET6 )
                 {
@@ -871,7 +868,7 @@ namespace
         ::std::uint8_t prefixLength{ 0 };
         if ( pIfAddr->ifa_netmask )
         {
-            auto netmaskAddr( reinterpret_cast< sockaddr_in * >( pIfAddr->ifa_netmask ) );
+            auto const netmaskAddr( reinterpret_cast< sockaddr_in * >( pIfAddr->ifa_netmask ) );
             auto netmask{ static_cast< ::std::uint32_t >( netmaskAddr->sin_addr.s_addr ) };
             while (netmask > 0)
             {
@@ -880,10 +877,10 @@ namespace
             }
         }
 
-        static constexpr ::std::uint32_t const flags{ 0 };
+        static constexpr ::std::uint16_t const flags{ 0 };
         if ( rInterface.isFlagEnabled( InterfaceFlag::BroadcastAddressSet ) && pIfAddr->ifa_broadaddr )
         {
-            auto broadcastAddress( reinterpret_cast< sockaddr_in * >( pIfAddr->ifa_broadaddr ) );
+            auto const broadcastAddress( reinterpret_cast< sockaddr_in * >( pIfAddr->ifa_broadaddr ) );
             addIPv4Address( rInterface, InterfaceIPv4Address(
                 address,
                 flags,
@@ -893,7 +890,7 @@ namespace
         }
         else if( rInterface.isFlagEnabled( InterfaceFlag::IsPointToPoint ) && pIfAddr->ifa_dstaddr )
         {
-            auto pointToPointDestination( reinterpret_cast< sockaddr_in * >( pIfAddr->ifa_dstaddr ) );
+            auto const pointToPointDestination( reinterpret_cast< sockaddr_in * >( pIfAddr->ifa_dstaddr ) );
             addIPv4Address( rInterface, InterfaceIPv4Address(
                 address,
                 flags,
@@ -952,7 +949,7 @@ namespace
         in6_ifreq ifr6 {};
         ::strncpy( ifr6.ifr_name, pIfAddr->ifa_name, IFNAMSIZ - 1 );
         ifr6.ifr_addr = *addr;
-        ::std::uint32_t flags{ 0 };
+        ::std::uint16_t flags{ 0 };
         if ( int sock( ::socket( AF_INET6, SOCK_DGRAM, 0 ) ); sock > -1 )
         {
             if ( ::ioctl( sock, SIOCGIFAFLAG_IN6, &ifr6 ) >= 0 )
@@ -981,7 +978,7 @@ namespace
             warnings.push_back( oss.str() );
         }
 #else /* SIOCGIFAFLAG_IN6 */
-        static constexpr ::std::uint32_t const flags{ 0 };
+        static constexpr ::std::uint16_t const flags{ 0 };
         ::std::ignore = warnings;
 #endif /* !SIOCGIFAFLAG_IN6 */
 

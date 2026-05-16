@@ -19,6 +19,8 @@
 #ifndef ODDSOURCE_NETWORK_INTERFACES_DETAIL_BITWISE_ENUM_IPP
 #define ODDSOURCE_NETWORK_INTERFACES_DETAIL_BITWISE_ENUM_IPP
 
+#include "config.h"
+
 #include <type_traits>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <utility>

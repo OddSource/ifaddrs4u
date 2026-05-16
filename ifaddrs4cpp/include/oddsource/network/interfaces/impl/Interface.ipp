@@ -138,7 +138,7 @@ namespace OddSource::Interfaces
         ::std::string_view const & name,
         ::std::string_view const & friendlyName,
         ::std::string_view const & description,
-        ::std::uint32_t const flags,
+        ::std::uint16_t const flags,
         ::std::optional< ::std::uint64_t const > const & mtu )
         : _index( index ),
           _name( name ),
@@ -247,7 +247,7 @@ namespace OddSource::Interfaces
     }
 
     OddSource_Inline
-    ::std::uint32_t
+    ::std::uint16_t
     Interface::
     flags() const
     {

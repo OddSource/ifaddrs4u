@@ -20,6 +20,7 @@
 #define ODDSOURCE_NETWORK_INTERFACES_IPADDRESS_HPP
 
 #include "detail/bitwise_enum.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "detail/config.h"
 // ReSharper disable once CppUnusedIncludeDirective
 #include "detail/winsock_includes.h"

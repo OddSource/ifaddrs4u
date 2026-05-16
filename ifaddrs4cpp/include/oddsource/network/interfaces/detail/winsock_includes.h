@@ -29,6 +29,7 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <ws2ipdef.h>
+#include <ws2tcpip.h>
 #include <iphlpapi.h>
 #include <ip2string.h>
 

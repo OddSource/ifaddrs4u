@@ -20,6 +20,7 @@
 #define ODDSOURCE_NETWORK_INTERFACES_INTERFACE_HPP
 
 #include "detail/bitwise_enum.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "detail/config.h"
 // ReSharper disable once CppUnusedIncludeDirective
 #include "detail/winsock_includes.h"
@@ -332,7 +333,7 @@ namespace OddSource::Interfaces
             ::std::string_view const & name,
             ::std::string_view const & friendlyName,
             ::std::string_view const & description,
-            ::std::uint32_t flags,
+            ::std::uint16_t flags,
             ::std::optional< ::std::uint64_t const > const & mtu = ::std::nullopt);
 
         OddSource_Inline
@@ -385,7 +386,7 @@ namespace OddSource::Interfaces
 
         [[nodiscard]]
         OddSource_Inline
-        ::std::uint32_t
+        ::std::uint16_t
         flags() const;
 
         [[nodiscard]]
@@ -435,7 +436,7 @@ namespace OddSource::Interfaces
         ::std::string _name;
         ::std::string _friendlyName;
         ::std::string _description;
-        ::std::uint32_t _flags;
+        ::std::uint16_t _flags;
         ::std::optional< ::std::uint64_t const > _mtu;
         ::std::optional< MacAddress const > _macAddress;
         ::std::vector< InterfaceIPv4Address > _ipv4Addresses;
