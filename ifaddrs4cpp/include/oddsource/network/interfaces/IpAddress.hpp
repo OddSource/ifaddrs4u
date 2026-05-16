@@ -19,6 +19,7 @@
 #ifndef ODDSOURCE_NETWORK_INTERFACES_IPADDRESS_HPP
 #define ODDSOURCE_NETWORK_INTERFACES_IPADDRESS_HPP
 
+#include "detail/bitwise_enum.h"
 #include "detail/config.h"
 // ReSharper disable once CppUnusedIncludeDirective
 #include "detail/winsock_includes.h"
@@ -126,33 +127,7 @@ namespace OddSource::Interfaces
         ReservedFlag = 0b1000 // unused, here for clarity and unit testing
     };
 
-    [[nodiscard]]
-    OddSource_Export
-    ::std::underlying_type_t< MulticastV6Flag >
-    operator&(
-        ::std::underlying_type_t< MulticastV6Flag > lhs,
-        MulticastV6Flag const & rhs );
-
-    [[nodiscard]]
-    OddSource_Export
-    ::std::underlying_type_t< MulticastV6Flag >
-    operator|(
-        MulticastV6Flag const & lhs,
-        MulticastV6Flag const & rhs );
-
-    [[nodiscard]]
-    OddSource_Export
-    ::std::underlying_type_t< MulticastV6Flag >
-    operator|(
-        ::std::underlying_type_t< MulticastV6Flag > lhs,
-        MulticastV6Flag const & rhs );
-
-    [[nodiscard]]
-    OddSource_Export
-    bool
-    operator==(
-        ::std::underlying_type_t< MulticastV6Flag > lhs,
-        MulticastV6Flag const & rhs );
+    ODDSOURCE_BITWISE_ENUM_OPERATORS_DECL( MulticastV6Flag );
 
     class OddSource_Export IPAddress
     {

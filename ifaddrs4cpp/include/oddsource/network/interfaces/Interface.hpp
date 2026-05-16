@@ -19,6 +19,7 @@
 #ifndef ODDSOURCE_NETWORK_INTERFACES_INTERFACE_HPP
 #define ODDSOURCE_NETWORK_INTERFACES_INTERFACE_HPP
 
+#include "detail/bitwise_enum.h"
 #include "detail/config.h"
 // ReSharper disable once CppUnusedIncludeDirective
 #include "detail/winsock_includes.h"
@@ -109,33 +110,7 @@ namespace OddSource::Interfaces
         Tentative = IN6_IFF_TENTATIVE
     };
 
-    [[nodiscard]]
-    OddSource_Export
-    ::std::underlying_type_t< InterfaceIPAddressFlag >
-    operator&(
-        ::std::underlying_type_t< InterfaceIPAddressFlag > lhs,
-        InterfaceIPAddressFlag const & rhs );
-
-    [[nodiscard]]
-    OddSource_Export
-    ::std::underlying_type_t< InterfaceIPAddressFlag >
-    operator|(
-        InterfaceIPAddressFlag const & lhs,
-        InterfaceIPAddressFlag const & rhs );
-
-    [[nodiscard]]
-    OddSource_Export
-    ::std::underlying_type_t< InterfaceIPAddressFlag >
-    operator|(
-        ::std::underlying_type_t< InterfaceIPAddressFlag > lhs,
-        InterfaceIPAddressFlag const & rhs );
-
-    [[nodiscard]]
-    OddSource_Export
-    bool
-    operator==(
-        ::std::underlying_type_t< InterfaceIPAddressFlag > lhs,
-        InterfaceIPAddressFlag const & rhs );
+    ODDSOURCE_BITWISE_ENUM_OPERATORS_DECL( InterfaceIPAddressFlag );
 
 #ifndef IFADDRS4CPP_INLINE_SOURCE
     OddSource_Extern OddSource_Export
@@ -203,33 +178,7 @@ namespace OddSource::Interfaces
 #endif /* IFF_OACTIVE */
     };
 
-    [[nodiscard]]
-    OddSource_Export
-    ::std::underlying_type_t< InterfaceFlag >
-    operator&(
-        ::std::underlying_type_t< InterfaceFlag > lhs,
-        InterfaceFlag const & rhs );
-
-    [[nodiscard]]
-    OddSource_Export
-    ::std::underlying_type_t< InterfaceFlag >
-    operator|(
-        InterfaceFlag const & lhs,
-        InterfaceFlag const & rhs );
-
-    [[nodiscard]]
-    OddSource_Export
-    ::std::underlying_type_t< InterfaceFlag >
-    operator|(
-        ::std::underlying_type_t< InterfaceFlag > lhs,
-        InterfaceFlag const & rhs );
-
-    [[nodiscard]]
-    OddSource_Export
-    bool
-    operator==(
-        ::std::underlying_type_t< InterfaceFlag > lhs,
-        InterfaceFlag const & rhs );
+    ODDSOURCE_BITWISE_ENUM_OPERATORS_DECL( InterfaceFlag );
 
 #ifndef IFADDRS4CPP_INLINE_SOURCE
     OddSource_Extern OddSource_Export

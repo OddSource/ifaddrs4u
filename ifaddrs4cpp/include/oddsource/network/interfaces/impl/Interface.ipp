@@ -20,6 +20,7 @@
 #include "../Interface.hpp"
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
+#include "../detail/bitwise_enum.ipp"
 #include "../detail/flip.hpp"
 
 // ReSharper disable once CppUnnamedNamespaceInHeaderFile
@@ -126,79 +127,9 @@ namespace OddSource::Interfaces
     PointToPoint_t const
     PointToPoint{};
 
-    OddSource_Inline
-    ::std::underlying_type_t< InterfaceIPAddressFlag >
-    operator&(
-        ::std::underlying_type_t< InterfaceIPAddressFlag > const lhs,
-        InterfaceIPAddressFlag const & rhs )
-    {
-        return lhs & static_cast< ::std::underlying_type_t< InterfaceIPAddressFlag > >( rhs );
-    }
+    ODDSOURCE_BITWISE_ENUM_OPERATORS_IMPL( InterfaceIPAddressFlag );
 
-    OddSource_Inline
-    ::std::underlying_type_t< InterfaceIPAddressFlag >
-    operator|(
-        InterfaceIPAddressFlag const & lhs,
-        InterfaceIPAddressFlag const & rhs )
-    {
-        return static_cast< ::std::underlying_type_t< InterfaceIPAddressFlag > >( lhs ) |
-               static_cast< ::std::underlying_type_t< InterfaceIPAddressFlag > >( rhs );
-    }
-
-    OddSource_Inline
-    ::std::underlying_type_t< InterfaceIPAddressFlag >
-    operator|(
-        ::std::underlying_type_t< InterfaceIPAddressFlag > const lhs,
-        InterfaceIPAddressFlag const & rhs )
-    {
-        return lhs | static_cast< ::std::underlying_type_t< InterfaceIPAddressFlag > >( rhs );
-    }
-
-    OddSource_Inline
-    bool
-    operator==(
-        ::std::underlying_type_t< InterfaceIPAddressFlag > const lhs,
-        InterfaceIPAddressFlag const & rhs )
-    {
-        return lhs == static_cast< ::std::underlying_type_t< InterfaceIPAddressFlag > >( rhs );
-    }
-
-    OddSource_Inline
-    ::std::underlying_type_t< InterfaceFlag >
-    operator&(
-        ::std::underlying_type_t< InterfaceFlag > const lhs,
-        InterfaceFlag const & rhs )
-    {
-        return lhs & static_cast< ::std::underlying_type_t< InterfaceFlag > >( rhs );
-    }
-
-    OddSource_Inline
-    ::std::underlying_type_t< InterfaceFlag >
-    operator|(
-        InterfaceFlag const & lhs,
-        InterfaceFlag const & rhs )
-    {
-        return static_cast< ::std::underlying_type_t< InterfaceFlag > >( lhs ) |
-               static_cast< ::std::underlying_type_t< InterfaceFlag > >( rhs );
-    }
-
-    OddSource_Inline
-    ::std::underlying_type_t< InterfaceFlag >
-    operator|(
-        ::std::underlying_type_t< InterfaceFlag > const lhs,
-        InterfaceFlag const & rhs )
-    {
-        return lhs | static_cast< ::std::underlying_type_t< InterfaceFlag > >( rhs );
-    }
-
-    OddSource_Inline
-    bool
-    operator==(
-        ::std::underlying_type_t< InterfaceFlag > const lhs,
-        InterfaceFlag const & rhs )
-    {
-        return lhs == static_cast< ::std::underlying_type_t< InterfaceFlag > >( rhs );
-    }
+    ODDSOURCE_BITWISE_ENUM_OPERATORS_IMPL( InterfaceFlag );
 
     OddSource_Inline
     Interface::

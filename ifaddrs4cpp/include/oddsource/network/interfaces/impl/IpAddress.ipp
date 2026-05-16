@@ -20,7 +20,9 @@
 #include "../IpAddress.hpp"
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
+#include "../detail/bitwise_enum.ipp"
 #include "../detail/flip.hpp"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "../detail/winsock_includes.h"
 
 #ifndef ODDSOURCE_IS_WINDOWS
@@ -384,42 +386,7 @@ namespace OddSource::Interfaces
         return os << toString( scope );
     }
 
-    OddSource_Inline
-    ::std::underlying_type_t< MulticastV6Flag >
-    operator&(
-        ::std::underlying_type_t< MulticastV6Flag > lhs,
-        MulticastV6Flag const & rhs )
-    {
-        return lhs & static_cast< ::std::underlying_type_t< MulticastV6Flag > >( rhs );
-    }
-
-    OddSource_Inline
-    ::std::underlying_type_t< MulticastV6Flag >
-    operator|(
-        MulticastV6Flag const & lhs,
-        MulticastV6Flag const & rhs )
-    {
-        return static_cast< ::std::underlying_type_t< MulticastV6Flag > >( lhs ) |
-               static_cast< ::std::underlying_type_t< MulticastV6Flag > >( rhs );
-    }
-
-    OddSource_Inline
-    ::std::underlying_type_t< MulticastV6Flag >
-    operator|(
-        ::std::underlying_type_t< MulticastV6Flag > lhs,
-        MulticastV6Flag const & rhs )
-    {
-        return lhs | static_cast< ::std::underlying_type_t< MulticastV6Flag > >( rhs );
-    }
-
-    OddSource_Inline
-    bool
-    operator==(
-        ::std::underlying_type_t< MulticastV6Flag > lhs,
-        MulticastV6Flag const & rhs )
-    {
-        return lhs == static_cast< ::std::underlying_type_t< MulticastV6Flag > >( rhs );
-    }
+    ODDSOURCE_BITWISE_ENUM_OPERATORS_IMPL( MulticastV6Flag );
 
     OddSource_Inline
     IPAddress::

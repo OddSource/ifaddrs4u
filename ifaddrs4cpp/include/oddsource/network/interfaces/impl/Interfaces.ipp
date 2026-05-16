@@ -20,6 +20,7 @@
 #include "../Interfaces.hpp"
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include "../detail/winsock_includes.h"
 
 #ifndef ODDSOURCE_IS_WINDOWS
@@ -65,9 +66,9 @@ namespace
     populateInterfaces(
         ::std::list< ::std::string > & warnings,
         ::std::list< ::std::shared_ptr< Interface const > > & interfaces,
-        ::std::function< void( Interface &, MacAddress && ) > setMacAddress,
-        ::std::function< void( Interface &, InterfaceIPv4Address && ) > addIPv4Address,
-        ::std::function< void( Interface &, InterfaceIPv6Address && ) > addIPv6Address );
+        ::std::function< void( Interface &, MacAddress && ) > && setMacAddress,
+        ::std::function< void( Interface &, InterfaceIPv4Address && ) > && addIPv4Address,
+        ::std::function< void( Interface &, InterfaceIPv6Address && ) > && addIPv6Address );
 }
 
 namespace OddSource::Interfaces
@@ -82,7 +83,7 @@ namespace OddSource::Interfaces
 
     OddSource_Inline
     InterfaceBrowserSystemError::
-    InterfaceBrowserSystemError(
+    InterfaceBrowserSystemError( // NOLINT(*-use-equals-default)
         InterfaceBrowserSystemError const & other ) noexcept
         : ::std::runtime_error( other )
     {
@@ -90,7 +91,7 @@ namespace OddSource::Interfaces
 
     OddSource_Inline
     InterfaceBrowserSystemError::
-    ~InterfaceBrowserSystemError() noexcept
+    ~InterfaceBrowserSystemError() noexcept // NOLINT(*-use-equals-default)
     {
     }
 
@@ -148,7 +149,7 @@ namespace OddSource::Interfaces
 
     OddSource_Inline
     InterfaceBrowser::
-    ~InterfaceBrowser() noexcept
+    ~InterfaceBrowser() noexcept // NOLINT(*-use-equals-default)
     {
     }
 
@@ -362,7 +363,7 @@ namespace
         }
 
         ::std::string errorMessage;
-        LPVOID allocation( nullptr )
+        LPVOID allocation( nullptr );
         __try
         {
             allocation = ::HeapAlloc( heap, HEAP_GENERATE_EXCEPTIONS | HEAP_ZERO_MEMORY, bufferLength );
@@ -384,9 +385,10 @@ namespace
             {
                 oss << "due to unknown error code: 0x" << ::std::hex << errorCode << ::std::dec << ".";
             }
+            errorMessage = oss.str();
         }
 
-        if ( errorMessage )
+        if ( !errorMessage.empty() )
         {
             throw InterfaceBrowserSystemError( errorMessage );
         }
@@ -489,7 +491,7 @@ namespace
             addIPv4Address( rInterface, InterfaceIPv4Address(
                 address,
                 flags,
-                prefixLength );
+                prefixLength ) );
         }
     }
 
@@ -523,9 +525,9 @@ namespace
     populateInterfaces(
         ::std::list< ::std::string > & warnings,
         ::std::list< ::std::shared_ptr< Interface const > > & interfaces,
-        ::std::function< void( Interface &, MacAddress && ) > setMacAddress,
-        ::std::function< void( Interface &, InterfaceIPv4Address && ) > addIPv4Address,
-        ::std::function< void( Interface &, InterfaceIPv6Address && ) > addIPv6Address )
+        ::std::function< void( Interface &, MacAddress && ) > && setMacAddress,
+        ::std::function< void( Interface &, InterfaceIPv4Address && ) > && addIPv4Address,
+        ::std::function< void( Interface &, InterfaceIPv6Address && ) > && addIPv6Address )
     {
         using namespace ::std::string_literals;
 
@@ -534,6 +536,7 @@ namespace
             &freeIpAdapterAddresses );
 
         {
+            static constexpr ULONG MAX_TRIES{ 3 };
             DWORD result{ 0 };
             ULONG iterations{ 0 };
             ULONG const flags{ GAA_FLAG_INCLUDE_PREFIX | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER };
@@ -548,7 +551,7 @@ namespace
                         "Adapter addresses unexpectedly a null pointer before call to GetAdapterAddresses." );
                 }
 
-                result = ::GetAdaptersAddresses( AF_UNSPEC, flags, nullptr, pAdapterAddresses, &bufferLength );
+                result = ::GetAdaptersAddresses( AF_UNSPEC, flags, nullptr, pAdapterAddresses.get(), &bufferLength );
                 iterations++;
 
                 if ( result == ERROR_BUFFER_OVERFLOW )
@@ -556,7 +559,7 @@ namespace
                     pAdapterAddresses.reset();
                 }
             }
-            while ( result == ERROR_BUFFER_OVERFLOW && iterations < ODDSOURCE_MAX_TRIES );
+            while ( result == ERROR_BUFFER_OVERFLOW && iterations < MAX_TRIES );
 
             if ( result == ERROR_NO_DATA )
             {
@@ -1000,9 +1003,9 @@ namespace
     populateInterfaces(
         ::std::list< ::std::string > & warnings,
         ::std::list< ::std::shared_ptr< Interface const > > & interfaces,
-        ::std::function< void( Interface &, MacAddress && ) > setMacAddress,
-        ::std::function< void( Interface &, InterfaceIPv4Address && ) > addIPv4Address,
-        ::std::function< void( Interface &, InterfaceIPv6Address && ) > addIPv6Address )
+        ::std::function< void( Interface &, MacAddress && ) > && setMacAddress,
+        ::std::function< void( Interface &, InterfaceIPv4Address && ) > && addIPv4Address,
+        ::std::function< void( Interface &, InterfaceIPv6Address && ) > && addIPv6Address )
     {
         ::std::unique_ptr< struct ifaddrs, decltype( &::freeifaddrs ) > pIfAddrs(
             nullptr,
