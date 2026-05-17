@@ -30,14 +30,16 @@
 #ifdef ODDSOURCE_IS_WINDOWS
 
 #if defined( ODDSOURCE_BUILDING_SHARED_LIBRARY )
-#pragma message("COMPILATION DEBUG: Defining OddSource_Export as __declspec(dllexport) in DLL")
-#define OddSource_Export __declspec(dllexport)
+#  pragma message("COMPILATION DEBUG: Defining OddSource_Export as __declspec(dllexport) in DLL")
+#  define OddSource_Export __declspec(dllexport)
 #elif defined( ODDSOURCE_BUILDING_STATIC_LIBRARY ) /* ODDSOURCE_BUILDING_SHARED_LIBRARY */
-#pragma message("COMPILATION DEBUG: Defining OddSource_Export as [nothing] in static library")
-#define OddSource_Export
-#elif !defined( ODDSOURCE_INTERFACES_STATIC_LINKAGE ) /* ODDSOURCE_BUILDING_STATIC_LIBRARY */
-#define OddSource_Export __declspec(dllimport)
-#endif /* !ODDSOURCE_INTERFACES_STATIC_LINKAGE */
+#  pragma message("COMPILATION DEBUG: Defining OddSource_Export as [nothing] in static library")
+#  define OddSource_Export
+#elif defined( ODDSOURCE_INTERFACES_STATIC_LINKAGE ) /* ODDSOURCE_BUILDING_STATIC_LIBRARY */
+#  define OddSource_Export
+#else /* ODDSOURCE_INTERFACES_STATIC_LINKAGE */
+#  define OddSource_Export __declspec(dllimport)
+#endif /* !anything */
 
 #else /* ODDSOURCE_IS_WINDOWS */
 
