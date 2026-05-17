@@ -197,6 +197,14 @@ namespace OddSource::Interfaces::Tests
                 Registrar && ) = delete;
 
             ~Registrar() = default;
+
+            Registrar &
+            operator=(
+                Registrar const & ) = delete;
+
+            Registrar &
+            operator=(
+                Registrar && ) = delete;
         };
 
     protected:

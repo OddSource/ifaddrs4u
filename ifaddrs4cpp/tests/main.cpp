@@ -254,10 +254,10 @@ main(
     int const argc,
     char * argv [] )
 {
-    auto const numArguments{ ::std::clamp< ::std::uint32_t >( argc, 0u, 65535u ) };
+    auto const numArguments{ static_cast< size_t >( ::std::clamp< int >( argc, 0, 65535 ) ) };
     ::std::vector< ::std::string > matching;
     matching.reserve( numArguments - 1 );
-    for ( ::std::uint32_t i{ 1 }; i < numArguments; ++i )
+    for ( size_t i{ 1 }; i < numArguments; ++i )
     {
         if ( ::std::strlen( argv[ i ] ) > 0 )
         {
