@@ -197,7 +197,7 @@ if(${ENABLE_TESTS})
     target_include_directories(${PROJECT_NAME}_tests PUBLIC "${CMAKE_SOURCE_DIR}/include")
     target_include_directories(${PROJECT_NAME}_tests PUBLIC "${PROJECT_BINARY_DIR}/include")
     if (MSVC)
-        target_include_directories(${PROJECT_NAME}-tests SYSTEM PRIVATE "C:/Program Files/Microsoft Visual Studio")
+        target_include_directories(${PROJECT_NAME}_tests SYSTEM PRIVATE "C:/Program Files/Microsoft Visual Studio")
     endif ()
     set_target_properties(${PROJECT_NAME}_tests PROPERTIES
                           CXX_VISIBILITY_PRESET hidden)
