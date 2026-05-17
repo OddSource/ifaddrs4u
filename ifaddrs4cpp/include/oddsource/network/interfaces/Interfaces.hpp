@@ -56,25 +56,6 @@ namespace OddSource::Interfaces
         ~InterfaceBrowserSystemError() noexcept; // NOLINT(*-use-override)
     };
 
-#ifdef ODDSOURCE_IS_WINDOWS
-    class OddSource_Export WinSockStartupCleanupHelper final
-    {
-    public:
-        OddSource_Inline
-        WinSockStartupCleanupHelper();
-
-        WinSockStartupCleanupHelper(
-            WinSockStartupCleanupHelper const & ) = delete;
-
-        OddSource_Inline
-        ~WinSockStartupCleanupHelper() noexcept;
-
-        WinSockStartupCleanupHelper &
-        operator=(
-            WinSockStartupCleanupHelper const & ) = delete;
-    };
-#endif
-
     class OddSource_Export InterfaceBrowser final
     {
     public:

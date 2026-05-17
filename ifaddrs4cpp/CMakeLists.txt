@@ -112,7 +112,8 @@ set(${PROJECT_NAME}_sources
     src/Interfaces.cpp
     src/IpAddress.cpp
     src/MacAddress.cpp
-    src/VersionInfo.cpp)
+    src/VersionInfo.cpp
+    src/WSAHelper.cpp)
 
 configure_file(version.h.in version.h)
 #file(COPY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_BINARY_DIR})

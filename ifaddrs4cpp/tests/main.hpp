@@ -17,7 +17,7 @@
 #pragma once
 
 #include <oddsource/network/interfaces/detail/config.h>
-#include <oddsource/network/interfaces/detail/winsock_includes.h>
+#include <oddsource/network/interfaces/WSAHelper.hpp>
 
 #include <cassert>
 #include <iostream>

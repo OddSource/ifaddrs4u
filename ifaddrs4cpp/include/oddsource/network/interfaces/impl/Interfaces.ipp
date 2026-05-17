@@ -103,30 +103,6 @@ namespace OddSource::Interfaces
     {
     }
 
-#ifdef ODDSOURCE_IS_WINDOWS
-    WinSockStartupCleanupHelper::
-    WinSockStartupCleanupHelper()
-    {
-        using namespace ::std::string_literals;
-        WORD version_requested = MAKEWORD( 2, 2 );
-        WSADATA data;
-        int error = WSAStartup( version_requested, &data );
-        if (error != 0)
-        {
-            throw ::std::runtime_error(
-                "Could not initialize WinSock subsystem due to error code: "s +
-                ::std::to_string(error) + ". For the meaning of this, see the documentation: "s +
-                "https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsastartup#return-value"s);
-        }
-    }
-
-    WinSockStartupCleanupHelper::
-    ~WinSockStartupCleanupHelper()
-    {
-        WSACleanup();
-    }
-#endif /* ODDSOURCE_IS_WINDOWS */
-
     OddSource_Inline
     InterfaceBrowser::
     InterfaceBrowser()
