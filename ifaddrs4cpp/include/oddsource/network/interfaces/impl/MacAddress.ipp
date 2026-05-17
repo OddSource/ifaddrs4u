@@ -25,6 +25,7 @@
 #  pragma warning( disable : 4242 )
 #  pragma warning( disable : 4244 )
 #endif /* ODDSOURCE_IS_WINDOWS */
+#include <algorithm>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cctype>
 // ReSharper disable once CppUnusedIncludeDirective
@@ -41,6 +42,9 @@
 namespace
 {
     using namespace OddSource::Interfaces;
+
+    constexpr ::std::uint16_t MAC_ADDRESS_CLAMP_MIN{ 0 };
+    constexpr ::std::uint16_t MAC_ADDRESS_CLAMP_MAX{ 256 };
 
     ::std::unique_ptr< ::std::uint8_t[] >
     copyHardwareAddress(
@@ -77,7 +81,8 @@ namespace
         // GNUC has ether_aton_r, which is thread-safe, but BSD systems have
         // ether_aton, which is not thread safe and basically cannot safely be used.
         // Windows has no built-in method until C#. So ... let's try something simple-ish.
-        auto predictedLength( static_cast< size_t >( predictReprLength( repr ) ) );
+        auto const predictedLength( static_cast< size_t >(
+            ::std::clamp( predictReprLength( repr ), MAC_ADDRESS_CLAMP_MIN, MAC_ADDRESS_CLAMP_MAX ) ) );
         if ( predictedLength > MacAddress::MAX_LENGTH )
         {
             ::std::ostringstream oss;
@@ -114,9 +119,10 @@ namespace
                 charsInByte++;
                 if ( charsInByte > 2 )
                 {
+                    auto const invalidNumChars{ ::std::clamp(
+                        static_cast< ::std::uint16_t >( charsInByte ), MAC_ADDRESS_CLAMP_MIN, MAC_ADDRESS_CLAMP_MAX ) };
                     throw InvalidMacAddress(
-                        "Invalid number of characters "s +
-                        ::std::to_string( static_cast< ::std::uint16_t >( charsInByte ) ) +
+                        "Invalid number of characters "s + ::std::to_string( invalidNumChars ) +
                         " between separators in MAC address '"s + MAC_ADDR_REPR_POS );
                 }
                 byte <<= 4;
@@ -152,21 +158,22 @@ namespace
         ::std::uint16_t const dataLength )
     {
         ::std::ostringstream oss;
-        if ( dataLength > MacAddress::MAX_LENGTH )
+        auto const clampedLength{ ::std::clamp( dataLength, MAC_ADDRESS_CLAMP_MIN, MAC_ADDRESS_CLAMP_MAX ) };
+        if ( clampedLength > MacAddress::MAX_LENGTH )
         {
-            oss << "MAC address length (" << dataLength
+            oss << "MAC address length (" << clampedLength
                 << ") greater than allowed length " << MacAddress::MAX_LENGTH;
             throw InvalidMacAddress( oss.str() );
         }
-        if ( dataLength < MacAddress::MIN_LENGTH )
+        if ( clampedLength < MacAddress::MIN_LENGTH )
         {
-            oss << "MAC address length (" << dataLength
+            oss << "MAC address length (" << clampedLength
                 << " bytes) too short (min " << MacAddress::MIN_LENGTH << " bytes).";
             throw InvalidMacAddress( oss.str() );
         }
 
         static char const HEX_DIGITS[] = "0123456789abcdef";
-        for( ::std::uint16_t i{ 0 }; i < dataLength; ++i )
+        for( ::std::uint16_t i{ 0 }; i < clampedLength; ++i )
         {
             if ( i > 0 )
             {

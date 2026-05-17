@@ -42,13 +42,17 @@ namespace
         using namespace ::std::string_literals;
         static_assert( ::std::is_base_of_v< IPAddress, IPAddressT >,
                        "the template parameter IPAddressT must derive from IPAddress." );
-        if ( prefixLength > address.maximumPrefixLength() )
+        constexpr ::std::uint16_t PREFIX_CLAMP_MIN{ 0 };
+        constexpr ::std::uint16_t PREFIX_CLAMP_MAX{ 256 };
+        auto const clampedPrefixLength{
+            ::std::clamp( prefixLength, PREFIX_CLAMP_MIN, PREFIX_CLAMP_MAX ) };
+        if ( clampedPrefixLength > address.maximumPrefixLength() )
         {
             throw ::std::invalid_argument(
-                "Invalid prefix length "s + ::std::to_string( prefixLength ) +
+                "Invalid prefix length "s + ::std::to_string( clampedPrefixLength ) +
                 " for IPv" + toString( address.version() ) );
         }
-        return prefixLength == 0 ? ::std::nullopt : ::std::optional( prefixLength );
+        return clampedPrefixLength == 0 ? ::std::nullopt : ::std::optional( clampedPrefixLength );
     }
 
     struct InterfaceIPFlagDisplayInfo

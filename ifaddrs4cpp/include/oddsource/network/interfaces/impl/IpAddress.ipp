@@ -41,6 +41,7 @@
 #  pragma warning( disable : 4242 )
 #  pragma warning( disable : 4244 )
 #endif /* ODDSOURCE_IS_WINDOWS */
+#include <algorithm>
 #include <array>
 #include <cstring>
 #include <string>
@@ -797,7 +798,9 @@ namespace OddSource::Interfaces
         ::std::uint32_t const scopeId )
         : IPv6Address(
             copy_in_addr( data ),
-            scopeId > 0 ? ::std::optional( scopeFrom( scopeId ) ) : ::std::nullopt )
+            scopeId > 0 ?
+                ::std::optional( scopeFrom( ::std::clamp( scopeId, 0u,  2'147'483'647u ) ) ) :
+                ::std::nullopt )
     {
     }
 
@@ -834,7 +837,9 @@ namespace OddSource::Interfaces
         ::std::uint32_t const scopeId )
         : IPv6Address(
             to_in6_addr( data ),
-            scopeId > 0 ? ::std::optional( scopeFrom( scopeId ) ) : ::std::nullopt )
+            scopeId > 0 ?
+                ::std::optional( scopeFrom( ::std::clamp( scopeId, 0u,  2'147'483'647u ) ) ) :
+                ::std::nullopt )
     {
     }
 
