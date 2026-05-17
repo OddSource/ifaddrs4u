@@ -21,7 +21,13 @@
 
 #include "config.h"
 
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( push, 0 )
+#endif /* ODDSOURCE_IS_WINDOWS */
 #include <type_traits>
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( pop )
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 #define ODDSOURCE_BITWISE_ENUM_OPERATORS_DECL(Enum) \
     [[nodiscard]] \

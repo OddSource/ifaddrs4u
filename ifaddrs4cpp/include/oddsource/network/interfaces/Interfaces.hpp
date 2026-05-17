@@ -22,12 +22,18 @@
 #include "detail/config.h"
 #include "Interface.hpp"
 
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( push, 0 )
+#endif /* ODDSOURCE_IS_WINDOWS */
 #include <functional>
 #include <list>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
 #include <unordered_map>
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( pop )
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 namespace OddSource::Interfaces
 {

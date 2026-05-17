@@ -21,10 +21,16 @@
 
 #include "detail/config.h"
 
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( push, 0 )
+#endif /* ODDSOURCE_IS_WINDOWS */
 #include <memory>
 #include <ostream>
 #include <string>
 #include <string_view>
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( pop )
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 #ifndef MIN_ADAPTER_ADDRESS_LENGTH
 #define MIN_ADAPTER_ADDRESS_LENGTH 6

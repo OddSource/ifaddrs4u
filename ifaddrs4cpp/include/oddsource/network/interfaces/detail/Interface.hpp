@@ -16,9 +16,15 @@
 
 #pragma once
 
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( push, 0 )
+#endif /* ODDSOURCE_IS_WINDOWS */
 #include <algorithm>
 #include <sstream>
 #include <string>
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( pop )
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 // ReSharper disable once CppUnnamedNamespaceInHeaderFile
 namespace

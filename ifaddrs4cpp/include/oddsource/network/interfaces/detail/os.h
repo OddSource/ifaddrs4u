@@ -37,6 +37,12 @@
 #endif
 #endif
 
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( push, 0 )
+#endif /* ODDSOURCE_IS_WINDOWS */
 #include <cstdint>
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( pop )
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 #endif /* ODDSOURCE_NETWORK_INTERFACES_DETAIL_OS_H */

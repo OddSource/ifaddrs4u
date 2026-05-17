@@ -36,12 +36,18 @@
 
 #endif /* !ODDSOURCE_IS_WINDOWS */
 
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( push, 0 )
+#endif /* ODDSOURCE_IS_WINDOWS */
 #include <array>
 #include <cstring>
 #include <string>
 #include <string_view>
 #include <sstream>
 #include <utility>
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( pop )
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 #define BYTES reinterpret_cast< ::std::uint8_t const * >( this->_data.get() )
 #define WORDS reinterpret_cast< ::std::uint16_t const * >( this->_data.get() )

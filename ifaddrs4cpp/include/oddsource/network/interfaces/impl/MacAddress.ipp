@@ -20,6 +20,9 @@
 #include "../MacAddress.hpp"
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( push, 0 )
+#endif /* ODDSOURCE_IS_WINDOWS */
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cctype>
 // ReSharper disable once CppUnusedIncludeDirective
@@ -28,6 +31,9 @@
 #include <memory>
 #include <sstream>
 #include <utility>
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( pop )
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 // ReSharper disable once CppUnnamedNamespaceInHeaderFile
 namespace

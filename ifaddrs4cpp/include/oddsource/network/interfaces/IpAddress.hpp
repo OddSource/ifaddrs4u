@@ -29,6 +29,9 @@
 #include <netinet/in.h>
 #endif /* !ODDSOURCE_IS_WINDOWS */
 
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( push, 0 )
+#endif /* ODDSOURCE_IS_WINDOWS */
 #include <array>
 #include <memory>
 #include <optional>
@@ -37,6 +40,9 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( pop )
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 #ifdef ODDSOURCE_INCLUDE_BOOST
 #  include ODDSOURCE_BOOST_HEADER(asio/ip/address.hpp)

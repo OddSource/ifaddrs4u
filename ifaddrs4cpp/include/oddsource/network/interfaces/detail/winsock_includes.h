@@ -21,6 +21,8 @@
 
 #ifdef ODDSOURCE_IS_WINDOWS
 
+#pragma warning( push, 0 )
+
 // Windows and Windows socket headers have to be included in a particular order, or else
 // all kinds of errors are encountered. Additionally, many (all?) of these header files
 // do not have double-inclusion guards. Both of these facts are incredible stupid, but
@@ -32,6 +34,8 @@
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
 #include <ip2string.h>
+
+#pragma warning( pop )
 
 #pragma comment(lib, "IPHLPAPI.lib")
 #pragma comment(lib, "ws2_32.lib")

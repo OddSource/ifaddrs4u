@@ -41,9 +41,15 @@
 #endif /* <netinet6/in6_var.h> */
 #endif /* !ODDSOURCE_IS_WINDOWS */
 
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( push, 0 )
+#endif /* ODDSOURCE_IS_WINDOWS */
 #include <optional>
 #include <vector>
 #include <unordered_map>
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( pop )
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 // BSD/macOS is the only OS that defines these, and older BSD versions
 // are missing the last three. Simply define these on all other
