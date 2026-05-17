@@ -72,12 +72,12 @@ jobs:
       - name: Run ifaddrs4cpp Tests
         working-directory: ifaddrs4cpp
         shell: bash
-        run: ctest --build-config Debug --verbose --test-action Test --output-on-failure
+        run: ctest --test-dir ./cmake-debug-test-build --build-config Debug --verbose --test-action Test --output-on-failure
 
-#      - name: Compile ifaddrs4cpp Release
-#        working-directory: ifaddrs4cpp
-#        shell: bash
-#        run: cmake --build ./cmake-external-build --config Release -j 14
+      - name: Compile ifaddrs4cpp Release
+        working-directory: ifaddrs4cpp
+        shell: bash
+        run: cmake --build ./cmake-external-build --config Release -j 14
 
       - name: Installing Java ${{ matrix.java }}
         uses: actions/setup-java@v5
