@@ -26,6 +26,7 @@
 #  pragma warning( push )
 #  pragma warning( disable : 4242 )
 #  pragma warning( disable : 4244 )
+#  pragma warning( disable : 4710 )
 #endif /* ODDSOURCE_IS_WINDOWS */
 #include <functional>
 #include <list>

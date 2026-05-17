@@ -16,3 +16,8 @@
 
 #include <oddsource/network/interfaces/Interfaces.hpp>
 #include <oddsource/network/interfaces/impl/Interfaces.ipp>
+
+// ReSharper disable once CppUnusedIncludeDirective
+#include <oddsource/network/interfaces/WSAHelper.hpp>
+// ReSharper disable once CppUnusedIncludeDirective
+#include <oddsource/network/interfaces/impl/WSAHelper.ipp>
