@@ -74,7 +74,7 @@ namespace
     [[maybe_unused]] PopupDisabler disabler;
 
 #ifdef ODDSOURCE_IS_WINDOWS
-    [[maybe_unused]] auto pWSAHelper( ::std::make_unique< WinSockStartupCleanupHelper >() );
+    [[maybe_unused]] auto pWSAHelper( ::std::make_unique< OddSource::Interfaces::WinSockStartupCleanupHelper >() );
 #endif /* ODDSOURCE_IS_WINDOWS */
 }
 
