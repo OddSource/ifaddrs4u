@@ -122,18 +122,11 @@ add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE "cxx_std_${CPP_VERSION}")
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
-                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-diagnostics:caret;-external:W0;-W4;-Wall;-WX;-wd4251;-wd4275;-wd4464;-wd4820>>")
+                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-diagnostics:caret;-external:W0;-external:I C:/Program Files/Microsoft Visual Studio;-external:I C:/Program Files (x86)/Windows Kits;-W4;-Wall;-WX;-wd4251;-wd4275;-wd4464;-wd4820>>")
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
                       CXX_STANDARD_REQUIRED ON
                       CXX_EXTENSIONS OFF)
-
-if(MSVC)
-    foreach(dir IN LISTS CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
-        target_include_directories(${PROJECT_NAME}_compiler_flags INTERFACE
-                                   SYSTEM "${dir}")
-    endforeach()
-endif()
 
 # Windows compiler warnings disablement explanations:
 # - C4251: 'type': 'type1' needs to have dll-interface to be used by clients of 'type2' (docs say this can be ignored
