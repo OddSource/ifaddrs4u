@@ -195,7 +195,29 @@ run_all_registered_test_cases(
             continue;
         }
         ::std::cout << "Running test case " << name << "..." << ::std::endl;
-        auto test( create_function() );
+
+        ::std::unique_ptr< Test > test;
+        try
+        {
+            test = create_function();
+        }
+        catch ( ::std::exception const & e )
+        {
+            total_test_count += 1;
+            total_error_count += 1;
+            ::std::cerr << "  Exception '" << type_id_string( e ) << "' encountered constructing test: "
+                        << e.what() << ::std::endl;
+            ret = 1;
+            continue;
+        }
+        catch ( ... )
+        {
+            total_test_count += 1;
+            total_error_count += 1;
+            ::std::cerr << "  UNKNOWN exception encountered constructing test: " << ::std::endl;
+            ret = 1;
+            continue;
+        }
         test->run();
         if ( !test->_failures.empty() || !test->_errors.empty() )
         {

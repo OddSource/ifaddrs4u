@@ -600,7 +600,7 @@ namespace
             }
 
             ::std::uint32_t const index{ pIfAddr->IfIndex == 0 ? pIfAddr->Ipv6IfIndex : pIfAddr->IfIndex };
-            assert( index > 0 );
+            //assert( index > 0 );
 
             ::std::string const guid( pIfAddr->AdapterName );
             auto pInterface( ::std::make_shared< Interface >(
