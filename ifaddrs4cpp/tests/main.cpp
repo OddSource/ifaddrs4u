@@ -16,6 +16,7 @@
 
 #include "main.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstring>
 
@@ -105,11 +106,13 @@ registry()
 
 namespace
 {
+    bool const is_tty{
 #ifdef ODDSOURCE_IS_WINDOWS
-    bool const is_tty( _isatty( _fileno( stdout ) ) );
+        _isatty( _fileno( stdout ) )
 #else /* ODDSOURCE_IS_WINDOWS */
-    bool const is_tty( isatty( fileno( stdin ) ) );
+        isatty( fileno( stdin ) )
 #endif /* !ODDSOURCE_IS_WINDOWS */
+        > 0 };
     char const * RED = is_tty ? "\033[0;31m" : "";
     char const * ORANGE = is_tty ? "\033[0;33m" : "";
     char const * GREEN = is_tty ? "\033[0;32m" : "";
@@ -248,12 +251,13 @@ run_all_registered_test_cases(
 
 int
 main(
-    int argc,
+    int const argc,
     char * argv [] )
 {
+    auto const numArguments{ ::std::clamp< ::std::uint32_t >( argc, 0u, 65535u ) };
     ::std::vector< ::std::string > matching;
-    matching.reserve( argc - 1 );
-    for ( int i{ 1 }; i < argc; ++i )
+    matching.reserve( numArguments - 1 );
+    for ( ::std::uint32_t i{ 1 }; i < numArguments; ++i )
     {
         if ( ::std::strlen( argv[ i ] ) > 0 )
         {
