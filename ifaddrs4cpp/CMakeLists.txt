@@ -129,8 +129,7 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       CXX_EXTENSIONS OFF)
 
 if (MSVC)
-    message(STATUS "BUILD DEBUG: ENV{INCLUDE} = $ENV{INCLUDE}")
-    message(STATUS "BUILD DEBUG: ENV{WindowsSdkDir} = $ENV{WindowsSdkDir}")
+    message(STATUS "BUILD DEBUG: CMAKE_VS_SDK_INCLUDE_DIRECTORIES = ${CMAKE_VS_SDK_INCLUDE_DIRECTORIES}")
     #target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE [=[SHELL:/external:I "C:\\Program Files\\Microsoft Visual Studio"]=])
     #target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE [=[SHELL:"/external:I\\"C:\\Program Files\\Microsoft Visual Studio\\""]=])
 endif ()
