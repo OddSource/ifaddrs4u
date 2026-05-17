@@ -21,7 +21,8 @@
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
 #ifdef ODDSOURCE_IS_WINDOWS
-#  pragma warning( push, 0 )
+#  pragma warning( push )
+#  pragma warning( disable : 4242 )
 #endif /* ODDSOURCE_IS_WINDOWS */
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cctype>

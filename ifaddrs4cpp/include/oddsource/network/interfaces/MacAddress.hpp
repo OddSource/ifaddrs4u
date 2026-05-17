@@ -22,7 +22,8 @@
 #include "detail/config.h"
 
 #ifdef ODDSOURCE_IS_WINDOWS
-#  pragma warning( push, 0 )
+#  pragma warning( push )
+#  pragma warning( disable : 4242 )
 #endif /* ODDSOURCE_IS_WINDOWS */
 #include <memory>
 #include <ostream>
