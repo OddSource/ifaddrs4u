@@ -840,11 +840,11 @@ namespace
             return;
         }
         auto const dataLength{ addr->sll_halen }; // should always be 6, but you never know
-        if ( dataLength < MIN_ADAPTER_ADDRESS_LENGTH )
+        if ( dataLength < MacAddress::MIN_LENGTH )
         {
             ::std::ostringstream oss;
             oss << "Mac address for interface " << rInterface.name() << " had unexpected length " << dataLength
-                << " bytes, should be at least " << MIN_ADAPTER_ADDRESS_LENGTH << " bytes.";
+                << " bytes, should be at least " << MacAddress::MIN_LENGTH << " bytes.";
             warnings.push_back( oss.str() );
             return;
         }
