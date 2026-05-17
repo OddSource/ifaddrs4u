@@ -36,7 +36,7 @@ namespace
     ::std::optional< ::std::uint8_t >
     sanitizePrefixLength(
         IPAddressT const & address,
-        ::std::uint8_t const prefixLength )
+        ::std::uint16_t const prefixLength )
     {
         using namespace ::std::string_literals;
         static_assert( ::std::is_base_of_v< IPAddress, IPAddressT >,
@@ -64,7 +64,7 @@ namespace OddSource::Interfaces
     InterfaceIPAddress(
         IPAddressT const & address,
         ::std::uint16_t const flags,
-        ::std::uint8_t const prefixLength )
+        ::std::uint16_t const prefixLength )
         : _address( address ),
           _prefixLength( sanitizePrefixLength( address, prefixLength ) ),
           _broadcast( ::std::nullopt ),
@@ -78,7 +78,7 @@ namespace OddSource::Interfaces
     InterfaceIPAddress(
         IPAddressT const & address,
         ::std::uint16_t const flags,
-        ::std::uint8_t const prefixLength,
+        ::std::uint16_t const prefixLength,
         Broadcast_t,
         IPAddressT const & broadcastAddress )
         : _address( address ),
@@ -93,7 +93,7 @@ namespace OddSource::Interfaces
     InterfaceIPAddress(
         IPAddressT const & address,
         ::std::uint16_t const flags,
-        ::std::uint8_t const prefixLength,
+        ::std::uint16_t const prefixLength,
         PointToPoint_t,
         IPAddressT const & pointToPointDestination )
         : _address( address ),
@@ -191,7 +191,7 @@ namespace OddSource::Interfaces
     }
 
     template< class IPAddressT >
-    ::std::optional< ::std::uint8_t >
+    ::std::optional< ::std::uint16_t >
     InterfaceIPAddress< IPAddressT >::
     prefixLength() const
     {

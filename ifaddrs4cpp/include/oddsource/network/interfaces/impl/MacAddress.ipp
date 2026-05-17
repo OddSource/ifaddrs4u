@@ -63,7 +63,7 @@ namespace
                 count++;
             }
         }
-        return count + 1;
+        return count + 1u;
     }
 
 #define MAC_ADDR_REPR_POS ::std::string( repr ) + "' at position "s + ::std::to_string( position )

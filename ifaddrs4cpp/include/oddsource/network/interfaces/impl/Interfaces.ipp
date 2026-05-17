@@ -287,7 +287,7 @@ namespace
         {
             return ::std::string();
         }
-        int sizeNeeded{ ::WideCharToMultiByte(
+        auto sizeNeeded{ ::WideCharToMultiByte(
             CP_UTF8,
             0,
             &wideString[ 0 ],
@@ -296,7 +296,7 @@ namespace
             0,
             NULL,
             NULL ) };
-        ::std::string string( sizeNeeded, 0 );
+        ::std::string string( static_cast< size_t >( sizeNeeded ), 0 );
         ::WideCharToMultiByte(
             CP_UTF8,
             0,
@@ -332,7 +332,7 @@ namespace
     int
     getSystemErrorCode()
     {
-        int errorCode( ::GetLastError() );
+        int errorCode( static_cast< int >( ::GetLastError() ) );
         if ( errorCode == 0 )
         {
             errorCode = ::WSAGetLastError();
@@ -348,7 +348,7 @@ namespace
         DWORD const result( ::FormatMessage(
             FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
             nullptr,
-            errorCode,
+            static_cast< DWORD >( errorCode ),
             MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
             (LPSTR)&errorMessageBuffer,
             0,
@@ -475,7 +475,7 @@ namespace
                 {
                     if ( candBytes[ i ] == 0xff )
                     {
-                        firstByteWithBroadcast = i;
+                        firstByteWithBroadcast = static_cast< ::std::uint8_t >( i );
                     }
                 }
                 if ( firstByteWithBroadcast > 0 )
@@ -593,7 +593,8 @@ namespace
             if ( result != NO_ERROR )
             {
                 ::std::ostringstream oss;
-                oss << "Error " << result << " calling GetAdapterAddresses: " << getSystemErrorMessage( result );
+                oss << "Error " << result << " calling GetAdapterAddresses: "
+                    << getSystemErrorMessage( static_cast< int >( result ) );
                 throw InterfaceBrowserSystemError( oss.str() );
             }
         }
@@ -606,19 +607,19 @@ namespace
 
         for ( PIP_ADAPTER_ADDRESSES pIfAddr = pAdapterAddresses.get(); pIfAddr != nullptr; pIfAddr = pIfAddr->Next )
         {
-            ::std::uint16_t flags{ 0 };
+            ::std::uint16_t interfaceFlags{ 0 };
             if ( pIfAddr->IfType == IF_TYPE_SOFTWARE_LOOPBACK )
             {
-                flags |= InterfaceFlag::IsLoopback;
+                interfaceFlags |= InterfaceFlag::IsLoopback;
             }
             if ( pIfAddr->OperStatus == IfOperStatusUp )
             {
-                flags |= InterfaceFlag::IsUp;
-                flags |= InterfaceFlag::IsRunning;
+                interfaceFlags |= InterfaceFlag::IsUp;
+                interfaceFlags |= InterfaceFlag::IsRunning;
             }
             if ( ( pIfAddr->Flags & IP_ADAPTER_NO_MULTICAST ) != IP_ADAPTER_NO_MULTICAST )
             {
-                flags |= InterfaceFlag::SupportsMulticast;
+                interfaceFlags |= InterfaceFlag::SupportsMulticast;
             }
 
             ::std::uint32_t const index{ pIfAddr->IfIndex == 0 ? pIfAddr->Ipv6IfIndex : pIfAddr->IfIndex };
@@ -630,7 +631,7 @@ namespace
                 guid,
                 utf8Encode( ::std::wstring( pIfAddr->FriendlyName ) ),
                 utf8Encode( ::std::wstring( pIfAddr->Description ) ),
-                flags,
+                interfaceFlags,
                 pIfAddr->Mtu ) );
             interfaces.emplace_back( pInterface );
 

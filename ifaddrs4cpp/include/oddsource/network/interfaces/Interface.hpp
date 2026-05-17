@@ -234,19 +234,19 @@ namespace OddSource::Interfaces
         InterfaceIPAddress(
             IPAddressT const & address,
             ::std::uint16_t flags,
-            ::std::uint8_t prefixLength = 0 );
+            ::std::uint16_t prefixLength = 0 );
 
         InterfaceIPAddress(
             IPAddressT const & address,
             ::std::uint16_t flags,
-            ::std::uint8_t prefixLength,
+            ::std::uint16_t prefixLength,
             Broadcast_t,
             IPAddressT const & broadcastAddress );
 
         InterfaceIPAddress(
             IPAddressT const & address,
             ::std::uint16_t flags,
-            ::std::uint8_t prefixLength,
+            ::std::uint16_t prefixLength,
             PointToPoint_t,
             IPAddressT const & pointToPointDestination );
 
@@ -280,7 +280,7 @@ namespace OddSource::Interfaces
         address() const;
 
         [[nodiscard]]
-        ::std::optional< ::std::uint8_t >
+        ::std::optional< ::std::uint16_t >
         prefixLength() const;
 
         [[nodiscard]]
@@ -311,7 +311,7 @@ namespace OddSource::Interfaces
             InterfaceIPAddress< IPAddressT > const & other ) const;
     private:
         IPAddressT _address;
-        ::std::optional< ::std::uint8_t > _prefixLength;
+        ::std::optional< ::std::uint16_t > _prefixLength;
         ::std::optional< IPAddressT > _broadcast;
         ::std::optional< IPAddressT > _pointToPointDestination;
         ::std::uint16_t _flags;

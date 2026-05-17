@@ -115,7 +115,8 @@ namespace
                 char * s = nullptr;
                 ::FormatMessage(
                     FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                    nullptr, success,
+                    nullptr,
+                    static_cast< DWORD >( success ),
                     MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
                     (LPTSTR)&s, 0, nullptr );
                 ::std::string const err( s == nullptr ? "" : s );
@@ -163,7 +164,8 @@ namespace
             char * s = nullptr;
             ::FormatMessage(
                 FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                nullptr, errorCode,
+                nullptr,
+                static_cast< DWORD >( errorCode ),
                 MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
                 (LPTSTR)&s, 0, nullptr );
             ::std::string const err( s == nullptr ? "" : s );

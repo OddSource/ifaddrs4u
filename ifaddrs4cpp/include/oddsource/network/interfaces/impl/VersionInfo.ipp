@@ -30,8 +30,11 @@ version()
     {
         return ::std::string( IFADDRS4CPP_VERSION ) + "-"s + IFADDRS4CPP_VERSION_SUFFIX;
     }
-    // ReSharper disable once CppDFAUnreachableCode
-    return IFADDRS4CPP_VERSION;
+    else
+    {
+        // ReSharper disable once CppDFAUnreachableCode
+        return IFADDRS4CPP_VERSION;
+    }
 }
 
 OddSource_Inline
@@ -68,8 +71,11 @@ suffix()
     {
         return "-"s + IFADDRS4CPP_VERSION_SUFFIX;
     }
-    // ReSharper disable once CppDFAUnreachableCode
-    return ::std::nullopt;
+    else
+    {
+        // ReSharper disable once CppDFAUnreachableCode
+        return ::std::nullopt;
+    }
 }
 
 OddSource_Inline
