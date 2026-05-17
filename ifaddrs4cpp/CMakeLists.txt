@@ -129,10 +129,8 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       CXX_EXTENSIONS OFF)
 
 if (MSVC)
-    message(STATUS "Iterating over CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES:")
-    foreach (dir IN LISTS CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
-        message(STATUS "..CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES value: ${dir}")
-    endforeach ()
+    message(STATUS "BUILD DEBUG: ENV{INCLUDE} = $ENV{INCLUDE}")
+    message(STATUS "BUILD DEBUG: ENV{WindowsSdkDir} = $ENV{WindowsSdkDir}")
     #target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE [=[SHELL:/external:I "C:\\Program Files\\Microsoft Visual Studio"]=])
     #target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE [=[SHELL:"/external:I\\"C:\\Program Files\\Microsoft Visual Studio\\""]=])
 endif ()
