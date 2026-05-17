@@ -346,8 +346,7 @@ namespace
     allocateAdapterAddresses(
         HANDLE & heap,
         ULONG const bufferLength,
-        bool & errorOccurred,
-        ::std::ostringstream & errorStream )
+        DWORD & errorCode )
     {
         __try
         {
@@ -355,21 +354,7 @@ namespace
         }
         __except ( EXCEPTION_EXECUTE_HANDLER )
         {
-            DWORD const errorCode{ GetExceptionCode() };
-            errorOccurred = true;
-            errorStream << "Failed to allocate " << bufferLength << " bytes for adapter addresses ";
-            if ( errorCode == STATUS_NO_MEMORY )
-            {
-                errorStream << "due to a lack of sufficient memory resources.";
-            }
-            else if ( errorCode == STATUS_ACCESS_VIOLATION )
-            {
-                errorStream << "due to heap corruption or invalid access.";
-            }
-            else
-            {
-                errorStream << "due to unknown error code: 0x" << ::std::hex << errorCode << ::std::dec << ".";
-            }
+            errorCode = GetExceptionCode();
         }
         return nullptr;
     }
@@ -388,18 +373,26 @@ namespace
             throw InterfaceBrowserSystemError( oss.str() );
         }
 
-        bool errorOccurred;
-        ::std::ostringstream errorStream;
-        LPVOID allocation( allocateAdapterAddresses( heap, bufferLength, errorOccurred, errorStream ) );
+        DWORD errorCode{ 0 };
+        LPVOID allocation( allocateAdapterAddresses( heap, bufferLength, errorCode ) );
 
-        if ( errorOccurred )
+        if ( errorCode > 0 )
         {
-            ::std::string errorMessage( errorStream.str() );
-            if ( errorMessage.empty() )
+            ::std::ostringstream oss;
+            oss << "Failed to allocate " << bufferLength << " bytes for adapter addresses ";
+            if ( errorCode == STATUS_NO_MEMORY )
             {
-                errorMessage = "unidentified error allocating adapter addresses";
+                oss << "due to a lack of sufficient memory resources.";
             }
-            throw InterfaceBrowserSystemError( errorMessage );
+            else if ( errorCode == STATUS_ACCESS_VIOLATION )
+            {
+                oss << "due to heap corruption or invalid access.";
+            }
+            else
+            {
+                oss << "due to unknown error code: 0x" << ::std::hex << errorCode << ::std::dec << ".";
+            }
+            throw InterfaceBrowserSystemError( oss.str() );
         }
         else if ( allocation == nullptr )
         {
