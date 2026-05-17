@@ -19,6 +19,12 @@
 
 using namespace OddSource::Interfaces;
 
+#ifdef ODDSOURCE_IS_WINDOWS
+// "compiler may not enforce left-to-right evaluation order for call to 'C++17 operator'"
+// MSVC is in violation of the C++17 standard here, but we don't care to try to mitigate it, because it's just a test.
+#  pragma warning( disable : 4866 )
+#endif
+
 class TestInterfaceBrowser : public Tests::Test
 {
 public:
