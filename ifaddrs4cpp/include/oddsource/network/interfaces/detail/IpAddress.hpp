@@ -27,7 +27,7 @@ namespace
     toV4(
         ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
     {
-        using namespace std::string_literals;
+        using namespace ::std::string_literals;
         if ( !other.is_v4() )
         {
             throw InvalidIPAddress(
@@ -42,7 +42,7 @@ namespace
     toV6(
         ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
     {
-        using namespace std::string_literals;
+        using namespace ::std::string_literals;
         if ( !other.is_v6() )
         {
             throw InvalidIPAddress(

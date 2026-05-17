@@ -21,7 +21,7 @@
 namespace OddSource::Interfaces::detail
 {
     template< class K, class V >
-    std::unordered_map< V, K const >
+    ::std::unordered_map< V, K const >
     flip(
         ::std::unordered_map< K, V const > const & source )
     {

@@ -128,6 +128,38 @@ namespace OddSource::Interfaces
     }
 
     template< class IPAddressT >
+    InterfaceIPAddress< IPAddressT > &
+    InterfaceIPAddress< IPAddressT >::
+    operator=(
+        InterfaceIPAddress const & rhs )
+    {
+        if ( this != &rhs )
+        {
+            this->_address = rhs._address;
+            this->_prefixLength = rhs._prefixLength;
+            this->_broadcast = rhs._broadcast;
+            this->_pointToPointDestination = rhs._pointToPointDestination;
+            this->_flags = rhs._flags;
+        }
+        return *this;
+    }
+
+    template< class IPAddressT >
+    InterfaceIPAddress< IPAddressT > &
+    InterfaceIPAddress< IPAddressT >::
+    operator=(
+        InterfaceIPAddress && rhs ) noexcept
+    {
+        this->_address = ::std::move( rhs._address );
+        this->_prefixLength = ::std::move( rhs._prefixLength ); // NOLINT(*-move-const-arg)
+        this->_broadcast = ::std::move( rhs._broadcast );
+        this->_pointToPointDestination = ::std::move( rhs._pointToPointDestination );
+        this->_flags = rhs._flags;
+        rhs._flags = 0;
+        return *this;
+    }
+
+    template< class IPAddressT >
     InterfaceIPAddress< IPAddressT >::
     operator ::std::string() const
     {
@@ -160,7 +192,7 @@ namespace OddSource::Interfaces
     }
 
     template< class IPAddressT >
-    ::std::optional< IPAddressT const > const &
+    ::std::optional< IPAddressT > const &
     InterfaceIPAddress< IPAddressT >::
     broadcastAddress() const
     {
@@ -168,7 +200,7 @@ namespace OddSource::Interfaces
     }
 
     template< class IPAddressT >
-    ::std::optional< IPAddressT const > const &
+    ::std::optional< IPAddressT > const &
     InterfaceIPAddress< IPAddressT >::
     pointToPointDestinationAddress() const
     {

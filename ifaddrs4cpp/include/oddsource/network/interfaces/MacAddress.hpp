@@ -80,6 +80,16 @@ namespace OddSource::Interfaces
         OddSource_Inline
         ~MacAddress() noexcept;
 
+        OddSource_Inline
+        MacAddress &
+        operator=(
+            MacAddress const & rhs );
+
+        OddSource_Inline
+        MacAddress &
+        operator=(
+            MacAddress && rhs ) noexcept;
+
         [[nodiscard]]
         OddSource_Inline
         explicit

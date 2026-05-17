@@ -158,7 +158,8 @@ namespace OddSource::Interfaces::detail
     operator~( \
         Enum const & rhs ) noexcept \
     { \
-        return ~detail::to_underlying< Enum >( rhs ); \
+        /* Have to cast because MSVC promotes ~ushort and ~uint to an int, resulting in an error on return */ \
+        return static_cast< ::std::underlying_type_t< Enum > >( ~detail::to_underlying< Enum >( rhs ) ); \
     } \
     \
     OddSource_Inline \

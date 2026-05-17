@@ -122,15 +122,20 @@ add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE "cxx_std_${CPP_VERSION}")
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
-                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-diagnostics:caret;-external:W0;-external:I'c:/Program Files/Microsoft Visual Studio';-external:I'c:/Program Files (x86)/Windows Kits';-W4;-Wall;-WX;-wd4275;-wd4251>>")
+                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-diagnostics:caret;-external:W0;-external:Ic:/Program Files/Microsoft Visual Studio;-external:Ic:/Program Files (x86)/Windows Kits;-W4;-Wall;-WX;-wd4251;-wd4275;-wd4464;-wd4820>>")
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
                       CXX_STANDARD_REQUIRED ON
                       CXX_EXTENSIONS OFF)
 
 # Windows compiler warnings disablement explanations:
-# - C4275: Docs say this can be ignored if your class is derived from a type in the C++ Standard
-# - C4251: Docs say this can be ignored if your class is exposing a type in the C++ Standard
+# - C4251: 'type': 'type1' needs to have dll-interface to be used by clients of 'type2' (docs say this can be ignored
+#          if your class is exposing a type in the C++ Standard)
+# - C4275: non-DLL-interface class 'class_1' used as base for DLL-interface class 'class_2' (docs say this can be
+#          ignored if your class is derived from a type in the C++ Standard)
+# - C4464: relative include path contains '..' (meant to catch using relative include paths to include external
+#          library headers, but we use relative include paths only for our internal headers)
+# - C4820: 'x' bytes padding added after data member (we don't care if there's a few bytes of padding in our classes)
 
 if(NOT ${BUILD_STATIC_ONLY})
     add_library(${PROJECT_NAME}-shared SHARED ${${PROJECT_NAME}_sources})

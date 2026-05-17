@@ -237,7 +237,7 @@ namespace
                 scope.scopeId = scopeId;
             }
         }
-        return std::move( scope );
+        return ::std::move( scope );
     }
 
     v6Scope
@@ -282,7 +282,7 @@ namespace
             ::std::string const scope( repr.substr( i + 1 ) );
             if ( !scope.empty() )
             {
-                if ( scope.find_first_not_of( "0123456789" ) == std::string::npos )
+                if ( scope.find_first_not_of( "0123456789" ) == ::std::string::npos )
                 {
                     try
                     {
@@ -415,7 +415,7 @@ namespace OddSource::Interfaces
     IPAddress::
     IPAddress(
         IPAddress && other ) noexcept
-        : _representation( std::move( other._representation ) ),
+        : _representation( ::std::move( other._representation ) ),
           _isUnspecified( other._isUnspecified ),
           _isLoopback( other._isLoopback ),
           _isLinkLocal( other._isLinkLocal ),
@@ -436,6 +436,49 @@ namespace OddSource::Interfaces
     IPAddress::
     ~IPAddress() noexcept // NOLINT(*-use-equals-default)
     {
+    }
+
+    OddSource_Inline
+    IPAddress &
+    IPAddress::
+    operator=(
+        IPAddress const & rhs )
+    {
+        if ( this != &rhs )
+        {
+            this->_representation = rhs._representation;
+            this->_isUnspecified = rhs._isUnspecified;
+            this->_isLoopback = rhs._isLoopback;
+            this->_isLinkLocal = rhs._isLinkLocal;
+            this->_isPrivate = rhs._isPrivate;
+            this->_isMulticast = rhs._isMulticast;
+            this->_isReserved = rhs._isReserved;
+            this->_multicastScope = rhs._multicastScope;
+        }
+        return *this;
+    }
+
+    OddSource_Inline
+    IPAddress &
+    IPAddress::
+    operator=(
+        IPAddress && rhs ) noexcept
+    {
+        this->_representation = ::std::move( rhs._representation );
+        this->_isUnspecified = rhs._isUnspecified;
+        this->_isLoopback = rhs._isLoopback;
+        this->_isLinkLocal = rhs._isLinkLocal;
+        this->_isPrivate = rhs._isPrivate;
+        this->_isMulticast = rhs._isMulticast;
+        this->_isReserved = rhs._isReserved;
+        this->_multicastScope = rhs._multicastScope;
+        rhs._isUnspecified = false;
+        rhs._isLoopback = false;
+        rhs._isLinkLocal = false;
+        rhs._isPrivate = false;
+        rhs._isMulticast = false;
+        rhs._isReserved = false;
+        return *this;
     }
 
     OddSource_Inline
@@ -653,8 +696,8 @@ namespace OddSource::Interfaces
     IPv4Address::
     IPv4Address(
        IPv4Address && other ) noexcept
-        : IPAddress( std::move( other ) ),
-          _data( std::move( other._data ) )
+        : IPAddress( ::std::move( other ) ),
+          _data( ::std::move( other._data ) )
     {
     }
 
@@ -662,6 +705,31 @@ namespace OddSource::Interfaces
     IPv4Address::
     ~IPv4Address() noexcept // NOLINT(*-use-equals-default)
     {
+    }
+
+    OddSource_Inline
+    IPv4Address &
+    IPv4Address::
+    operator=(
+        IPv4Address const & rhs )
+    {
+        if ( this != &rhs )
+        {
+            IPAddress::operator=( rhs );
+            this->_data = copy_in_addr( rhs._data );
+        }
+        return *this;
+    }
+
+    OddSource_Inline
+    IPv4Address &
+    IPv4Address::
+    operator=(
+        IPv4Address && rhs ) noexcept
+    {
+        IPAddress::operator=( ::std::move( rhs ) );
+        this->_data = ::std::move( rhs._data );
+        return *this;
     }
 
     OddSource_Inline
@@ -708,7 +776,7 @@ namespace OddSource::Interfaces
     IPv6Address::
     IPv6Address(
         in6_addr const * data )
-        : IPv6Address( copy_in_addr( data ), std::nullopt )
+        : IPv6Address( copy_in_addr( data ), ::std::nullopt )
     {
     }
 
@@ -784,7 +852,7 @@ namespace OddSource::Interfaces
         ::std::string_view const & reprWithScope,
         ::std::string_view const & reprWithoutScope )
         : IPv6Address(
-            std::string( reprWithoutScope ),
+            ::std::string( reprWithoutScope ),
             fromRepr< in6_addr >( reprWithoutScope ),
             extractScope( reprWithScope ) )
     {
@@ -795,7 +863,7 @@ namespace OddSource::Interfaces
     IPv6Address(
         ::std::unique_ptr< in6_addr const > && data,
         ::std::optional< v6Scope > && scope )
-        : IPv6Address( toRepr( data.get() ), std::move( data ), std::move( scope ) )
+        : IPv6Address( toRepr( data.get() ), ::std::move( data ), ::std::move( scope ) )
     {
     }
 
@@ -807,7 +875,7 @@ namespace OddSource::Interfaces
         ::std::optional< v6Scope > && scope )
         : IPAddress( addScope( reprWithoutScope, scope ) ),
           _data( ::std::move( data ) ),
-          _scope( std::move( scope ) ),
+          _scope( ::std::move( scope ) ),
           _withoutScope( reprWithoutScope )
     {
         auto const bytes = BYTES;
@@ -924,10 +992,10 @@ namespace OddSource::Interfaces
     IPv6Address::
     IPv6Address(
         IPv6Address && other ) noexcept
-        : IPAddress( std::move( other ) ),
-          _data( std::move( other._data ) ),
-          _scope( std::move( other._scope ) ),
-          _withoutScope( std::move( other._withoutScope ) ),
+        : IPAddress( ::std::move( other ) ),
+          _data( ::std::move( other._data ) ),
+          _scope( ::std::move( other._scope ) ),
+          _withoutScope( ::std::move( other._withoutScope ) ),
           _isUniqueLocal( other._isUniqueLocal ),
           _isSiteLocal( other._isSiteLocal ),
           _isV4Mapped( other._isV4Mapped ),
@@ -949,6 +1017,56 @@ namespace OddSource::Interfaces
     IPv6Address::
     ~IPv6Address() noexcept // NOLINT(*-use-equals-default)
     {
+    }
+
+    OddSource_Inline
+    IPv6Address &
+    IPv6Address::
+    operator=(
+        IPv6Address const & rhs )
+    {
+        if ( this != &rhs )
+        {
+            IPAddress::operator=( rhs );
+            this->_data = copy_in_addr( rhs._data );
+            this->_scope = rhs._scope;
+            this->_withoutScope = rhs._withoutScope;
+            this->_isUniqueLocal = rhs._isUniqueLocal;
+            this->_isSiteLocal = rhs._isSiteLocal;
+            this->_isV4Mapped = rhs._isV4Mapped;
+            this->_isV4Compatible = rhs._isV4Compatible;
+            this->_isV4Translated = rhs._isV4Translated;
+            this->_is6to4 = rhs._is6to4;
+            this->_multicastFlags = rhs._multicastFlags;
+        }
+        return *this;
+    }
+
+    OddSource_Inline
+    IPv6Address &
+    IPv6Address::
+    operator=(
+        IPv6Address && rhs ) noexcept
+    {
+        IPAddress::operator=( ::std::move( rhs ) );
+        this->_data = ::std::move( rhs._data );
+        this->_scope = ::std::move( rhs._scope );
+        this->_withoutScope = ::std::move( rhs._withoutScope );
+        this->_isUniqueLocal = rhs._isUniqueLocal;
+        this->_isSiteLocal = rhs._isSiteLocal;
+        this->_isV4Mapped = rhs._isV4Mapped;
+        this->_isV4Compatible = rhs._isV4Compatible;
+        this->_isV4Translated = rhs._isV4Translated;
+        this->_is6to4 = rhs._is6to4;
+        this->_multicastFlags = rhs._multicastFlags;
+        rhs._isUniqueLocal = false;
+        rhs._isSiteLocal = false;
+        rhs._isV4Mapped = false;
+        rhs._isV4Compatible = false;
+        rhs._isV4Translated = false;
+        rhs._is6to4 = false;
+        rhs._multicastFlags = 0;
+        return *this;
     }
 
     OddSource_Inline

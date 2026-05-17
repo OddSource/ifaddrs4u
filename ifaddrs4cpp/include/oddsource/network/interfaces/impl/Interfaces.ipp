@@ -128,7 +128,7 @@ namespace OddSource::Interfaces
             this->_interfaces,
             []( Interface & rInterface, MacAddress && macAddress )
             {
-                rInterface._macAddress.emplace( std::move( macAddress ) );
+                rInterface._macAddress.emplace( ::std::move( macAddress ) );
             },
             []( Interface & rInterface, InterfaceIPv4Address && ipAddress )
             {
@@ -136,11 +136,11 @@ namespace OddSource::Interfaces
                 {
                     rInterface._flags |= InterfaceFlag::BroadcastAddressSet;
                 }
-                rInterface._ipv4Addresses.push_back( std::move( ipAddress ) );
+                rInterface._ipv4Addresses.push_back( ::std::move( ipAddress ) );
             },
             []( Interface & rInterface, InterfaceIPv6Address && ipAddress )
             {
-                rInterface._ipv6Addresses.push_back( std::move( ipAddress ) );
+                rInterface._ipv6Addresses.push_back( ::std::move( ipAddress ) );
             } );
 
         for ( auto const & pInterface : this->_interfaces )
@@ -204,12 +204,12 @@ namespace OddSource::Interfaces
     operator[](
         ::std::uint32_t index ) const
     {
-        using namespace std::string_literals;
+        using namespace ::std::string_literals;
         if ( auto const found( this->_indexToInterface.find( index ) ); found != this->_indexToInterface.end() )
         {
             return *found->second;
         }
-        throw ::std::out_of_range( "interface index not found: "s + std::to_string( index ) );
+        throw ::std::out_of_range( "interface index not found: "s + ::std::to_string( index ) );
     }
 
     OddSource_Inline
@@ -218,7 +218,7 @@ namespace OddSource::Interfaces
     getInterface(
         ::std::string_view name ) const
     {
-        if ( auto const found( this->_nameToInterface.find( std::string( name ) ) );
+        if ( auto const found( this->_nameToInterface.find( ::std::string( name ) ) );
              found != this->_nameToInterface.end() )
         {
             return found->second;
@@ -232,13 +232,13 @@ namespace OddSource::Interfaces
     operator[](
         ::std::string_view name ) const
     {
-        using namespace std::string_literals;
-        if ( auto const found( this->_nameToInterface.find( std::string( name ) ) );
+        using namespace ::std::string_literals;
+        if ( auto const found( this->_nameToInterface.find( ::std::string( name ) ) );
              found != this->_nameToInterface.end() )
         {
             return *found->second;
         }
-        throw ::std::out_of_range( "interface name not found: "s + std::string( name ) );
+        throw ::std::out_of_range( "interface name not found: "s + ::std::string( name ) );
     }
 
     OddSource_Inline

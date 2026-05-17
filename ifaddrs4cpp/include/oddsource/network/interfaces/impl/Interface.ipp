@@ -174,7 +174,7 @@ namespace OddSource::Interfaces
           _friendlyName( ::std::move( other._friendlyName ) ),
           _description( ::std::move( other._description ) ),
           _flags( other._flags ),
-          _mtu( ::std::move( other._mtu ) ),
+          _mtu( ::std::move( other._mtu ) ), // NOLINT(*-move-const-arg)
           _macAddress( ::std::move( other._macAddress ) ),
           _ipv4Addresses( ::std::move( other._ipv4Addresses ) ),
           _ipv6Addresses( ::std::move( other._ipv6Addresses ) )
@@ -187,6 +187,47 @@ namespace OddSource::Interfaces
     Interface::
     ~Interface() noexcept // NOLINT(*-use-equals-default)
     {
+    }
+
+    OddSource_Inline
+    Interface &
+    Interface::
+    operator=(
+        Interface const & rhs )
+    {
+        if ( this != &rhs )
+        {
+            this->_index = rhs._index;
+            this->_name = rhs._name;
+            this->_friendlyName = rhs._friendlyName;
+            this->_description = rhs._description;
+            this->_flags = rhs._flags;
+            this->_mtu = rhs._mtu;
+            this->_macAddress = rhs._macAddress;
+            this->_ipv4Addresses = rhs._ipv4Addresses;
+            this->_ipv6Addresses = rhs._ipv6Addresses;
+        }
+        return *this;
+    }
+
+    OddSource_Inline
+    Interface &
+    Interface::
+    operator=(
+        Interface && rhs ) noexcept
+    {
+        _index = rhs._index;
+        _name = ::std::move( rhs._name );
+        _friendlyName = ::std::move( rhs._friendlyName );
+        _description = ::std::move( rhs._description );
+        _flags = rhs._flags;
+        _mtu = ::std::move( rhs._mtu ); // NOLINT(*-move-const-arg)
+        _macAddress = ::std::move( rhs._macAddress );
+        _ipv4Addresses = ::std::move( rhs._ipv4Addresses );
+        _ipv6Addresses = ::std::move( rhs._ipv6Addresses );
+        rhs._index = 0;
+        rhs._flags = 0;
+        return *this;
     }
 
     OddSource_Inline
@@ -271,7 +312,7 @@ namespace OddSource::Interfaces
     }
 
     OddSource_Inline
-    ::std::optional< MacAddress const > const &
+    ::std::optional< MacAddress > const &
     Interface::
     macAddress() const
     {

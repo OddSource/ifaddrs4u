@@ -252,6 +252,14 @@ namespace OddSource::Interfaces
         virtual
         ~InterfaceIPAddress() noexcept;
 
+        InterfaceIPAddress &
+        operator=(
+            InterfaceIPAddress const & rhs );
+
+        InterfaceIPAddress &
+        operator=(
+            InterfaceIPAddress && rhs ) noexcept;
+
         [[nodiscard]]
         explicit
         operator ::std::string() const;
@@ -269,11 +277,11 @@ namespace OddSource::Interfaces
         prefixLength() const;
 
         [[nodiscard]]
-        ::std::optional< IPAddressT const > const &
+        ::std::optional< IPAddressT > const &
         broadcastAddress() const;
 
         [[nodiscard]]
-        ::std::optional< IPAddressT const > const &
+        ::std::optional< IPAddressT > const &
         pointToPointDestinationAddress() const;
 
         [[nodiscard]]
@@ -297,8 +305,8 @@ namespace OddSource::Interfaces
     private:
         IPAddressT _address;
         ::std::optional< ::std::uint8_t > _prefixLength;
-        ::std::optional< IPAddressT const > _broadcast;
-        ::std::optional< IPAddressT const > _pointToPointDestination;
+        ::std::optional< IPAddressT > _broadcast;
+        ::std::optional< IPAddressT > _pointToPointDestination;
         ::std::uint16_t _flags;
     };
 
@@ -334,7 +342,7 @@ namespace OddSource::Interfaces
             ::std::string_view const & friendlyName,
             ::std::string_view const & description,
             ::std::uint16_t flags,
-            ::std::optional< ::std::uint64_t const > const & mtu = ::std::nullopt);
+            ::std::optional< ::std::uint64_t const > const & mtu = ::std::nullopt );
 
         OddSource_Inline
         Interface(
@@ -347,6 +355,16 @@ namespace OddSource::Interfaces
         OddSource_Inline
         virtual
         ~Interface() noexcept;
+
+        OddSource_Inline
+        Interface &
+        operator=(
+            Interface const & rhs );
+
+        OddSource_Inline
+        Interface &
+        operator=(
+            Interface && rhs ) noexcept;
 
         [[nodiscard]]
         OddSource_Inline
@@ -401,7 +419,7 @@ namespace OddSource::Interfaces
 
         [[nodiscard]]
         OddSource_Inline
-        ::std::optional< MacAddress const > const &
+        ::std::optional< MacAddress > const &
         macAddress() const;
 
         [[nodiscard]]
@@ -437,8 +455,8 @@ namespace OddSource::Interfaces
         ::std::string _friendlyName;
         ::std::string _description;
         ::std::uint16_t _flags;
-        ::std::optional< ::std::uint64_t const > _mtu;
-        ::std::optional< MacAddress const > _macAddress;
+        ::std::optional< ::std::uint64_t > _mtu;
+        ::std::optional< MacAddress > _macAddress;
         ::std::vector< InterfaceIPv4Address > _ipv4Addresses;
         ::std::vector< InterfaceIPv6Address > _ipv6Addresses;
     };

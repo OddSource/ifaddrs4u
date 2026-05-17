@@ -59,7 +59,7 @@ namespace
         return count + 1;
     }
 
-#define MAC_ADDR_REPR_POS ::std::string( repr ) + "' at position "s + std::to_string( position )
+#define MAC_ADDR_REPR_POS ::std::string( repr ) + "' at position "s + ::std::to_string( position )
 
     ::std::unique_ptr< ::std::uint8_t[] >
     fromRepr(
@@ -158,7 +158,7 @@ namespace
 
         static constexpr size_t FORMATTED_BYTE_SIZE{ 3 };
 
-        auto const buffer( std::make_unique< char[] >( FORMATTED_BYTE_SIZE ) );
+        auto const buffer( ::std::make_unique< char[] >( FORMATTED_BYTE_SIZE ) );
         for( ::std::uint8_t i{ 0 }; i < dataLength; i++ )
         {
             ::std::snprintf( buffer.get(), FORMATTED_BYTE_SIZE, "%02x", data[ i ] );
@@ -201,7 +201,7 @@ namespace OddSource::Interfaces
     MacAddress::
     MacAddress(
         ::std::string_view const & repr )
-        : MacAddress( std::string( repr ), fromRepr( repr ), predictReprLength( repr ) )
+        : MacAddress( ::std::string( repr ), fromRepr( repr ), predictReprLength( repr ) )
     {
     }
 
@@ -220,7 +220,7 @@ namespace OddSource::Interfaces
         ::std::string && repr,
         ::std::unique_ptr< ::std::uint8_t const[] > && data,
         ::std::uint8_t const dataLength )
-        : _representation( std::move( repr ) ),
+        : _representation( ::std::move( repr ) ),
           _data( ::std::move( data ) ),
           _dataLength( dataLength )
     {
@@ -240,16 +240,45 @@ namespace OddSource::Interfaces
     MacAddress::
     MacAddress(
         MacAddress && other ) noexcept
-        : _representation( std::move( other._representation ) ),
-          _data( std::move( other._data ) ),
+        : _representation( ::std::move( other._representation ) ),
+          _data( ::std::move( other._data ) ),
           _dataLength( other._dataLength )
     {
+        other._dataLength = 0;
     }
 
     OddSource_Inline
     MacAddress::
     ~MacAddress() noexcept // NOLINT(*-use-equals-default)
     {
+    }
+
+    OddSource_Inline
+    MacAddress &
+    MacAddress::
+    operator=(
+        MacAddress const & rhs )
+    {
+        if ( this != &rhs )
+        {
+            this->_representation = rhs._representation;
+            this->_data = copyHardwareAddress( rhs._data.get(), rhs._dataLength );
+            this->_dataLength = rhs._dataLength;
+        }
+        return *this;
+    }
+
+    OddSource_Inline
+    MacAddress &
+    MacAddress::
+    operator=(
+        MacAddress && rhs ) noexcept
+    {
+        this->_representation = ::std::move( rhs._representation );
+        this->_data = ::std::move( rhs._data );
+        this->_dataLength = rhs._dataLength;
+        rhs._dataLength = 0;
+        return *this;
     }
 
     OddSource_Inline

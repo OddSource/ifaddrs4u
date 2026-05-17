@@ -295,6 +295,16 @@ namespace OddSource::Interfaces
         IPAddress(
             IPAddress && other ) noexcept;
 
+        OddSource_Inline
+        IPAddress &
+        operator=(
+            IPAddress const & rhs );
+
+        OddSource_Inline
+        IPAddress &
+        operator=(
+            IPAddress && rhs ) noexcept;
+
         ::std::string _representation;
         bool _isUnspecified = false;
         bool _isLoopback = false;
@@ -352,6 +362,16 @@ namespace OddSource::Interfaces
         virtual
         OddSource_Inline
         ~IPv4Address() noexcept; // NOLINT(*-use-override)[[nodiscard]]
+
+        OddSource_Inline
+        IPv4Address &
+        operator=(
+            IPv4Address const & rhs );
+
+        OddSource_Inline
+        IPv4Address &
+        operator=(
+            IPv4Address && rhs ) noexcept;
 
         [[nodiscard]]
         inline
@@ -506,6 +526,16 @@ namespace OddSource::Interfaces
         virtual
         OddSource_Inline
         ~IPv6Address() noexcept; // NOLINT(*-use-override)
+
+        OddSource_Inline
+        IPv6Address &
+        operator=(
+            IPv6Address const & rhs );
+
+        OddSource_Inline
+        IPv6Address &
+        operator=(
+            IPv6Address && rhs ) noexcept;
 
         [[nodiscard]]
         inline
