@@ -24,10 +24,10 @@
 
 #include "export.h"
 
-#if defined(ODDSOURCE_IS_WINDOWS) && defined(ODDSOURCE_BUILDING_LIBRARY)
+#ifdef ODDSOURCE_IS_WINDOWS
 #pragma comment(lib, "IPHLPAPI.lib")
 #pragma comment(lib, "ws2_32.lib")
-#endif /* defined(ODDSOURCE_IS_WINDOWS) && defined(ODDSOURCE_BUILDING_LIBRARY) */
+#endif /* ODDSOURCE_IS_WINDOWS */
 
 #define ODDSOURCE_HEADER_BRACKETS(prefix, suffix) <prefix/suffix>
 #define ODDSOURCE_HEADER_EXPAND(prefix, suffix) ODDSOURCE_HEADER_BRACKETS(prefix, suffix)
