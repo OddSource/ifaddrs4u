@@ -38,8 +38,20 @@ namespace OddSource::Interfaces::detail
     {
         return static_cast< ::std::underlying_type_t< Enum > >( e );
     }
+
+    template< class Enum, typename result >
+    constexpr
+    ::std::underlying_type_t< Enum >
+    recast_underlying(
+        result r ) noexcept
+    {
+        return static_cast< ::std::underlying_type_t< Enum > >( r );
+    }
 #endif
 }
+
+// NOTE: All of the recasts of the return values below are to appease MSVC, which "upgrades" bitwise results of
+// ushorts and uints to ints.
 
 #define ODDSOURCE_BITWISE_ENUM_OPERATORS_IMPL(Enum) \
     OddSource_Inline \
@@ -48,7 +60,8 @@ namespace OddSource::Interfaces::detail
         Enum const & lhs, \
         Enum const & rhs ) noexcept \
     { \
-        return detail::to_underlying< Enum >( lhs ) & detail::to_underlying< Enum >( rhs ); \
+        return detail::recast_underlying< Enum >( \
+            detail::to_underlying< Enum >( lhs ) & detail::to_underlying< Enum >( rhs ) ); \
     } \
     \
     OddSource_Inline \
@@ -57,7 +70,7 @@ namespace OddSource::Interfaces::detail
         ::std::underlying_type_t< Enum > const lhs, \
         Enum const & rhs ) noexcept \
     { \
-        return lhs & detail::to_underlying< Enum >( rhs ); \
+        return detail::recast_underlying< Enum >( lhs & detail::to_underlying< Enum >( rhs ) ); \
     } \
     \
     OddSource_Inline \
@@ -66,7 +79,7 @@ namespace OddSource::Interfaces::detail
         Enum const & lhs, \
         ::std::underlying_type_t< Enum > const rhs ) noexcept \
     { \
-        return detail::to_underlying< Enum >( lhs ) & rhs; \
+        return detail::recast_underlying< Enum >( detail::to_underlying< Enum >( lhs ) & rhs ); \
     } \
     \
     OddSource_Inline \
@@ -85,7 +98,8 @@ namespace OddSource::Interfaces::detail
         Enum const & lhs, \
         Enum const & rhs ) noexcept \
     { \
-        return detail::to_underlying< Enum >( lhs ) | detail::to_underlying< Enum >( rhs ); \
+        return detail::recast_underlying< Enum >( \
+            detail::to_underlying< Enum >( lhs ) | detail::to_underlying< Enum >( rhs ) ); \
     } \
     \
     OddSource_Inline \
@@ -94,7 +108,7 @@ namespace OddSource::Interfaces::detail
         ::std::underlying_type_t< Enum > const lhs, \
         Enum const & rhs ) noexcept \
     { \
-        return lhs | detail::to_underlying< Enum >( rhs ); \
+        return detail::recast_underlying< Enum >( lhs | detail::to_underlying< Enum >( rhs ) ); \
     } \
     \
     OddSource_Inline \
@@ -103,7 +117,7 @@ namespace OddSource::Interfaces::detail
         Enum const & lhs, \
         ::std::underlying_type_t< Enum > const rhs ) noexcept \
     { \
-        return detail::to_underlying< Enum >( lhs ) | rhs; \
+        return detail::recast_underlying< Enum >( detail::to_underlying< Enum >( lhs ) | rhs ); \
     } \
     \
     OddSource_Inline \
@@ -122,7 +136,8 @@ namespace OddSource::Interfaces::detail
         Enum const & lhs, \
         Enum const & rhs ) noexcept \
     { \
-        return detail::to_underlying< Enum >( lhs ) ^ detail::to_underlying< Enum >( rhs ); \
+        return detail::recast_underlying< Enum >( \
+            detail::to_underlying< Enum >( lhs ) ^ detail::to_underlying< Enum >( rhs ) ); \
     } \
     \
     OddSource_Inline \
@@ -131,7 +146,7 @@ namespace OddSource::Interfaces::detail
         ::std::underlying_type_t< Enum > const lhs, \
         Enum const & rhs ) noexcept \
     { \
-        return lhs ^ detail::to_underlying< Enum >( rhs ); \
+        return detail::recast_underlying< Enum >( lhs ^ detail::to_underlying< Enum >( rhs ) ); \
     } \
     \
     OddSource_Inline \
@@ -140,7 +155,7 @@ namespace OddSource::Interfaces::detail
         Enum const & lhs, \
         ::std::underlying_type_t< Enum > const rhs ) noexcept \
     { \
-        return detail::to_underlying< Enum >( lhs ) ^ rhs; \
+        return detail::recast_underlying< Enum >( detail::to_underlying< Enum >( lhs ) ^ rhs ); \
     } \
     \
     OddSource_Inline \
@@ -159,7 +174,7 @@ namespace OddSource::Interfaces::detail
         Enum const & rhs ) noexcept \
     { \
         /* Have to cast because MSVC promotes ~ushort and ~uint to an int, resulting in an error on return */ \
-        return static_cast< ::std::underlying_type_t< Enum > >( ~detail::to_underlying< Enum >( rhs ) ); \
+        return detail::recast_underlying< Enum >( ~detail::to_underlying< Enum >( rhs ) ); \
     } \
     \
     OddSource_Inline \
