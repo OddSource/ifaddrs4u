@@ -23,6 +23,7 @@
 
 #pragma warning( push )
 #pragma warning( disable : 4242 )
+#pragma warning( disable : 4244 )
 
 // Windows and Windows socket headers have to be included in a particular order, or else
 // all kinds of errors are encountered. Additionally, many (all?) of these header files
