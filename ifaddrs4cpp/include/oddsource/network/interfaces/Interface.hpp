@@ -226,7 +226,7 @@ namespace OddSource::Interfaces
 #endif /* !IFADDRS4CPP_INLINE_SOURCE */
 
     template< class IPAddressT >
-    class OddSource_Export InterfaceIPAddress
+    class InterfaceIPAddress
     {
         static_assert( ::std::is_base_of_v< IPAddress, IPAddressT >,
                        "the template parameter IPAddressT must derive from IPAddress." );
@@ -326,13 +326,11 @@ namespace OddSource::Interfaces
 
     template< class IPAddressT >
     [[nodiscard]]
-    OddSource_Export
     ::std::string
     toString(
         InterfaceIPAddress< IPAddressT > const & address );
 
     template< class IPAddressT >
-    OddSource_Export
     ::std::ostream &
     operator<<(
         ::std::ostream &,

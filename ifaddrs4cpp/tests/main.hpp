@@ -17,6 +17,7 @@
 #pragma once
 
 #include <oddsource/network/interfaces/detail/config.h>
+#include <oddsource/network/interfaces/detail/winsock_includes.h>
 
 #include <cassert>
 #include <iostream>
@@ -25,7 +26,6 @@
 #include <sstream>
 
 #ifdef ODDSOURCE_IS_WINDOWS
-#include "../winsock_includes.h"
 #include <errhandlingapi.h>
 #include <crtdbg.h>
 #endif /* ODDSOURCE_IS_WINDOWS */
