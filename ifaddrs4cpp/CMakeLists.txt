@@ -122,7 +122,7 @@ add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE "cxx_std_${CPP_VERSION}")
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
-                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-diagnostics:caret;-external:W0;-W4;-Wall;-WX;-wd4251;-wd4275;-wd4464;-wd4820>>")
+                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-diagnostics:caret;-Qspectre;-external:W0;-W4;-Wall;-WX;-wd4251;-wd4275;-wd4464;-wd4820;-wd5045>>")
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
                       CXX_STANDARD_REQUIRED ON
@@ -136,6 +136,8 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
 # - C4464: relative include path contains '..' (meant to catch using relative include paths to include external
 #          library headers, but we use relative include paths only for our internal headers)
 # - C4820: 'x' bytes padding added after data member (we don't care if there's a few bytes of padding in our classes)
+# - C5045: Compiler will insert Spectre mitigation for memory load (even using std::clamp, it appears to be impossible
+#          to satisfy MSVC's ultra-conservative Spectre checks, so enable /Qspectre but suppress the warning)
 
 if(NOT ${BUILD_STATIC_ONLY})
     add_library(${PROJECT_NAME}-shared SHARED ${${PROJECT_NAME}_sources})
