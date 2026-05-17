@@ -130,7 +130,7 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
 
 if (MSVC)
     #target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE [=[SHELL:/external:I "C:\\Program Files\\Microsoft Visual Studio"]=])
-    target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE [=[SHELL:"/external:I\\"C:\\Program Files\\Microsoft Visual Studio\\""]=])
+    #target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE [=[SHELL:"/external:I\\"C:\\Program Files\\Microsoft Visual Studio\\""]=])
 endif ()
 
 # Windows compiler warnings disablement explanations:
@@ -148,9 +148,10 @@ if(NOT ${BUILD_STATIC_ONLY})
     target_compile_definitions(${PROJECT_NAME}-shared PRIVATE ODDSOURCE_BUILDING_LIBRARY=1)
     target_include_directories(${PROJECT_NAME}-shared PUBLIC "${CMAKE_SOURCE_DIR}/include")
     target_include_directories(${PROJECT_NAME}-shared PUBLIC "${PROJECT_BINARY_DIR}/include")
-    #if (MSVC)
+    if (MSVC)
     #    target_include_directories(${PROJECT_NAME}-shared SYSTEM PRIVATE "C:/Program Files/Microsoft Visual Studio")
-    #endif ()
+        target_compile_options(${PROJECT_NAME}-shared PRIVATE "/external:I\"C:/Program Files/Microsoft Visual Studio\"")
+    endif ()
     set_target_properties(${PROJECT_NAME}-shared PROPERTIES
                           CXX_VISIBILITY_PRESET hidden)
 endif()
@@ -161,9 +162,10 @@ if(NOT ${BUILD_DYNAMIC_ONLY})
     target_compile_definitions(${PROJECT_NAME}-static PRIVATE ODDSOURCE_BUILDING_LIBRARY=1)
     target_include_directories(${PROJECT_NAME}-static PUBLIC "${CMAKE_SOURCE_DIR}/include")
     target_include_directories(${PROJECT_NAME}-static PUBLIC "${PROJECT_BINARY_DIR}/include")
-    #if (MSVC)
+    if (MSVC)
     #    target_include_directories(${PROJECT_NAME}-static SYSTEM PRIVATE "C:/Program Files/Microsoft Visual Studio")
-    #endif ()
+        target_compile_options(${PROJECT_NAME}-static PRIVATE "/external:I\"C:/Program Files/Microsoft Visual Studio\"")
+    endif ()
     set_target_properties(${PROJECT_NAME}-static PROPERTIES
                           POSITION_INDEPENDENT_CODE ON
                           CXX_VISIBILITY_PRESET hidden)
@@ -197,9 +199,10 @@ if(${ENABLE_TESTS})
     target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}-static)
     target_include_directories(${PROJECT_NAME}_tests PUBLIC "${CMAKE_SOURCE_DIR}/include")
     target_include_directories(${PROJECT_NAME}_tests PUBLIC "${PROJECT_BINARY_DIR}/include")
-    #if (MSVC)
+    if (MSVC)
     #    target_include_directories(${PROJECT_NAME}_tests SYSTEM PRIVATE "C:/Program Files/Microsoft Visual Studio")
-    #endif ()
+        target_compile_options(${PROJECT_NAME}_tests PRIVATE "/external:I\"C:/Program Files/Microsoft Visual Studio\"")
+    endif ()
     set_target_properties(${PROJECT_NAME}_tests PROPERTIES
                           CXX_VISIBILITY_PRESET hidden)
 
