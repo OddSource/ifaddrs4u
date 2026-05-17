@@ -29,6 +29,20 @@ public:
         add_test( test_version_info );
     }
 
+    TestVersionInfo(
+        TestVersionInfo const & ) = delete;
+
+    TestVersionInfo(
+        TestVersionInfo && ) = delete;
+
+    TestVersionInfo &
+    operator=(
+        TestVersionInfo const & ) = delete;
+
+    TestVersionInfo &
+    operator=(
+        TestVersionInfo && ) = delete;
+
     void
     test_version_info()
     {

@@ -32,6 +32,20 @@ public:
         add_test( test_construct_malformed );
     }
 
+    TestMacAddress(
+        TestMacAddress const & ) = delete;
+
+    TestMacAddress(
+        TestMacAddress && ) = delete;
+
+    TestMacAddress &
+    operator=(
+        TestMacAddress const & ) = delete;
+
+    TestMacAddress &
+    operator=(
+        TestMacAddress && ) = delete;
+
     void
     test_equals()
     {

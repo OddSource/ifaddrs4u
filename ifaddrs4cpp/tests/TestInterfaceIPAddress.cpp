@@ -30,6 +30,20 @@ public:
         add_test( test_simple_v6 );
     }
 
+    TestInterfaceIPAddress(
+        TestInterfaceIPAddress const & ) = delete;
+
+    TestInterfaceIPAddress(
+        TestInterfaceIPAddress && ) = delete;
+
+    TestInterfaceIPAddress &
+    operator=(
+        TestInterfaceIPAddress const & ) = delete;
+
+    TestInterfaceIPAddress &
+    operator=(
+        TestInterfaceIPAddress && ) = delete;
+
     void
     test_simple_v4()
     {

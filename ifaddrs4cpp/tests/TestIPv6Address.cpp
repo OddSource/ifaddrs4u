@@ -59,6 +59,20 @@ public:
 #endif
     }
 
+    TestIPv6Address(
+        TestIPv6Address const & ) = delete;
+
+    TestIPv6Address(
+        TestIPv6Address && ) = delete;
+
+    TestIPv6Address &
+    operator=(
+        TestIPv6Address const & ) = delete;
+
+    TestIPv6Address &
+    operator=(
+        TestIPv6Address && ) = delete;
+
     void
     test_equals()
     {

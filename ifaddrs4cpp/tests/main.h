@@ -59,8 +59,22 @@ namespace OddSource::Interfaces::Tests
     public:
         Test();
 
+        Test(
+            Test const & ) = delete;
+
+        Test(
+            Test && ) = delete;
+
         virtual
         ~Test() = default;
+
+        Test &
+        operator=(
+            Test const & ) = delete;
+
+        Test &
+        operator=(
+            Test && ) = delete;
 
         virtual
         void

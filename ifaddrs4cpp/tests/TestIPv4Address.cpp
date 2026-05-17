@@ -52,6 +52,20 @@ public:
 #endif
     }
 
+    TestIPv4Address(
+        TestIPv4Address const & ) = delete;
+
+    TestIPv4Address(
+        TestIPv4Address && ) = delete;
+
+    TestIPv4Address &
+    operator=(
+        TestIPv4Address const & ) = delete;
+
+    TestIPv4Address &
+    operator=(
+        TestIPv4Address && ) = delete;
+
     void
     test_equals()
     {

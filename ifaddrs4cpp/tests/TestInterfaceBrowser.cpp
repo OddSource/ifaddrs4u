@@ -30,6 +30,20 @@ public:
         add_test( test_get_interfaces );
     }
 
+    TestInterfaceBrowser(
+        TestInterfaceBrowser const & ) = delete;
+
+    TestInterfaceBrowser(
+        TestInterfaceBrowser && ) = delete;
+
+    TestInterfaceBrowser &
+    operator=(
+        TestInterfaceBrowser const & ) = delete;
+
+    TestInterfaceBrowser &
+    operator=(
+        TestInterfaceBrowser && ) = delete;
+
     void
     test_print_all()
     {

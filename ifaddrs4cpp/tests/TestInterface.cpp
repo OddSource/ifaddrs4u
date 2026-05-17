@@ -32,6 +32,20 @@ namespace OddSource::Interfaces
             add_test( test_ipv6_addresses );
         }
 
+        TestInterface(
+            TestInterface const & ) = delete;
+
+        TestInterface(
+            TestInterface && ) = delete;
+
+        TestInterface &
+        operator=(
+            TestInterface const & ) = delete;
+
+        TestInterface &
+        operator=(
+            TestInterface && ) = delete;
+
         void
         test_empty_flags()
         {
