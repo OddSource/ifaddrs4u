@@ -34,14 +34,6 @@
 #  pragma warning( pop )
 #endif /* ODDSOURCE_IS_WINDOWS */
 
-#ifndef MIN_ADAPTER_ADDRESS_LENGTH
-#define MIN_ADAPTER_ADDRESS_LENGTH 6
-#endif
-
-#ifndef MAX_ADAPTER_ADDRESS_LENGTH
-#define MAX_ADAPTER_ADDRESS_LENGTH 8
-#endif /* MAX_ADAPTER_ADDRESS_LENGTH */
-
 namespace OddSource::Interfaces
 {
     class OddSource_Export InvalidMacAddress : public ::std::invalid_argument
@@ -64,6 +56,9 @@ namespace OddSource::Interfaces
     class OddSource_Export MacAddress
     {
     public:
+        static constexpr ::std::uint16_t MIN_LENGTH{ 6 };
+        static constexpr ::std::uint16_t MAX_LENGTH{ 8 };
+
         MacAddress() = delete;
 
         OddSource_Inline
@@ -73,8 +68,8 @@ namespace OddSource::Interfaces
 
         OddSource_Inline
         MacAddress(
-            ::std::uint8_t const data[ MAX_ADAPTER_ADDRESS_LENGTH ],
-            ::std::uint8_t dataLength );
+            ::std::uint8_t const data[ MAX_LENGTH ],
+            ::std::uint16_t dataLength );
 
         OddSource_Inline
         MacAddress(
@@ -115,7 +110,7 @@ namespace OddSource::Interfaces
 
         [[nodiscard]]
         OddSource_Inline
-        ::std::uint8_t
+        ::std::uint16_t
         length() const;
 
         [[nodiscard]]
@@ -135,11 +130,11 @@ namespace OddSource::Interfaces
         MacAddress(
             ::std::string && repr,
             ::std::unique_ptr< ::std::uint8_t const[] > && data,
-            ::std::uint8_t dataLength );
+            ::std::uint16_t dataLength );
 
         ::std::string _representation;
         ::std::unique_ptr< ::std::uint8_t const[] > _data;
-        ::std::uint8_t _dataLength;
+        ::std::uint16_t _dataLength;
     };
 
     [[nodiscard]]
