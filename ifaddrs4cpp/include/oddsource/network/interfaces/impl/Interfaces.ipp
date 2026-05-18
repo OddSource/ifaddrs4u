@@ -508,7 +508,7 @@ namespace
             {
                 ::std::ostringstream oss;
                 oss << "Error " << result << " calling GetAdapterAddresses: "
-                    << detail::getSystemErrorMessage( static_cast< int >( result ) );
+                    << detail::getSystemErrorMessage( result );
                 throw InterfaceBrowserSystemError( oss.str() );
             }
         }

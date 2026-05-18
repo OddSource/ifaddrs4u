@@ -35,7 +35,8 @@
 #include <ws2ipdef.h>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
-#include <ip2string.h>
+#include <Ip2string.h>
+#include <Mstcpip.h>
 
 #pragma warning( pop )
 
