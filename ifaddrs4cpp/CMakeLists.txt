@@ -115,6 +115,16 @@ set(${PROJECT_NAME}_sources
     src/system_errors.cpp
     src/VersionInfo.cpp)
 
+set(${PROJECT_NAME}_test_sources
+    tests/main.cpp
+    tests/TestIPv4Address.cpp
+    tests/TestIPv6Address.cpp
+    tests/TestMacAddress.cpp
+    tests/TestInterface.cpp
+    tests/TestInterfaceIPAddress.cpp
+    tests/TestVersionInfo.cpp
+    tests/TestInterfaceBrowser.cpp)
+
 configure_file(version.h.in version.h)
 file(COPY ${CMAKE_BINARY_DIR}/version.h DESTINATION ${CMAKE_BINARY_DIR}/include/oddsource/network/interfaces/detail)
 
@@ -165,15 +175,26 @@ if(NOT ${BUILD_DYNAMIC_ONLY})
 endif()
 
 if(${ENABLE_TESTS})
-    add_executable(${PROJECT_NAME}_tests
-                   tests/main.cpp
-                   tests/TestIPv4Address.cpp
-                   tests/TestIPv6Address.cpp
-                   tests/TestMacAddress.cpp
-                   tests/TestInterface.cpp
-                   tests/TestInterfaceIPAddress.cpp
-                   tests/TestVersionInfo.cpp
-                   tests/TestInterfaceBrowser.cpp)
+    if(NOT ${BUILD_STATIC_ONLY})
+        add_executable(${PROJECT_NAME}_shared_tests ${${PROJECT_NAME}_test_sources})
+        target_link_libraries(${PROJECT_NAME}_shared_tests PUBLIC ${PROJECT_NAME}_compiler_flags)
+        target_include_directories(${PROJECT_NAME}_shared_tests PUBLIC "${CMAKE_SOURCE_DIR}/include")
+        target_include_directories(${PROJECT_NAME}_shared_tests PUBLIC "${PROJECT_BINARY_DIR}/include")
+        set_target_properties(${PROJECT_NAME}_shared_tests PROPERTIES CXX_VISIBILITY_PRESET hidden)
+
+        target_link_libraries(${PROJECT_NAME}_shared_tests PUBLIC ${PROJECT_NAME}-shared)
+    endif()
+
+    if(NOT ${BUILD_DYNAMIC_ONLY})
+        add_executable(${PROJECT_NAME}_static_tests ${${PROJECT_NAME}_test_sources})
+        target_link_libraries(${PROJECT_NAME}_static_tests PUBLIC ${PROJECT_NAME}_compiler_flags)
+        target_include_directories(${PROJECT_NAME}_static_tests PUBLIC "${CMAKE_SOURCE_DIR}/include")
+        target_include_directories(${PROJECT_NAME}_static_tests PUBLIC "${PROJECT_BINARY_DIR}/include")
+        set_target_properties(${PROJECT_NAME}_static_tests PROPERTIES CXX_VISIBILITY_PRESET hidden)
+
+        target_compile_definitions(${PROJECT_NAME}_static_tests PRIVATE IFADDRS4CPP_STATIC_LINKAGE=1)
+        target_link_libraries(${PROJECT_NAME}_static_tests PUBLIC ${PROJECT_NAME}-static)
+    endif()
 
     if(${SKIP_BOOST})
         message(STATUS "Boost skipped for tests.")
@@ -181,21 +202,24 @@ if(${ENABLE_TESTS})
         find_package(Boost CONFIG)
         if(Boost_FOUND)
             message(STATUS "Boost found, enabling Boost::Asio::IP features.")
-            target_include_directories(${PROJECT_NAME}_tests PRIVATE Boost)
-            target_compile_definitions(${PROJECT_NAME}_tests PRIVATE ODDSOURCE_INCLUDE_BOOST=1)
+            if(NOT ${BUILD_STATIC_ONLY})
+                target_include_directories(${PROJECT_NAME}_shared_tests PRIVATE Boost)
+                target_compile_definitions(${PROJECT_NAME}_shared_tests PRIVATE IFADDRS4CPP_INCLUDE_BOOST=1)
+            endif()
+            if(NOT ${BUILD_DYNAMIC_ONLY})
+                target_include_directories(${PROJECT_NAME}_static_tests PRIVATE Boost)
+                target_compile_definitions(${PROJECT_NAME}_static_tests PRIVATE IFADDRS4CPP_INCLUDE_BOOST=1)
+            endif()
         else()
             message(STATUS "Boost not found, building without Boost::Asio::IP features.")
         endif()
     endif()
 
-    target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}_compiler_flags)
-    target_compile_definitions(${PROJECT_NAME}_tests PRIVATE IFADDRS4CPP_STATIC_LINKAGE=1)
-    target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}-static)
-    target_include_directories(${PROJECT_NAME}_tests PUBLIC "${CMAKE_SOURCE_DIR}/include")
-    target_include_directories(${PROJECT_NAME}_tests PUBLIC "${PROJECT_BINARY_DIR}/include")
-    set_target_properties(${PROJECT_NAME}_tests PROPERTIES
-                          CXX_VISIBILITY_PRESET hidden)
-
     enable_testing()
-    add_test(NAME Tests COMMAND ${PROJECT_NAME}_tests)
+    if(NOT ${BUILD_STATIC_ONLY})
+        add_test(NAME SharedLibraryTests COMMAND ${PROJECT_NAME}_shared_tests)
+    endif()
+    if(NOT ${BUILD_DYNAMIC_ONLY})
+        add_test(NAME StaticLibraryTests COMMAND ${PROJECT_NAME}_static_tests)
+    endif()
 endif()

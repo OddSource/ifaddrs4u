@@ -46,9 +46,9 @@
 #  pragma warning( pop )
 #endif /* ODDSOURCE_IS_WINDOWS */
 
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
 #  include ODDSOURCE_BOOST_HEADER(asio/ip/address.hpp)
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
 namespace OddSource::Interfaces
 {
@@ -169,12 +169,12 @@ namespace OddSource::Interfaces
         size_t
         dataLength() const noexcept = 0;
 
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
         [[nodiscard]]
         virtual
         explicit
-        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const = 0;
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+        operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address() const = 0;
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
         /**
          * Converts the IP address to a C++ string.
@@ -345,17 +345,17 @@ namespace OddSource::Interfaces
         IPv4Address(
             ::std::uint32_t data );
 
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
         inline
         explicit
         IPv4Address(
-            ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other );
+            IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address const & other );
 
         inline
         explicit
         IPv4Address(
-            ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 const & other );
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+            IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 const & other );
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
         // copy constructor
         OddSource_Inline
@@ -405,18 +405,18 @@ namespace OddSource::Interfaces
         size_t
         dataLength() const noexcept override;
 
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
         [[nodiscard]]
         virtual
         inline
         explicit
-        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const override;
+        operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address() const override;
 
         [[nodiscard]]
         inline
         explicit
-        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4() const;
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+        operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4() const;
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
         [[nodiscard]]
         OddSource_Inline
@@ -509,17 +509,17 @@ namespace OddSource::Interfaces
             Bytes const & data,
             v6Scope const & scope );
 
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
         inline
         explicit
         IPv6Address(
-            ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other );
+            IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address const & other );
 
         inline
         explicit
         IPv6Address(
-            ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 const & other );
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+            IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 const & other );
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
         // copy constructor
         OddSource_Inline
@@ -569,18 +569,18 @@ namespace OddSource::Interfaces
         size_t
         dataLength() const noexcept override;
 
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
         [[nodiscard]]
         virtual
         inline
         explicit
-        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const override;
+        operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address() const override;
 
         [[nodiscard]]
         inline
         explicit
-        operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6() const;
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+        operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6() const;
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
         [[nodiscard]]
         OddSource_Inline

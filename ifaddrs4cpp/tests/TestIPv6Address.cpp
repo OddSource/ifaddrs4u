@@ -54,7 +54,7 @@ public:
         add_test( test_6to4_addresses );
         add_test( test_construct_malformed );
 
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
         add_test( test_boost_address_conversion );
 #endif
     }
@@ -928,16 +928,16 @@ public:
         assert_throws( IPv6Address( "ffff::1::2" ), InvalidIPAddress );
     }
 
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
     void
     test_boost_address_conversion()
     {
         IPv6Address const address( "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" );
-        auto const genericBoostAddress( static_cast< boost::asio::ip::address >( address ) );
+        auto const genericBoostAddress( static_cast< IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address >( address ) );
         assert_that( genericBoostAddress.is_v6(), "The generic Boost address should be an IPv6 address." );
         assert_equals( genericBoostAddress.to_string(), "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" );
 
-        auto const versionedBoostAddress( static_cast< boost::asio::ip::address_v6 >( address ) );
+        auto const versionedBoostAddress( static_cast< IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >( address ) );
         assert_equals( versionedBoostAddress.to_string(), "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" );
 
         IPv6Address const genericRoundTrip( genericBoostAddress );
@@ -946,7 +946,7 @@ public:
         IPv6Address const versionedRoundTrip( versionedBoostAddress );
         assert_equals( toString( versionedRoundTrip ), "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" );
 
-        auto const v4Address( boost::asio::ip::make_address( "129.173.55.4" ) );
+        auto const v4Address( IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::make_address( "129.173.55.4" ) );
         assert_throws( IPv6Address{ v4Address }, InvalidIPAddress );
     }
 #endif

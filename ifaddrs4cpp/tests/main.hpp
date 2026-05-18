@@ -30,10 +30,10 @@
 #include <crtdbg.h>
 #endif /* ODDSOURCE_IS_WINDOWS */
 
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
 #  include ODDSOURCE_BOOST_HEADER(exception/exception.hpp)
 #  include ODDSOURCE_BOOST_HEADER(exception/diagnostic_information.hpp)
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
 // ReSharper disable once CppUnnamedNamespaceInHeaderFile
 namespace
@@ -306,8 +306,8 @@ assert_except(
 
         this->failure( oss.str(), file, line );
     }
-#ifdef ODDSOURCE_INCLUDE_BOOST
-    catch ( ODDSOURCE_BOOST_NAMESPACE_ROOT::exception const & e )
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
+    catch ( IFADDRS4CPP_BOOST_NAMESPACE_ROOT::exception const & e )
     {
         ::std::ostringstream oss;
         oss << "assert " << expression << " throws " << exceptionType;
@@ -317,7 +317,7 @@ assert_except(
         }
         oss << " has failed (actual exception type: " << demangle( typeid( e ).name() )
             << ", diagnostic information: \""
-            << ODDSOURCE_BOOST_NAMESPACE_ROOT::diagnostic_information( e ) << "\")";
+            << IFADDRS4CPP_BOOST_NAMESPACE_ROOT::diagnostic_information( e ) << "\")";
         if ( message )
         {
             oss << ": " << *message;
@@ -325,7 +325,7 @@ assert_except(
 
         this->failure( oss.str(), file, line );
     }
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
     catch ( ... )
     {
         ::std::ostringstream oss;

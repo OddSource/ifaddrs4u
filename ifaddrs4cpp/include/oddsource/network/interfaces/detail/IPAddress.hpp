@@ -19,13 +19,13 @@
 // ReSharper disable once CppUnnamedNamespaceInHeaderFile
 namespace
 {
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
     using namespace OddSource::Interfaces;
 
     inline
-    ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4
+    IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4
     toV4(
-        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
+        IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
     {
         using namespace ::std::string_literals;
         if ( !other.is_v4() )
@@ -38,9 +38,9 @@ namespace
     }
 
     inline
-    ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6
+    IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6
     toV6(
-        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
+        IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
     {
         using namespace ::std::string_literals;
         if ( !other.is_v6() )
@@ -51,16 +51,16 @@ namespace
         }
         return other.to_v6();
     }
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
 }
 
 namespace OddSource::Interfaces
 {
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
     inline
     IPv4Address::
     IPv4Address(
-        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
+        IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
         : IPv4Address( toV4( other ) )
     {
     }
@@ -68,11 +68,11 @@ namespace OddSource::Interfaces
     inline
     IPv4Address::
     IPv4Address(
-        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 const & other )
+        IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 const & other )
         : IPv4Address( other.to_uint() )
     {
     }
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
     inline
 #if __cplusplus >= 202002L
@@ -107,26 +107,26 @@ namespace OddSource::Interfaces
         return 4;
     }
 
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
     inline
     IPv4Address::
-    operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const
+    operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address() const
     {
-        return ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address(
-            static_cast< ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 >( *this ) );
+        return IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address(
+            static_cast< IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 >( *this ) );
     }
 
     inline
     IPv4Address::
-    operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4() const
+    operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4() const
     {
-        return ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v4( static_cast< ::std::uint32_t >( *this ) );
+        return IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4( static_cast< ::std::uint32_t >( *this ) );
     }
 
     inline
     IPv6Address::
     IPv6Address(
-        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
+        IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address const & other )
         : IPv6Address( toV6( other ) )
     {
     }
@@ -134,11 +134,11 @@ namespace OddSource::Interfaces
     inline
     IPv6Address::
     IPv6Address(
-        ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 const & other )
+        IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 const & other )
         : IPv6Address( other.to_bytes(), other.scope_id() )
     {
     }
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
     inline
 #if __cplusplus >= 202002L
@@ -173,20 +173,20 @@ namespace OddSource::Interfaces
         return 16;
     }
 
-#ifdef ODDSOURCE_INCLUDE_BOOST
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
     inline
     IPv6Address::
-    operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address() const
+    operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address() const
     {
-        return ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address(
-            static_cast< ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >( *this ) );
+        return IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address(
+            static_cast< IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >( *this ) );
     }
 
     inline
     IPv6Address::
-    operator ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6() const
+    operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6() const
     {
-        return ODDSOURCE_BOOST_NAMESPACE_ROOT::asio::ip::address_v6( static_cast< Bytes >( *this ) );
+        return IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6( static_cast< Bytes >( *this ) );
     }
-#endif /* ODDSOURCE_INCLUDE_BOOST */
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
 }
