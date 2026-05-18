@@ -19,8 +19,6 @@ package io.oddsource.java.test.unit;
 import static org.junit.Assert.*;
 
 import java.net.UnknownHostException;
-import java.util.Locale;
-import java.util.UUID;
 
 import org.junit.Test;
 
@@ -109,11 +107,8 @@ public class TestSamples
         assertNotNull(anInterface);
         assertEquals(3, anInterface.getIndex());
         assertEquals("en0", anInterface.getName());
-
-        if (System.getProperty("os.name").toLowerCase(Locale.US).contains("win"))
-        {
-            assertEquals(UUID.fromString("24af9519-2a42-4f62-99fa-1ed3147ad90a"), anInterface.getWindowsUuid());
-        }
+        assertEquals("en0", anInterface.getFriendlyName());
+        assertEquals("en0", anInterface.getDescription());
 
         assertEquals("ac:de:48:00:11:22", anInterface.getMacAddress().toString());
         final var iterV4 = anInterface.getIpv4Addresses();

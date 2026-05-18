@@ -23,27 +23,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
- * Represents a network interface (adapter) on the system, including its index, name, UUID if on Windows,
+ * Represents a network interface (adapter) on the system, including its index, name, friendly name, description,
  * configuration flags, configured MTU, MAC (hardware) address, IPv4 address(es), and IPv6 address(es).
  *
  * @since 1.0.0
  */
 public final class Interface implements Iterable<InterfaceIPAddress<? extends InetAddress>>
 {
-    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase(Locale.US).contains("win");
-
-    private static final String NO_WINDOWS = "The windowsUuid property is supported only on Windows platforms.";
-
     private final int index;
 
     private final String name;
 
-    private final UUID windowsUuid;
+    private final String friendlyName;
+
+    private final String description;
 
     private final int flags;
 
@@ -58,6 +54,8 @@ public final class Interface implements Iterable<InterfaceIPAddress<? extends In
     Interface(
         final int index,
         final String name,
+        final String friendlyName,
+        final String description,
         final int flags,
         final Long mtu,
         final MacAddress macAddress,
@@ -65,28 +63,10 @@ public final class Interface implements Iterable<InterfaceIPAddress<? extends In
         final List<InterfaceIPAddress<Inet6Address>> ipv6Addresses
     )
     {
-        this(index, name, null, flags, mtu, macAddress, ipv4Addresses, ipv6Addresses);
-    }
-
-    Interface(
-        final int index,
-        final String name,
-        final String windowsUuid,
-        final int flags,
-        final Long mtu,
-        final MacAddress macAddress,
-        final List<InterfaceIPAddress<Inet4Address>> ipv4Addresses,
-        final List<InterfaceIPAddress<Inet6Address>> ipv6Addresses
-    )
-    {
-        if (windowsUuid != null && !Interface.IS_WINDOWS)
-        {
-            throw new UnsupportedOperationException(Interface.NO_WINDOWS);
-        }
-
         this.index = index;
         this.name = name;
-        this.windowsUuid = windowsUuid == null ? null : UUID.fromString(windowsUuid);
+        this.friendlyName = friendlyName;
+        this.description = description;
         this.flags = flags;
         this.mtu = mtu;
         this.macAddress = macAddress;
@@ -115,19 +95,23 @@ public final class Interface implements Iterable<InterfaceIPAddress<? extends In
     }
 
     /**
-     * Get the interface UUID on the Windows platform. If this platform is not Windows, this method
-     * throws {@link UnsupportedOperationException}.
+     * Get the interface's friendly name.
      *
-     * @return the Windows platform interface UUID.
-     * @throws UnsupportedOperationException if the platform is not Windows.
+     * @return the friendly name.
      */
-    public UUID getWindowsUuid()
+    public String getFriendlyName()
     {
-        if (!Interface.IS_WINDOWS)
-        {
-            throw new UnsupportedOperationException(Interface.NO_WINDOWS);
-        }
-        return this.windowsUuid;
+        return this.friendlyName;
+    }
+
+    /**
+     * Get the interface's description.
+     *
+     * @return the description.
+     */
+    public String getDescription()
+    {
+        return this.description;
     }
 
     /**
