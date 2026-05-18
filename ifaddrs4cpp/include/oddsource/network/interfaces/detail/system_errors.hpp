@@ -20,6 +20,8 @@
 #define ODDSOURCE_NETWORK_INTERFACES_DETAIL_SYSTEM_ERRORS_H
 
 #include "config.h"
+// ReSharper disable once CppUnusedIncludeDirective
+#include "winsock_includes.h"
 
 #ifdef ODDSOURCE_IS_WINDOWS
 #  pragma warning( push )

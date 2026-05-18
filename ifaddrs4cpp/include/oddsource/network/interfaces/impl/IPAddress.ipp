@@ -124,7 +124,8 @@ namespace
             {
                 throw InvalidIPAddress(
                     "Malformed IPv4 address string '"s + reprStr + "' or unknown ::RtlIpv4StringToAddress error "s +
-                    ::std::to_string( result ) + ": "s + detail::getSystemErrorMessage( result ) );
+                    ::std::to_string( result ) + ": "s +
+                    detail::getSystemErrorMessage( static_cast< detail::ErrorCode_t >( result ) ) );
             }
 #else /* ODDSOURCE_IS_WINDOWS */
             // While inet_pton can handle IPv4 addresses, it can handle them only in dotted-decimal format
