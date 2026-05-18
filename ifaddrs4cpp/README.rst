@@ -1,6 +1,10 @@
 ifaddrs4cpp - Exploring Network Interfaces in C++
 =================================================
 
+.. contents:: Table of Contents
+   :local:
+   :depth: 2
+
 ifaddrs4cpp is a C++ library (static or shared) for retrieving detailed information about system network interfaces.
 Its cross-platform support allows you to examine network interfaces and their addresses without knowing the
 details of :code:`getifaddrs`, :code:`GetAdaptersAddresses`, or :code:`ioctl`, etc.
@@ -97,7 +101,53 @@ CMake configuration commands above.
 Usage
 *****
 
-This section is to-be-completed.
+Macro Definitions
+-----------------
+
+- :code:`IFADDRS4CPP_INLINE_SOURCE`: Define this macro when building your application/library if you want it to use
+  ifaddrs4cpp as a header-only library. You will not need to build/install ifaddrs4cpp binaries or link against the
+  library in order to use it in this case.
+- :code:`IFADDRS4CPP_STATIC_LINKAGE`: If you are using ifaddrs4cpp as a static library on Windows, define this macro
+  when building your application/library to prevent :code:`__declspec(dllimport)` attributes' being added to symbols in
+  included headers. If you are using it as a static library on any other operating system, this is not required;
+  however, to support multiple platforms at once, it is safe to define this macro on any platform (it is ignored on
+  non-Windows platforms).
+
+Including Headers
+-----------------
+
+The headers in :code:`oddsource/network/interfaces/detail` and :code:`oddsource/network/interfaces/impl` are not meant
+to be included directly. They are included as necessary at build time or inline based on the macros you do or don't
+define when building your application (see above). To use ifaddrs4cpp, include one or more of the following headers in
+:code:`oddsource/network/interfaces`:
+
+- :code:`Interfaces.hpp`: provides the class :code:`InterfaceBrowser`, which is the primary API for accessing the
+  system's network interfaces, as well as exception :code:`InterfaceBrowserSystemError`. In most cases, this is the
+  only header you will need to include, as it includes all the other headers directly or indirectly.
+- :code:`MacAddress.hpp`: provides the class :code:`MacAddress` and exception :code:`InvalidMacAddress`, as well as
+  streaming operators and :code:`toString` overloads.
+- :code:`IpAddress.hpp`: provides the class :code:`IPAddress`, exception :code:`InvalidIPAddress`, and enum classes
+  :code:`IPAddressVersion`, :code:`MulticastScope`, :code:`MulticastV6Flag`, as well as streaming operators and
+  :code:`toString` overloads.
+- :code:`Interface.hpp`: provides the template class :code:`InterfaceIPAddress` and its instantiations
+  :code:`InterfaceIPv4Address` and :code:`InterfaceIPv6Address`, the class :code:`Interface`, and the enum classes
+  :code:`InterfaceIPAddressFlag` and :code:`InterfaceFlag`, as well as streaming operators and :code:`toString`
+  overloads.
+- :code:`VersionInfo.hpp`: provides the static class :code:`VersionInfo` providing programmatic access to the
+  ifaddrs4cpp library version information.
+- :code:`WSAHelper.hpp`: On Windows only, this header provides an RAII-patterned helper class
+  :code:`WinSockStartupCleanupHelper` that performs the necessary Windows Socket API startup operations on construction
+  and cleanup operations on destruction. On non-Windows platforms, the header still exists, but including it is a no-op.
+
+API Documentation
+-----------------
+
+TODO
+
+Examples
+--------
+
+TODO
 
 .. _Java: https://github.com/OddSource/ifaddrs4u/blob/main/ifaddrs4j/README.rst
 .. _Python: https://github.com/OddSource/ifaddrs4u/blob/main/ifaddrs4py/README.rst

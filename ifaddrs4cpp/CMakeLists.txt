@@ -189,7 +189,7 @@ if(${ENABLE_TESTS})
     endif()
 
     target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}_compiler_flags)
-    target_compile_definitions(${PROJECT_NAME}_tests PRIVATE ODDSOURCE_INTERFACES_STATIC_LINKAGE=1)
+    target_compile_definitions(${PROJECT_NAME}_tests PRIVATE IFADDRS4CPP_STATIC_LINKAGE=1)
     target_link_libraries(${PROJECT_NAME}_tests PUBLIC ${PROJECT_NAME}-static)
     target_include_directories(${PROJECT_NAME}_tests PUBLIC "${CMAKE_SOURCE_DIR}/include")
     target_include_directories(${PROJECT_NAME}_tests PUBLIC "${PROJECT_BINARY_DIR}/include")
