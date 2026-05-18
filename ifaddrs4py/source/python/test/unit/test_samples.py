@@ -16,6 +16,7 @@
 
 from unittest import TestCase
 
+from ifaddrs4py.constants import IS_WINDOWS
 from ifaddrs4py import extern
 
 
@@ -59,9 +60,14 @@ class TestSamples(TestCase):
         interface = extern.get_sample_interface()
         self.assertIsNotNone(interface)
         self.assertEqual(interface.index, 3)
-        self.assertEqual(interface.name, "en0")
-        self.assertEqual(interface.friendly_name, "en0")
-        self.assertEqual(interface.description, "en0")
+        if IS_WINDOWS:
+            self.assertEqual(interface.name, "{24af9519-2a42-4f62-99fa-1ed3147ad90a}")
+            self.assertEqual(interface.friendly_name, "Wi-Fi")
+            self.assertEqual(interface.description, "Intel(R) Wi-Fi 6 AX201 160MHz")
+        else:
+            self.assertEqual(interface.name, "en0")
+            self.assertEqual(interface.friendly_name, "Friendly Name")
+            self.assertEqual(interface.description, "Long Description")
 
         self.assertEqual(f"{interface.mac_address}", "ac:de:48:00:11:22")
 

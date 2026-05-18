@@ -19,6 +19,7 @@ package io.oddsource.java.test.unit;
 import static org.junit.Assert.*;
 
 import java.net.UnknownHostException;
+import java.util.Locale;
 
 import org.junit.Test;
 
@@ -28,6 +29,8 @@ import io.oddsource.java.net.ifaddrs4j.Samples;
 
 public class TestSamples
 {
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase(Locale.US).contains("win");
+
     public TestSamples()
     {
     }
@@ -106,9 +109,19 @@ public class TestSamples
         final var anInterface = Samples.getInterface();
         assertNotNull(anInterface);
         assertEquals(3, anInterface.getIndex());
-        assertEquals("en0", anInterface.getName());
-        assertEquals("en0", anInterface.getFriendlyName());
-        assertEquals("en0", anInterface.getDescription());
+
+        if(IS_WINDOWS)
+        {
+            assertEquals("{24af9519-2a42-4f62-99fa-1ed3147ad90a}", anInterface.getName());
+            assertEquals("Wi-Fi", anInterface.getFriendlyName());
+            assertEquals("Intel(R) Wi-Fi 6 AX201 160MHz", anInterface.getDescription());
+        }
+        else
+        {
+            assertEquals("en0", anInterface.getName());
+            assertEquals("Friendly Name", anInterface.getFriendlyName());
+            assertEquals("Long Description", anInterface.getDescription());
+        }
 
         assertEquals("ac:de:48:00:11:22", anInterface.getMacAddress().toString());
         final var iterV4 = anInterface.getIpv4Addresses();

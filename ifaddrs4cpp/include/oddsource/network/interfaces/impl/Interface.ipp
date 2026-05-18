@@ -347,8 +347,8 @@ namespace OddSource::Interfaces
             "Intel(R) Wi-Fi 6 AX201 160MHz",
 #else /* ODDSOURCE_IS_WINDOWS */
             "en0",
-            "en0",
-            "en0",
+            "Friendly Name",
+            "Long Description",
 #endif /* !ODDSOURCE_IS_WINDOWS */
             InterfaceFlag::BroadcastAddressSet | InterfaceFlag::IsUp | InterfaceFlag::IsRunning,
             1725 );

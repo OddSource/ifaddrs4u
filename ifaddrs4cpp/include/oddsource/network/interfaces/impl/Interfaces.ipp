@@ -57,8 +57,6 @@
 #  pragma warning( push )
 #  pragma warning( disable : 4242 )
 #  pragma warning( disable : 4244 )
-#  pragma warning( disable : 4710 )
-#  pragma warning( disable : 4711 )
 #endif /* ODDSOURCE_IS_WINDOWS */
 #include <cassert>
 #include <functional>
@@ -133,13 +131,16 @@ namespace OddSource::Interfaces
         {
             this->_indexToInterface.emplace( pInterface->index(), pInterface );
             this->_nameToInterface.emplace( pInterface->name(), pInterface );
-#ifdef ODDSOURCE_IS_WINDOWS
+            if ( pInterface->name() != pInterface->friendlyName() &&
+                 this->_nameToInterface.find( pInterface->friendlyName() ) == this->_nameToInterface.end() )
+            {
+                this->_nameToInterface.emplace( pInterface->friendlyName(), pInterface );
+            }
             if ( pInterface->name() != pInterface->description() &&
                  this->_nameToInterface.find( pInterface->description() ) == this->_nameToInterface.end() )
             {
                 this->_nameToInterface.emplace( pInterface->description(), pInterface );
             }
-#endif /* ODDSOURCE_IS_WINDOWS */
         }
     }
 
@@ -287,26 +288,6 @@ namespace
             NULL);
         return string;
     }
-
-    /*class InterfacePopulator
-    {
-    private:
-        PIP_ADAPTER_ADDRESSES _pAddresses;
-
-    public:
-        InterfacePopulator()
-          : _pAddresses( nullptr )
-        {
-        }
-
-        ~InterfacePopulator()
-        {
-            if ( this->_pAddresses )
-            {
-                FREE( this->_pAddresses );
-            }
-        }
-    };*/
 
     int
     getSystemErrorCode()
@@ -699,26 +680,6 @@ namespace
 
 #else /* ODDSOURCE_IS_WINDOWS */
 
-    /*class InterfacePopulator
-    {
-    private:
-        struct ifaddrs * _ifaddrs;
-
-    public:
-        InterfacePopulator()
-          : _ifaddrs( nullptr )
-        {
-        }
-
-        ~InterfacePopulator()
-        {
-            if ( this->_ifaddrs )
-            {
-                ::freeifaddrs( this->_ifaddrs );
-            }
-        }
-    };*/
-
     ::std::string
     getSystemErrorMessage(
         int const errorCode )
@@ -731,9 +692,9 @@ namespace
         {
             errorMessage = errorMessageBuffer;
         }
-#else
+#else /* STRERROR_R_RETURNS_INT == 1 */
         ::std::string const errorMessage( ::strerror_r( errorCode, errorMessageBuffer, MAX_LENGTH ) );
-#endif
+#endif /* STRERROR_R_RETURNS_INT != 1 */
 
         using namespace ::std::string_literals;
         return errorMessage.empty() ? "Unknown error"s : errorMessage;
@@ -1072,14 +1033,6 @@ namespace
     }
 
 #endif /* !ODDSOURCE_IS_WINDOWS */
-
-    /*void
-    populateInterfaces(
-        ::std::list< ::std::shared_ptr< Interface const > > & interfaces )
-    {
-        InterfacePopulator populator;
-        populator( interfaces );
-    }*/
 }
 
 #ifndef ODDSOURCE_IS_WINDOWS

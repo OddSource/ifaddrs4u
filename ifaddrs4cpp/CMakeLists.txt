@@ -115,7 +115,6 @@ set(${PROJECT_NAME}_sources
     src/VersionInfo.cpp)
 
 configure_file(version.h.in version.h)
-#file(COPY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CMAKE_BINARY_DIR}/version.h DESTINATION ${CMAKE_BINARY_DIR}/include/oddsource/network/interfaces/detail)
 
 add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
