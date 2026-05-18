@@ -20,12 +20,20 @@
 #include "system_errors.hpp"
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
-#ifdef ODDSOURCE_IS_WINDOWS
-#include "winsock_includes.h"
-#else /* ODDSOURCE_IS_WINDOWS */
+#ifndef ODDSOURCE_IS_WINDOWS
 #include <cerrno>
 #include <cstring>
 #endif /* !ODDSOURCE_IS_WINDOWS */
+
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( push )
+#  pragma warning( disable : 4242 )
+#  pragma warning( disable : 4244 )
+#endif /* ODDSOURCE_IS_WINDOWS */
+#include <stdexcept>
+#ifdef ODDSOURCE_IS_WINDOWS
+#  pragma warning( pop )
+#endif
 
 namespace OddSource::Interfaces::detail
 {
@@ -43,6 +51,9 @@ namespace OddSource::Interfaces::detail
 
         while ( lastErrorCode == 0 && !checkedGLE && !checkedWSA )
         {
+            // If you reverse-engineer the Windows DLLs, ::WSAGetLastError() merely calls ::GetLastError(). However,
+            // the official documentation says they are different / unrelated. As such, it's safest to check them both,
+            // in case the implementation changes someday.
             if ( socketFirst || checkedGLE )
             {
                 checkedWSA = true;
@@ -52,7 +63,7 @@ namespace OddSource::Interfaces::detail
                     // per the MSVC documentation, this should be impossible
                     throw ::std::runtime_error(
                         "::WSAGetLastError() unexpectedly returned negative value "s +
-                        ::std::to_string( wsaLastErrorCode ) "incompatible with the ::FormatMessage interface.") ;
+                        ::std::to_string( wsaLastErrorCode ) + "incompatible with the ::FormatMessage interface." );
                 }
                 lastErrorCode = static_cast< ErrorCode_t >( wsaLastErrorCode );
             }
@@ -99,7 +110,7 @@ namespace OddSource::Interfaces::detail
             nullptr,
             errorCode,
             MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
-            &errorMessageBuffer,
+            ( LPTSTR )&errorMessageBuffer,
             0,
             nullptr ) );
 

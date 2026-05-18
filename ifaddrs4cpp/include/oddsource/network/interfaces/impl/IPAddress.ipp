@@ -120,7 +120,7 @@ namespace
                     "An invalid parameter was passed to ::RtlIpv4StringToAddress while converting IPv4 address '"s +
                     reprStr + "'"s );
             }
-            else if ( result != STATUS_SUCCESS )
+            else if ( result != 0 ) // != STATUS_SUCCESS, but apparently hard to include the right header to get this
             {
                 throw InvalidIPAddress(
                     "Malformed IPv4 address string '"s + reprStr + "' or unknown ::RtlIpv4StringToAddress error "s +
