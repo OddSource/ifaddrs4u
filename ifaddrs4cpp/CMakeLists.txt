@@ -110,7 +110,7 @@ endif()
 set(${PROJECT_NAME}_sources
     src/Interface.cpp
     src/Interfaces.cpp
-    src/IpAddress.cpp
+    src/IPAddress.cpp
     src/MacAddress.cpp
     src/system_errors.cpp
     src/VersionInfo.cpp)

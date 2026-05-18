@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-#include <oddsource/network/interfaces/IpAddress.hpp>
-#include <oddsource/network/interfaces/impl/IpAddress.ipp>
+#include <oddsource/network/interfaces/IPAddress.hpp>
+#include <oddsource/network/interfaces/impl/IPAddress.ipp>

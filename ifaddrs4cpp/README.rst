@@ -126,7 +126,7 @@ define when building your application (see above). To use ifaddrs4cpp, include o
   only header you will need to include, as it includes all the other headers directly or indirectly.
 - :code:`MacAddress.hpp`: provides the class :code:`MacAddress` and exception :code:`InvalidMacAddress`, as well as
   streaming operators and :code:`toString` overloads.
-- :code:`IpAddress.hpp`: provides the class :code:`IPAddress`, exception :code:`InvalidIPAddress`, and enum classes
+- :code:`IPAddress.hpp`: provides the class :code:`IPAddress`, exception :code:`InvalidIPAddress`, and enum classes
   :code:`IPAddressVersion`, :code:`MulticastScope`, :code:`MulticastV6Flag`, as well as streaming operators and
   :code:`toString` overloads.
 - :code:`Interface.hpp`: provides the template class :code:`InterfaceIPAddress` and its instantiations

@@ -18,7 +18,7 @@
 
 #include <jni.h>
 
-#include <oddsource/network/interfaces/IpAddress.hpp>
+#include <oddsource/network/interfaces/IPAddress.hpp>
 
 namespace OddSource::ifaddrs4j
 {

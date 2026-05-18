@@ -20,7 +20,7 @@
 
 #include "cache.h"
 #include "Interface.h"
-#include "IpAddress.h"
+#include "IPAddress.h"
 #include "MacAddress.h"
 #include "macros.h"
 #include "wrappers.h"

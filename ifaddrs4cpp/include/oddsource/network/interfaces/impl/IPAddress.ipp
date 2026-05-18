@@ -17,7 +17,7 @@
 #pragma once
 
 #ifndef IFADDRS4CPP_INLINE_SOURCE
-#include "../IpAddress.hpp"
+#include "../IPAddress.hpp"
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
 #include "../detail/bitwise_enum.ipp"

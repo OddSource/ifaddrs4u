@@ -15,7 +15,7 @@
  */
 
 #include "cache.h"
-#include "IpAddress.h"
+#include "IPAddress.h"
 #include "macros.h"
 #include "wrappers.h"
 

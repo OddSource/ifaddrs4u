@@ -24,7 +24,7 @@
 #include "detail/config.h"
 // ReSharper disable once CppUnusedIncludeDirective
 #include "detail/winsock_includes.h"
-#include "IpAddress.hpp"
+#include "IPAddress.hpp"
 #include "MacAddress.hpp"
 
 #ifndef ODDSOURCE_IS_WINDOWS

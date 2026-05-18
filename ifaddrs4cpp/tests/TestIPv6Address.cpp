@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <oddsource/network/interfaces/IpAddress.hpp>
+#include <oddsource/network/interfaces/IPAddress.hpp>
 #include "main.h"
 
 #include <cstring>

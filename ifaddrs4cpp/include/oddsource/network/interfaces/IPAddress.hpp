@@ -766,10 +766,10 @@ namespace OddSource::Interfaces
         IPAddress const & address );
 }
 
-#include "detail/IpAddress.hpp"
+#include "detail/IPAddress.hpp"
 
 #ifdef IFADDRS4CPP_INLINE_SOURCE
-#include "impl/IpAddress.ipp"
+#include "impl/IPAddress.ipp"
 #endif /* IFADDRS4CPP_INLINE_SOURCE */
 
 #endif /* ODDSOURCE_NETWORK_INTERFACES_IPADDRESS_HPP */

@@ -82,7 +82,7 @@ set(${PROJECT_NAME}_sources
     ${SOURCES_DIRECTORY}/cache.cpp
     ${SOURCES_DIRECTORY}/Interface.cpp
     ${SOURCES_DIRECTORY}/InterfaceBrowser.cpp
-    ${SOURCES_DIRECTORY}/IpAddress.cpp
+    ${SOURCES_DIRECTORY}/IPAddress.cpp
     ${SOURCES_DIRECTORY}/MacAddress.cpp
     ${SOURCES_DIRECTORY}/Samples.cpp
     ${SOURCES_DIRECTORY}/VersionInfo.cpp

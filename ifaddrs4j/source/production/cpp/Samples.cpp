@@ -16,12 +16,12 @@
 
 #include "generated/io_oddsource_java_net_ifaddrs4j_Samples.h"
 
-#include <oddsource/network/interfaces/IpAddress.hpp>
+#include <oddsource/network/interfaces/IPAddress.hpp>
 #include <oddsource/network/interfaces/MacAddress.hpp>
 #include <oddsource/network/interfaces/Interface.hpp>
 
 #include "Interface.h"
-#include "IpAddress.h"
+#include "IPAddress.h"
 #include "MacAddress.h"
 #include "macros.h"
 
