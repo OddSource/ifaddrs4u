@@ -22,10 +22,10 @@
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "../detail/winsock_includes.h"
+#include "../detail/system_errors.hpp"
 
 #ifndef ODDSOURCE_IS_WINDOWS
 
-#include <cerrno>
 #include <cstring>
 #include <ifaddrs.h>
 #include <net/if.h>
@@ -245,14 +245,6 @@ namespace OddSource::Interfaces
 #    define ODDSOURCE_AF_MAC_ADDRESS AF_PACKET
 #  endif /* AF_LINK */
 
-#  if defined(__clang__) && ODDSOURCE_IS_MACOS
-#    define STRERROR_R_RETURNS_INT 1
-#  elif ( _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600 ) && !_GNU_SOURCE
-#    define STRERROR_R_RETURNS_INT 1
-#  else
-#    define STRERROR_R_RETURNS_INT 0
-#  endif
-
 #endif /* ODDSOURCE_IS_WINDOWS */
 
 // ReSharper disable once CppUnnamedNamespaceInHeaderFile
@@ -289,42 +281,6 @@ namespace
         return string;
     }
 
-    int
-    getSystemErrorCode()
-    {
-        int errorCode( static_cast< int >( ::GetLastError() ) );
-        if ( errorCode == 0 )
-        {
-            errorCode = ::WSAGetLastError();
-        }
-        return errorCode;
-    }
-
-    ::std::string
-    getSystemErrorMessage(
-        int const errorCode )
-    {
-        char * errorMessageBuffer( nullptr );
-        DWORD const result( ::FormatMessage(
-            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-            nullptr,
-            static_cast< DWORD >( errorCode ),
-            MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
-            (LPSTR)&errorMessageBuffer,
-            0,
-            nullptr ) );
-
-        ::std::string errorMessage;
-        if ( result > 0 )
-        {
-            errorMessage = errorMessageBuffer;
-        }
-        ::LocalFree( errorMessageBuffer );
-
-        using namespace ::std::string_literals;
-        return errorMessage.empty() ? "Unknown error"s : errorMessage;
-    }
-
     LPVOID
     allocateAdapterAddresses(
         HANDLE & heap,
@@ -349,10 +305,10 @@ namespace
         HANDLE heap( ::GetProcessHeap() );
         if ( heap == nullptr )
         {
-            auto const errorCode( getSystemErrorCode() );
+            auto const errorCode( detail::getLastSystemErrorCode() );
             ::std::ostringstream oss;
             oss << "Error " << errorCode << " getting process heap handle to allocate adapter addresses: "
-                << getSystemErrorMessage( errorCode );
+                << detail::getSystemErrorMessage( errorCode );
             throw InterfaceBrowserSystemError( oss.str() );
         }
 
@@ -392,18 +348,18 @@ namespace
         HANDLE heap( ::GetProcessHeap() );
         if ( heap == nullptr )
         {
-            auto const errorCode( getSystemErrorCode() );
+            auto const errorCode( detail::getLastSystemErrorCode() );
             ::std::ostringstream oss;
             oss << "Error " << errorCode << " getting process heap handle to free adapter addresses allocation: "
-                << getSystemErrorMessage( errorCode );
+                << detail::getSystemErrorMessage( errorCode );
             throw InterfaceBrowserSystemError( oss.str() );
         }
         if ( !::HeapFree( heap, 0, addresses ) )
         {
-            auto const errorCode( getSystemErrorCode() );
+            auto const errorCode( detail::getLastSystemErrorCode() );
             ::std::ostringstream oss;
             oss << "Error " << errorCode << " freeing adapter addresses allocation: "
-                << getSystemErrorMessage( errorCode );
+                << detail::getSystemErrorMessage( errorCode );
             throw InterfaceBrowserSystemError( oss.str() );
         }
     }
@@ -552,7 +508,7 @@ namespace
             {
                 ::std::ostringstream oss;
                 oss << "Error " << result << " calling GetAdapterAddresses: "
-                    << getSystemErrorMessage( static_cast< int >( result ) );
+                    << detail::getSystemErrorMessage( static_cast< int >( result ) );
                 throw InterfaceBrowserSystemError( oss.str() );
             }
         }
@@ -680,26 +636,6 @@ namespace
 
 #else /* ODDSOURCE_IS_WINDOWS */
 
-    ::std::string
-    getSystemErrorMessage(
-        int const errorCode )
-    {
-        static constexpr size_t const MAX_LENGTH{ 4096 };
-        char errorMessageBuffer[ MAX_LENGTH ];
-#if STRERROR_R_RETURNS_INT == 1
-        ::std::string errorMessage;
-        if ( int const result( ::strerror_r( errorCode, errorMessageBuffer, MAX_LENGTH ) ); result == 0 )
-        {
-            errorMessage = errorMessageBuffer;
-        }
-#else /* STRERROR_R_RETURNS_INT == 1 */
-        ::std::string const errorMessage( ::strerror_r( errorCode, errorMessageBuffer, MAX_LENGTH ) );
-#endif /* STRERROR_R_RETURNS_INT != 1 */
-
-        using namespace ::std::string_literals;
-        return errorMessage.empty() ? "Unknown error"s : errorMessage;
-    }
-
     ::std::optional< ::std::uint64_t const >
     getMtu(
         ::std::list< ::std::string > & warnings,
@@ -718,19 +654,19 @@ namespace
             }
             else
             {
-                auto const errorCode( errno );
+                auto const errorCode( detail::getLastSystemErrorCode() );
                 ::std::ostringstream oss;
                 oss << "Error " << errorCode << " calling ioctl on datagram socket to determine MTU for interface "
-                    << interfaceName << ": " << getSystemErrorMessage( errorCode );
+                    << interfaceName << ": " << detail::getSystemErrorMessage( errorCode );
                 warnings.push_back( oss.str() );
             }
         }
         else
         {
-            auto const errorCode( errno );
+            auto const errorCode( detail::getLastSystemErrorCode() );
             ::std::ostringstream oss;
             oss << "Error " << errorCode << " creating datagram socket to determine MTU for interface "
-                << interfaceName << ": " << getSystemErrorMessage( errorCode );
+                << interfaceName << ": " << detail::getSystemErrorMessage( errorCode );
             warnings.push_back( oss.str() );
         }
 
@@ -907,21 +843,21 @@ namespace
             }
             else
             {
-                auto const errorCode( errno );
+                auto const errorCode( detail::getLastSystemErrorCode() );
                 ::std::ostringstream oss;
                 oss << "Error " << errorCode << " calling ioctl on datagram socket to determine flags for address "
                     << IPv6Address( &addr->sin6_addr ) << " on interface " << rInterface.name() << ": "
-                    << getSystemErrorMessage( errorCode );
+                    << detail::getSystemErrorMessage( errorCode );
                 warnings.push_back( oss.str() );
             }
         }
         else
         {
-            auto const errorCode( errno );
+            auto const errorCode( detail::getLastSystemErrorCode() );
             ::std::ostringstream oss;
             oss << "Error " << errorCode << " creating datagram socket to determine flags for address "
                 << IPv6Address( &addr->sin6_addr ) << " on interface " << rInterface.name() << ": "
-                << getSystemErrorMessage( errorCode );
+                << detail::getSystemErrorMessage( errorCode );
             warnings.push_back( oss.str() );
         }
 #else /* SIOCGIFAFLAG_IN6 */
@@ -969,9 +905,9 @@ namespace
         }
         else
         {
-            auto const errorCode( errno );
+            auto const errorCode( detail::getLastSystemErrorCode() );
             ::std::ostringstream oss;
-            oss << "Error " << errorCode << " calling getifaddrs: " << getSystemErrorMessage( errorCode );
+            oss << "Error " << errorCode << " calling getifaddrs: " << detail::getSystemErrorMessage( errorCode );
             throw InterfaceBrowserSystemError( oss.str() );
         }
 
@@ -1036,8 +972,5 @@ namespace
 }
 
 #ifndef ODDSOURCE_IS_WINDOWS
-
 #  undef ODDSOURCE_AF_MAC_ADDRESS
-#  undef STRERROR_R_RETURNS_INT
-
 #endif /* ODDSOURCE_IS_WINDOWS */

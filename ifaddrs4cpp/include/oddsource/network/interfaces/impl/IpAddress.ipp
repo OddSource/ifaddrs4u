@@ -22,13 +22,13 @@
 
 #include "../detail/bitwise_enum.ipp"
 #include "../detail/flip.hpp"
+#include "../detail/system_errors.hpp"
 // ReSharper disable once CppUnusedIncludeDirective
 #include "../detail/winsock_includes.h"
 
 #ifndef ODDSOURCE_IS_WINDOWS
 
 #include <arpa/inet.h>
-#include <cerrno>
 #include <netdb.h>
 #include <net/if.h>
 #include <netinet/in.h>
@@ -78,64 +78,77 @@ namespace
 
         ::std::string const reprStr( repr );
         auto data( ::std::make_unique< Addr >() );
-        int success;
         if constexpr ( ::std::is_same_v< Addr, in6_addr > )
         {
-            // inet_pton can also handle IPv4 addresses, but only in dotted-decimal format
-            // (1.2.3.4), not in octal, hexadecimal, or any other valid IPv4 format.
-            success = ::inet_pton( AF_INET6, reprStr.c_str(), data.get() );
+            auto const result{ ::inet_pton( AF_INET6, reprStr.c_str(), data.get() ) };
+            if ( result != 1 )
+            {
+                if ( result == 0 )
+                {
+                    throw InvalidIPAddress(
+                        "Malformed IPv6 address string '"s + reprStr + "' could not be parsed."s );
+                }
+                auto const errorCode( detail::getLastSystemErrorCode( true ) );
+                throw InvalidIPAddress(
+                    "Malformed IPv6 address string '"s + reprStr + "' or unexpected ::inet_pton error "s +
+                    ::std::to_string( errorCode ) + ": "s + detail::getSystemErrorMessage( errorCode ) );
+            }
         }
         else
         {
             int numDots{ 0 };
-            for (char const c : repr)
+            for ( char const c : repr )
             {
-                if (c == '.')
+                if ( c == '.' )
                 {
                     numDots++;
                 }
             }
-            if (numDots != 3)
+            if ( numDots != 3 )
             {
                 // some implementations of inet_aton tolerate incomplete addresses, but we do not
                 throw InvalidIPAddress(
-                        "Malformed IPv4 address string '"s + reprStr + "' with "s +
-                        ::std::to_string( numDots + 1 ) + " parts instead of 4"s );
+                    "Malformed IPv4 address string '"s + reprStr + "' with "s +
+                    ::std::to_string( numDots + 1 ) + " parts instead of four"s );
             }
-            // inet_aton/RtlIpv4StringToAddress, however, can handle IPv4 addresses in all valid formats.
 #ifdef ODDSOURCE_IS_WINDOWS
             char const * end = nullptr;
-            success = RtlIpv4StringToAddress( reprStr.c_str(), false, &end, data.get() );
-            if ( success == STATUS_INVALID_PARAMETER )
+            auto const result{ ::RtlIpv4StringToAddress( reprStr.c_str(), false, &end, data.get() ) };
+            if ( result == STATUS_INVALID_PARAMETER )
             {
                 throw InvalidIPAddress(
-                    "An invalid parameter was passed to RtlIpv4StringToAddress while converting '"s +
+                    "An invalid parameter was passed to ::RtlIpv4StringToAddress while converting IPv4 address '"s +
                     reprStr + "'"s );
             }
-            else if ( success != 0 )
+            else if ( result != STATUS_SUCCESS )
             {
-                char * s = nullptr;
-                ::FormatMessage(
-                    FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                    nullptr,
-                    static_cast< DWORD >( success ),
-                    MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
-                    (LPTSTR)&s, 0, nullptr );
-                ::std::string const err( s == nullptr ? "" : s );
-                LocalFree( s );
                 throw InvalidIPAddress(
-                    "Malformed IP address string '"s + reprStr + "' or unknown RtlIpv4StringToAddress error ("s +
-                    ::std::to_string( success ) + "): "s + err );
+                    "Malformed IPv4 address string '"s + reprStr + "' or unknown ::RtlIpv4StringToAddress error "s +
+                    ::std::to_string( result ) + ": "s + detail::getSystemErrorMessage( result ) );
             }
-            success = 1;
 #else /* ODDSOURCE_IS_WINDOWS */
-            success = inet_aton( reprStr.c_str(), data.get() );
+            // While inet_pton can handle IPv4 addresses, it can handle them only in dotted-decimal format
+            // (1.2.3.4), not in octal, hexadecimal, or any other completely valid IPv4 format that we support. So
+            // we need to try inet_aton first, to handle octal and hexadecimal cases. It's important to try inet_aton
+            // first, because some octal addresses may pass as decimal addresses. But if inet_aton fails, we have no
+            // way of determining why. So we try again with inet_pton.
+            if ( ::inet_aton( reprStr.c_str(), data.get() ) == 0 )
+            {
+                auto const result{ ::inet_pton( AF_INET, reprStr.c_str(), data.get() ) };
+                if ( result != 1 )
+                {
+                    if ( result == 0 )
+                    {
+                        throw InvalidIPAddress(
+                            "Malformed IPv4 address string '"s + reprStr + "' could not be parsed."s );
+                    }
+                    auto const errorCode( detail::getLastSystemErrorCode() );
+                    throw InvalidIPAddress(
+                        "Malformed IPv4 address string '"s + reprStr + "' or unexpected ::inet_pton error "s +
+                        ::std::to_string( errorCode ) + ": "s + detail::getSystemErrorMessage( errorCode ) );
+                }
+            }
 #endif /* !ODDSOURCE_IS_WINDOWS */
-        }
-        if (success != 1)
-        {
-            throw InvalidIPAddress(
-                "Malformed IP address string '"s + reprStr + "' or unknown inet_*ton error."s );
         }
 
         return data;
@@ -161,26 +174,29 @@ namespace
         auto ptr( ::inet_ntop( family, data, hostChars, HOST_LENGTH ) );
         if ( ptr == nullptr )
         {
+            auto const errorCode( detail::getLastSystemErrorCode( true ) );
 #ifdef ODDSOURCE_IS_WINDOWS
-            auto errorCode( ::WSAGetLastError() );
-            char * s = nullptr;
-            ::FormatMessage(
-                FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                nullptr,
-                static_cast< DWORD >( errorCode ),
-                MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
-                (LPTSTR)&s, 0, nullptr );
-            ::std::string const err( s == nullptr ? "" : s );
-            LocalFree( s );
+            auto const errorMessage( detail::getSystemErrorMessage( errorCode ) );
 #else /* ODDSOURCE_IS_WINDOWS */
-            auto const errorCode{ errno };
-            char const * err(
-                errorCode == EAFNOSUPPORT ? "Address family not supported" :
-                ( errorCode == ENOSPC ? "Converted address would exceed string size" : ::gai_strerror( errorCode ) ) );
+            ::std::string errorMessage;
+            if ( errorCode == EAFNOSUPPORT )
+            {
+                // a more common error for which we want a more-tailored error message, omitting "for protocol"
+                errorMessage = "Address family not supported";
+            }
+            else if ( errorCode == ENOSPC )
+            {
+                // a more common error for which we want a better error message than "no space left on device"
+                errorMessage = "Converted address would exceed string size";
+            }
+            else
+            {
+                errorMessage = detail::getSystemErrorMessage( errorCode );
+            }
 #endif /* !ODDSOURCE_IS_WINDOWS */
             throw InvalidIPAddress(
-                "Malformed in_addr data or inet_ntop system error: "s +
-                ::std::to_string( errorCode ) + " ('"s + err + "')"s );
+                "Malformed in_addr data or inet_ntop system error "s +
+                ::std::to_string( errorCode ) + ": "s + errorMessage );
         }
         return hostChars;
     }

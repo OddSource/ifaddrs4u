@@ -112,6 +112,7 @@ set(${PROJECT_NAME}_sources
     src/Interfaces.cpp
     src/IpAddress.cpp
     src/MacAddress.cpp
+    src/system_errors.cpp
     src/VersionInfo.cpp)
 
 configure_file(version.h.in version.h)
