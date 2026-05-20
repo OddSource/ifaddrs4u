@@ -235,7 +235,7 @@ namespace OddSource::Interfaces
         InterfaceIPAddress(
             IPAddressT const & address,
             ::std::uint16_t flags,
-            ::std::uint16_t prefixLength = 0 );
+            ::std::uint16_t prefixLength = 0u );
 
         InterfaceIPAddress(
             IPAddressT const & address,

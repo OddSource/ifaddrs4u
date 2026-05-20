@@ -22,9 +22,15 @@
 #include <mutex>
 #include <unordered_map>
 
-jint JNI_OnLoad(JavaVM *, void *);
+jint
+JNI_OnLoad(
+    JavaVM *,
+    void * );
 
-void JNI_OnUnload(JavaVM *, void *);
+void
+JNI_OnUnload(
+    JavaVM *,
+    void * );
 
 namespace OddSource::ifaddrs4j
 {
@@ -44,55 +50,130 @@ namespace OddSource::ifaddrs4j
     public:
         ~ClassMethodCache();
 
-        static jclass c(JNIEnv *, ::std::string);
+        ClassMethodCache(
+            ClassMethodCache const & ) = delete;
 
-        static jmethodID m(JNIEnv *, ::std::string, ::std::string);
+        ClassMethodCache(
+            ClassMethodCache && ) = delete;
 
-        static jmethodID m(JNIEnv *, jclass, ::std::string, ::std::string);
+        ClassMethodCache &
+        operator=(
+            ClassMethodCache const & ) = delete;
 
-        static jmethodID sm(JNIEnv *, jclass, ::std::string, ::std::string);
+        ClassMethodCache &
+        operator=(
+            ClassMethodCache && ) = delete;
+
+        static
+        jclass
+        c(
+            JNIEnv * pEnv,
+            ::std::string className );
+
+        static
+        jmethodID
+        m(
+            JNIEnv * pEnv,
+            ::std::string className,
+            ::std::string methodName );
+
+        static
+        jmethodID
+        m(
+            JNIEnv * pEnv,
+            jclass pClass,
+            ::std::string className,
+            ::std::string methodName );
+
+        static
+        jmethodID
+        sm(
+            JNIEnv * pEnv,
+            jclass pClass,
+            ::std::string className,
+            ::std::string methodName );
 
     private:
-        friend jint (::JNI_OnLoad)(JavaVM *, void *);
-        friend void (::JNI_OnUnload)(JavaVM *, void *);
-
         ClassMethodCache();
 
-        static void create_instance(JNIEnv *);
+        friend
+        jint
+        (::JNI_OnLoad)(
+            JavaVM *,
+            void * );
 
-        static void destroy_instance(JNIEnv *);
+        friend
+        void
+        (::JNI_OnUnload)(
+            JavaVM *,
+            void * );
 
-        static bool ensure_singleton(JNIEnv *);
+        static
+        void
+        create_instance(
+            JNIEnv * pEnv );
 
-        static void IllegalStateException(JNIEnv *, char const *);
+        static
+        void
+        destroy_instance(
+            JNIEnv * pEnv );
+
+        static
+        bool
+        ensure_singleton(
+            JNIEnv * pEnv );
+
+        static
+        void
+        IllegalStateException(
+            JNIEnv * pEnv,
+            char const * message );
 
         static ::std::mutex _singleton_mutex;
-        static ::std::unique_ptr<ClassMethodCache> _singleton;
-        static ::std::unordered_map<::std::string, ClassSearchPath> const _class_name_to_canon;
-        static ::std::unordered_map<::std::string, MethodSignature> const _method_name_to_signature;
-        static ::std::unordered_map<::std::string, MethodSignature> const _static_method_name_to_signature;
+        static ::std::unique_ptr< ClassMethodCache > _singleton;
+        static ::std::unordered_map< ::std::string, ClassSearchPath > const _class_name_to_canon;
+        static ::std::unordered_map< ::std::string, MethodSignature > const _method_name_to_signature;
+        static ::std::unordered_map< ::std::string, MethodSignature > const _static_method_name_to_signature;
 
-        jclass get_class(JNIEnv *, ::std::string);
+        jclass
+        get_class(
+            JNIEnv * pEnv,
+            ::std::string className );
 
-        jmethodID get_method(JNIEnv *, ::std::string, ::std::string);
+        jmethodID
+        get_method(
+            JNIEnv * pEnv,
+            ::std::string className,
+            ::std::string methodName );
 
-        jmethodID get_method(JNIEnv *, jclass, ::std::string, ::std::string);
+        jmethodID
+        get_method(
+            JNIEnv * pEnv,
+            jclass pClass,
+            ::std::string className,
+            ::std::string methodName );
 
-        jmethodID get_static_method(JNIEnv *, jclass, ::std::string, ::std::string);
+        jmethodID
+        get_static_method(
+            JNIEnv * pEnv,
+            jclass pClass,
+            ::std::string className,
+            ::std::string methodName );
 
-        jmethodID get_any_method(
-            JNIEnv *,
-            jclass,
-            ::std::string,
-            ::std::string,
-            ::std::unordered_map<::std::string, MethodSignature> const &,
-            ::std::unordered_map<::std::string, jmethodID> &,
-            bool is_static = false);
+        jmethodID
+        get_any_method(
+            JNIEnv * pEnv,
+            jclass pClass,
+            ::std::string className,
+            ::std::string methodName,
+            ::std::unordered_map< ::std::string, MethodSignature > const & signatureMap,
+            ::std::unordered_map< ::std::string, jmethodID > & methodCache,
+            bool isStatic = false );
 
         ::std::recursive_mutex _mutex;
-        ::std::unordered_map<::std::string, jclass> _class_cache;
-        ::std::unordered_map<::std::string, jmethodID> _method_cache;
-        ::std::unordered_map<::std::string, jmethodID> _static_method_cache;
+        ::std::unordered_map< ::std::string, jclass > _class_cache;
+        ::std::unordered_map< ::std::string, jmethodID > _method_cache;
+        ::std::unordered_map< ::std::string, jmethodID > _static_method_cache;
     };
 
     typedef ClassMethodCache JCache;

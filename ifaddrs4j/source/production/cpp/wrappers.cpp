@@ -20,6 +20,20 @@
 
 namespace OddSource::ifaddrs4j
 {
+    bool
+    convert(
+        jboolean const value )
+    {
+        return value == JNI_TRUE;
+    }
+
+    jboolean
+    convert(
+        bool value )
+    {
+        return value ? JNI_TRUE : JNI_FALSE;
+    }
+
     ::std::string const ArrayList::class_name = "ArrayList"s;
 
     ArrayList::
@@ -68,9 +82,10 @@ namespace OddSource::ifaddrs4j
 
     bool
     ArrayList::
-    add(jobject obj)
+    add(
+        jobject pObject )
     {
-        return this->_env->CallBooleanMethod(this->_wrapped, this->_add, obj);
+        return convert( this->_env->CallBooleanMethod( this->_wrapped, this->_add, pObject ) );
     }
 
     jobject
@@ -124,9 +139,10 @@ namespace OddSource::ifaddrs4j
 
     bool
     BooleanUnboxer::
-    operator()(jobject obj)
+    operator()(
+        jobject pObject )
     {
-        return this->_env->CallBooleanMethod(obj, this->_booleanValue);
+        return convert( this->_env->CallBooleanMethod( pObject, this->_booleanValue ) );
     }
 
     jobject

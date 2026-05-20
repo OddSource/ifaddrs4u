@@ -351,24 +351,24 @@ namespace OddSource::Interfaces
             "Long Description",
 #endif /* !ODDSOURCE_IS_WINDOWS */
             InterfaceFlag::BroadcastAddressSet | InterfaceFlag::IsUp | InterfaceFlag::IsRunning,
-            1725 );
+            1725u );
         iface._macAddress.emplace( "ac:de:48:00:11:22" );
         iface._ipv4Addresses.emplace_back(
             IPv4Address( "192.168.0.42" ),
-            0,
-            24,
+            static_cast< ::std::uint16_t >( 0u ),
+            static_cast< ::std::uint16_t >( 24u ),
             Broadcast,
             IPv4Address( "192.168.0.254" ) );
         iface._ipv6Addresses.emplace_back(
             IPv6Address(
                 static_cast< in6_addr const * >( IPv6Address( "fe80::aede:48ff:fe00:1122" ) ),
                 v6Scope {6, "en5"} ),
-            0 | InterfaceIPAddressFlag::Secured,
-            64 );
+            static_cast< ::std::uint16_t >( 0u ) | InterfaceIPAddressFlag::Secured,
+            static_cast< ::std::uint16_t >( 64u ) );
         iface._ipv6Addresses.emplace_back(
             IPv6Address( "2001:470:2ccb:a61b:e:acf8:6736:d81f" ),
             InterfaceIPAddressFlag::AutoConfigured | InterfaceIPAddressFlag::Secured,
-            56 );
+            static_cast< ::std::uint16_t >( 56u ) );
         return iface;
     }
 

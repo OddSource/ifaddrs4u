@@ -22,6 +22,14 @@
 
 namespace OddSource::ifaddrs4j
 {
+    bool
+    convert(
+        jboolean value );
+
+    jboolean
+    convert(
+        bool value );
+
     class ArrayList
     {
     public:
