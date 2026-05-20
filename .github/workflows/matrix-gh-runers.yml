@@ -57,7 +57,9 @@ jobs:
     steps:
       - name: Install Boost Headers If Applicable
         if: matrix.boost
-        run: sudo apt-get update && apt-get install -y libboost-dev
+        run: |
+             sudo apt-get update
+             sudo apt-get install -y libboost-dev
 
       - name: Checkout ifaddrs4u
         uses: actions/checkout@v6
