@@ -26,7 +26,7 @@ namespace
     using namespace OddSource::Interfaces;
 
     template< class IPAddressT >
-    ::std::optional< ::std::uint8_t >
+    ::std::optional< ::std::uint16_t >
     sanitizePrefixLength(
         IPAddressT const & address,
         ::std::uint16_t const prefixLength )

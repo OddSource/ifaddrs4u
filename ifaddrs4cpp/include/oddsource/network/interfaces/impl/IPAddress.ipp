@@ -977,7 +977,8 @@ namespace OddSource::Interfaces
 
         if ( this->isMulticast() )
         {
-            this->_multicastFlags = ( bytes[ 1 ] & 0b11110000 ) >> 4;
+            this->_multicastFlags = static_cast< ::std::uint8_t >(
+                static_cast< ::std::uint8_t >( bytes[ 1 ] & 0b11110000 ) >> 4 );
             switch ( bytes[ 1 ] & 0b1111 )
             {
                 case 0x0:
