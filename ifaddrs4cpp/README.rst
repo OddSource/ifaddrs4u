@@ -5,14 +5,14 @@ ifaddrs4cpp - Exploring Network Interfaces in C++
    :local:
    :depth: 2
 
-ifaddrs4cpp is a C++ library (static or shared) for retrieving detailed information about system network interfaces.
-Its cross-platform support allows you to examine network interfaces and their addresses without knowing the
+ifaddrs4cpp is a C++ library (static, shared, or header-only) for retrieving detailed information about system network
+interfaces. Its cross-platform support allows you to examine network interfaces and their addresses without knowing the
 details of :code:`getifaddrs`, :code:`GetAdaptersAddresses`, or :code:`ioctl`, etc.
 
 Other Languages
 ***************
 
-Native extensions wrapping this C++ library are available for `Java`_, `Python`_, and (TBD) `Perl`_.
+Native extensions wrapping this C++ library are available for `Java`_, `Python`_, and (maybe, TBD) `Perl`_.
 
 System Requirements
 *******************
@@ -20,8 +20,10 @@ System Requirements
 When used as a static library, there are no runtime system requirements. When used as a shared library, a
 C++17/20/23 Standard Runtime library must be available on the library path applicable to your platform.
 
-Build Requirements
-******************
+Building ifaddrs4cpp
+******************++
+
+If not using ifaddrs4cpp as a header-only library, you'll need the following to build it:
 
 - Clang 17 or higher, GCC 9 or higher, or Visual Studio 2022 or higher (on Windows), or any other comparable
   compiler capable of compiling for the C++17, C++20, and/or C++23 standards.
@@ -29,7 +31,7 @@ Build Requirements
 - CMake 3.22 or newer installed and available on the path
 
 Building
-********
+--------
 
 The simplest build, which will output both a static library and a shared/dynamic library without debug symbols::
 
@@ -74,29 +76,36 @@ Or more manually::
     $ ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:verify_asan_link_order=0 ./cmake-build-test-with-asan/ifaddrs4cpp_tests
 
 Changing C++ Standard Version
-*****************************
+-----------------------------
 
-The default C++ version automatically used is C++17. However, you can change the version with :code:`-DCPP_VERSION=20`
-or :code:`-DCPP_VERSION=23`.
+The default C++ version automatically used is C++17. However, you can change the version by passing the argument
+:code:`-DCPP_VERSION=20` or :code:`-DCPP_VERSION=23` to the CMake configuration commands when building. If you are using
+ifaddrs4cpp as a header-only library, all that matters is the way you compile your application/library, and you don't
+need to take any additional steps.
 
 Boost Support
 *************
 
-ifaddrs4cpp supports converting IP address objects to and from Boost IP address objects. To enable this, define
-:code:`IFADDRS4CPP_INCLUDE_BOOST` before including any ifaddrs4cpp headers and/or at build time with
-:code:`-DIFADDRS4CPP_INCLUDE_BOOST`.
+ifaddrs4cpp supports converting IP address objects to and from Boost.ASIO IP address objects. To enable this, define
+:code:`IFADDRS4CPP_INCLUDE_BOOST` before including any ifaddrs4cpp headers in your application/library, and/or when
+your application/library is built with :code:`-DIFADDRS4CPP_INCLUDE_BOOST`.
 
-If you need your Boost namespace to be something other than :code:`boost`,
-define :code:`IFADDRS4CPP_BOOST_NAMESPACE_ROOT=my_boost` to indicate an alternate namespace. If you need the include root
-to be something other than :code:`boost`, define :code:`IFADDRS4CPP_BOOST_HEADER_ROOT=my_boost` to indicate an alternate
-root.
+If you need your Boost root namespace to be something other than :code:`boost` (i.e. you have transformed Boost
+namespaces using `the Boost Copy Tool (bcp)`_), define :code:`IFADDRS4CPP_BOOST_NAMESPACE_ROOT=my_boost` to indicate an
+alternate namespace (:code:`my_boost` in this example). If doing this, you may also need to change the root directory
+of the Boost include path to be something other than :code:`boost`. If you need to do this (for any reason) define
+:code:`IFADDRS4CPP_BOOST_HEADER_ROOT=my_boost` to indicate an alternate root.
 
-To run tests with Boost support using CMake if it does not automatically find Boost, include
-:code:`-DBOOST_ROOT=/path/to/boot` or :code:`-DBoost_DIR=/path/to/boost` in the CMake configuration commands above.
-This will have  the side effect of automatically defining :code:`IFADDRS4CPP_INCLUDE_BOOST` for that cmake build.
+.. _the Boost Copy Tool (bcp): https://www.boost.org/doc/libs/1_91_0/tools/bcp/doc/html/index.html
 
-If CMake automatically finds and uses Boost but you do not want it to, include :code:`-DSKIP_BOOST:BOOL=ON` in the
-CMake configuration commands above.
+All Boost support is inline/header-only (there are no exported symbols), so ifaddrs4cpp does not need to be
+built/rebuilt with Boost support enabled. All that matters is how your application/library is built. However, if Boost
+is installed in a standard location on your system, the CMake build will automatically find it, add it to the *test*
+compilation include path, and define :code:`IFADDRS4CPP_INCLUDE_BOOST` in the *test* compilation macros so that
+additional tests are executed to verify the Boost.ASIO IP address integration. If you do not want it to do this,
+include :code:`-DSKIP_BOOST:BOOL=ON` in the CMake configuration commands above. If you do want to test Boost code but
+Boost is in a non-standard location that CMake cannot automatically find, include :code:`-DBOOST_ROOT=/path/to/boot`
+or :code:`-DBoost_DIR=/path/to/boost` in the CMake configuration commands above.
 
 Usage
 *****
@@ -112,6 +121,14 @@ Macro Definitions
   included headers. If you are using it as a static library on any other operating system, this is not required;
   however, to support multiple platforms at once, it is safe to define this macro on any platform (it is ignored on
   non-Windows platforms).
+- :code:`IFADDRS4CPP_INCLUDE_BOOST`: Define this macro when building your application/library if you want to make use
+  of support for Boost.ASIO IP addresses (see above).
+- :code:`IFADDRS4CPP_BOOST_HEADER_ROOT`: Define this macro both when building this library (if applicable) and when
+  building your application/library if you're using Boost.ASIO IP addresses and the root directory in the Boost include
+  path is something other than :code:`boost` (see above).
+- :code:`IFADDRS4CPP_BOOST_NAMESPACE_ROOT`: Define this macro both when building this library (if applicable) and when
+  building your application/library if you're using Boost.ASIO IP addresses and the root Boost namespace is something
+  other than :code:`boost` (see above).
 
 Including Headers
 -----------------

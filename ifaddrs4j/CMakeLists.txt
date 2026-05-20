@@ -37,15 +37,11 @@ endif()
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "The macOS target" FORCE)
 
-set(STATIC_LIBRARY_EXTENSION "a")
 set(DYNAMIC_LIBRARY_EXTENSION "so")
-set(IFADDRS_LIBRARY_PREFIX "lib")
 set(LIB_JAVA "lib/libjava")
 set(JAVA_PLATFORM_INCLUDE "linux")
 if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
-    set(STATIC_LIBRARY_EXTENSION "lib")
     set(DYNAMIC_LIBRARY_EXTENSION "dll")
-    set(IFADDRS_LIBRARY_PREFIX "${CMAKE_BUILD_TYPE}/")
     set(LIB_JAVA "bin/java")
     set(JAVA_PLATFORM_INCLUDE "win32")
 elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
@@ -98,20 +94,19 @@ set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       CXX_STANDARD_REQUIRED ON
                       CXX_EXTENSIONS OFF)
 
+# See "Windows compiler warnings disablement explanations" in ../ifaddrs4cpp/CMakeLists.txt
+
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_sources})
-set_target_properties(${PROJECT_NAME} PROPERTIES
-                      CXX_VISIBILITY_PRESET hidden)
-if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
-# Apparently, we do not have to link to java.dll on Windows like we link to java.so/dylib on other platforms.
-    target_link_libraries(${PROJECT_NAME} PUBLIC
-                          ${PROJECT_NAME}_compiler_flags)
-                          #"${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static${IFADDRS_LIBRARY_SUFFIX}.${STATIC_LIBRARY_EXTENSION}")
-else()
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_compiler_flags)
+
+if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
+    # Apparently, we do not have to link to java.dll on Windows like we link to java.so/dylib on other platforms.
     target_link_libraries(${PROJECT_NAME} PUBLIC
                           ${PROJECT_NAME}_compiler_flags
                           "$ENV{JAVA_HOME}/${LIB_JAVA}.${DYNAMIC_LIBRARY_EXTENSION}")
-                          #"${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/${IFADDRS_LIBRARY_PREFIX}ifaddrs4cpp-static${IFADDRS_LIBRARY_SUFFIX}.${STATIC_LIBRARY_EXTENSION}"
 endif()
+
 target_include_directories(${PROJECT_NAME} PUBLIC
                            "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/cmake-external-build/include"
                            "${CMAKE_SOURCE_DIR}/../ifaddrs4cpp/include"
