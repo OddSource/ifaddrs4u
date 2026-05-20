@@ -1,5 +1,8 @@
 # CLion names
 cmake-build*/
+# GH Workflow names
+cmake-release-test-build
+cmake-debug-test-build
 # Py/setup.py and J/Maven names
 cmake-external-build
 
