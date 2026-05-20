@@ -23,15 +23,7 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "winsock_includes.h"
 
-#ifdef ODDSOURCE_IS_WINDOWS
-#  pragma warning( push )
-#  pragma warning( disable : 4242 )
-#  pragma warning( disable : 4244 )
-#endif /* ODDSOURCE_IS_WINDOWS */
 #include <string>
-#ifdef ODDSOURCE_IS_WINDOWS
-#  pragma warning( pop )
-#endif /* ODDSOURCE_IS_WINDOWS */
 
 namespace OddSource::Interfaces::detail
 {

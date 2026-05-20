@@ -19,19 +19,12 @@
 #ifndef ODDSOURCE_NETWORK_INTERFACES_DETAIL_BITWISE_ENUM_IPP
 #define ODDSOURCE_NETWORK_INTERFACES_DETAIL_BITWISE_ENUM_IPP
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include "config.h"
 
-#ifdef ODDSOURCE_IS_WINDOWS
-#  pragma warning( push )
-#  pragma warning( disable : 4242 )
-#  pragma warning( disable : 4244 )
-#endif /* ODDSOURCE_IS_WINDOWS */
 #include <type_traits>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <utility>
-#ifdef ODDSOURCE_IS_WINDOWS
-#  pragma warning( pop )
-#endif /* ODDSOURCE_IS_WINDOWS */
 
 namespace OddSource::Interfaces::detail
 {

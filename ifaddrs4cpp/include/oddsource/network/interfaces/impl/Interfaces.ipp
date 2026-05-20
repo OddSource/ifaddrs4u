@@ -53,19 +53,11 @@
 
 #endif /* !ODDSOURCE_IS_WINDOWS */
 
-#ifdef ODDSOURCE_IS_WINDOWS
-#  pragma warning( push )
-#  pragma warning( disable : 4242 )
-#  pragma warning( disable : 4244 )
-#endif /* ODDSOURCE_IS_WINDOWS */
 #include <cassert>
 #include <functional>
 #include <iomanip>
 #include <sstream>
 #include <string>
-#ifdef ODDSOURCE_IS_WINDOWS
-#  pragma warning( pop )
-#endif /* ODDSOURCE_IS_WINDOWS */
 
 // ReSharper disable once CppUnnamedNamespaceInHeaderFile
 namespace

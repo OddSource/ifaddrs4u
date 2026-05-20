@@ -36,11 +36,6 @@
 
 #endif /* !ODDSOURCE_IS_WINDOWS */
 
-#ifdef ODDSOURCE_IS_WINDOWS
-#  pragma warning( push )
-#  pragma warning( disable : 4242 )
-#  pragma warning( disable : 4244 )
-#endif /* ODDSOURCE_IS_WINDOWS */
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -48,9 +43,6 @@
 #include <string_view>
 #include <sstream>
 #include <utility>
-#ifdef ODDSOURCE_IS_WINDOWS
-#  pragma warning( pop )
-#endif /* ODDSOURCE_IS_WINDOWS */
 
 #define BYTES reinterpret_cast< ::std::uint8_t const * >( this->_data.get() )
 #define WORDS reinterpret_cast< ::std::uint16_t const * >( this->_data.get() )
