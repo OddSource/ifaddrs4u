@@ -99,7 +99,7 @@ namespace OddSource::ifaddrs4j
     class Boxers
     {
     public:
-        static jobject Short(JNIEnv *, ::std::optional<uint8_t const> const &);
+        static jobject Short(JNIEnv *, ::std::optional<uint16_t const> const &);
 
         static jobject Integer(JNIEnv *, ::std::optional<uint32_t const> const &);
 

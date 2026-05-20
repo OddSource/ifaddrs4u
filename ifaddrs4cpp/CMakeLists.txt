@@ -49,10 +49,6 @@ if(${BUILD_STATIC_ONLY} AND ${BUILD_DYNAMIC_ONLY})
     message(FATAL_ERROR
             "Options BUILD_STATIC_ONLY and BUILD_DYNAMIC_ONLY are mutually exclusive. Only one may be specified at a time.")
 endif()
-if(${BUILD_DYNAMIC_ONLY} AND ${ENABLE_TESTS})
-    message(FATAL_ERROR
-            "Options ENABLE_TESTS and BUILD_DYNAMIC_ONLY are mutually exclusive. Only one may be specified at a time.")
-endif()
 
 if(NOT ${CPP_VERSION} IN_LIST _CPP_VERSION_OPTIONS)
     message(FATAL_ERROR

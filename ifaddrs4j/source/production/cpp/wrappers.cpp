@@ -147,7 +147,7 @@ namespace OddSource::ifaddrs4j
 
     jobject
     Boxers::
-    Short(JNIEnv * env, ::std::optional<uint8_t const> const & value)
+    Short(JNIEnv * env, ::std::optional<uint16_t const> const & value)
     {
         if (!value)
         {
