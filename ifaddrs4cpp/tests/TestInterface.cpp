@@ -185,8 +185,14 @@ namespace OddSource::Interfaces
             assert_equals( iface.ipv4Addresses().size(), 0u );
             assert_equals( iface.ipv6Addresses().size(), 0u );
 
-            iface._ipv4Addresses.emplace_back( IPv4Address( "192.168.0.52" ), 0, 24 );
-            iface._ipv4Addresses.emplace_back( IPv4Address( "192.168.0.53" ), 0, 24 );
+            iface._ipv4Addresses.emplace_back(
+                IPv4Address( "192.168.0.52" ),
+                static_cast< ::std::uint64_t >( 0u ),
+                static_cast< ::std::uint64_t >( 24u ) );
+            iface._ipv4Addresses.emplace_back(
+                IPv4Address( "192.168.0.53" ),
+                static_cast< ::std::uint64_t >( 0u ),
+                static_cast< ::std::uint64_t >( 24u ) );
 
             assert_not_that( iface.hasMacAddress() );
             assert_not_that( static_cast< bool >( iface.macAddress() ) );
@@ -211,9 +217,18 @@ namespace OddSource::Interfaces
             assert_equals( iface.ipv4Addresses().size(), 0u );
             assert_equals( iface.ipv6Addresses().size(), 0u );
 
-            iface._ipv6Addresses.emplace_back( IPv6Address( "2001::dead:beef" ), 0, 64 );
-            iface._ipv6Addresses.emplace_back( IPv6Address( "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" ), 0, 64 );
-            iface._ipv6Addresses.emplace_back( IPv6Address( "fe80::f1:1612:447b:70c5%en0" ), 0, 64 );
+            iface._ipv6Addresses.emplace_back(
+                IPv6Address( "2001::dead:beef" ),
+                static_cast< ::std::uint64_t >( 0u ),
+                static_cast< ::std::uint64_t >( 64u ) );
+            iface._ipv6Addresses.emplace_back(
+                IPv6Address( "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" ),
+                static_cast< ::std::uint64_t >( 0u ),
+                static_cast< ::std::uint64_t >( 64u ) );
+            iface._ipv6Addresses.emplace_back(
+                IPv6Address( "fe80::f1:1612:447b:70c5%en0" ),
+                static_cast< ::std::uint64_t >( 0u ),
+                static_cast< ::std::uint64_t >( 64u ) );
 
             assert_not_that( iface.hasMacAddress() );
             assert_not_that( static_cast< bool >( iface.macAddress() ) );
