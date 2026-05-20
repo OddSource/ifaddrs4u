@@ -61,7 +61,7 @@ jobs:
         working-directory: ifaddrs4cpp
         shell: bash
         run: |
-             cmake -DCMAKE_BUILD_TYPE=Release -S . -B ./cmake-external-build
+             cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-release-test-build
              cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-debug-test-build
 
       - name: Compile ifaddrs4cpp Debug
@@ -69,7 +69,7 @@ jobs:
         shell: bash
         run: cmake --build ./cmake-debug-test-build --config Debug -j 14
 
-      - name: Run ifaddrs4cpp Tests
+      - name: Run ifaddrs4cpp Tests Debug
         working-directory: ifaddrs4cpp
         shell: bash
         run: ctest --test-dir ./cmake-debug-test-build --build-config Debug --verbose --test-action Test --output-on-failure
@@ -77,7 +77,12 @@ jobs:
       - name: Compile ifaddrs4cpp Release
         working-directory: ifaddrs4cpp
         shell: bash
-        run: cmake --build ./cmake-external-build --config Release -j 14
+        run: cmake --build ./cmake-release-test-build --config Release -j 14
+
+      - name: Run ifaddrs4cpp Tests Release
+        working-directory: ifaddrs4cpp
+        shell: bash
+        run: ctest --test-dir ./cmake-release-test-build --build-config Release --verbose --test-action Test --output-on-failure
 
       - name: Installing Java ${{ matrix.java }}
         uses: actions/setup-java@v5
