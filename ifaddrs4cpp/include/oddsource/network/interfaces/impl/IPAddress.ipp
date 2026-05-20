@@ -1035,7 +1035,7 @@ namespace OddSource::Interfaces
         other._isV4Compatible = false;
         other._isV4Translated = false;
         other._is6to4 = false;
-        other._multicastFlags = 0;
+        other._multicastFlags.reset();
     }
 
     OddSource_Inline
@@ -1090,7 +1090,7 @@ namespace OddSource::Interfaces
         rhs._isV4Compatible = false;
         rhs._isV4Translated = false;
         rhs._is6to4 = false;
-        rhs._multicastFlags = 0;
+        rhs._multicastFlags.reset();
         return *this;
     }
 
