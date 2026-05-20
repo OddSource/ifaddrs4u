@@ -58,7 +58,7 @@ namespace OddSource::ifaddrs4j
           "(Ljava/net/InetAddress;ILjava/lang/Short;Ljava/net/InetAddress;Ljava/net/InetAddress;)V"}},
         {"Interface#Interface(...)",
          {"<init>",
-          "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V"}},
+          "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Long;Lio/oddsource/java/net/ifaddrs4j/MacAddress;Ljava/util/List;Ljava/util/List;)V"}},
     };
 
     ::std::unordered_map<::std::string, MethodSignature> const ClassMethodCache::_static_method_name_to_signature = {

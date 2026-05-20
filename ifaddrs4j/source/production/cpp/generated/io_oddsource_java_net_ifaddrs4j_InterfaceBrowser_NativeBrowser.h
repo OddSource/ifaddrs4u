@@ -34,10 +34,10 @@ JNIEXPORT jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_
 /*
  * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_NativeBrowser
  * Method:    getInterface
- * Signature: (I)Lio/oddsource/java/net/ifaddrs4j/Interface;
+ * Signature: (J)Lio/oddsource/java/net/ifaddrs4j/Interface;
  */
-JNIEXPORT jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_getInterface__I
-  (JNIEnv *, jobject, jint);
+JNIEXPORT jobject JNICALL Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_getInterface__J
+  (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_NativeBrowser

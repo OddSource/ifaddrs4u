@@ -33,7 +33,7 @@ import java.util.stream.Stream;
  */
 public final class Interface implements Iterable<InterfaceIPAddress<? extends InetAddress>>
 {
-    private final int index;
+    private final long index;
 
     private final String name;
 
@@ -52,7 +52,7 @@ public final class Interface implements Iterable<InterfaceIPAddress<? extends In
     private final List<InterfaceIPAddress<Inet6Address>> ipv6Addresses;
 
     Interface(
-        final int index,
+        final long index,
         final String name,
         final String friendlyName,
         final String description,
@@ -79,7 +79,7 @@ public final class Interface implements Iterable<InterfaceIPAddress<? extends In
      *
      * @return the interface index.
      */
-    public int getIndex()
+    public long getIndex()
     {
         return this.index;
     }

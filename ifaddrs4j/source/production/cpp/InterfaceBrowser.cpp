@@ -216,10 +216,10 @@ Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_getInte
  * Signature: (I)Lio/oddsource/java/net/ifaddrs4j/Interface;
  */
 jobject JNICALL
-Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_getInterface__I(
+Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_getInterface__J(
     JNIEnv * env,
     jobject self,
-    jint index)
+    jlong index)
 {
     using namespace OddSource::ifaddrs4j;
 
@@ -229,7 +229,7 @@ Java_io_oddsource_java_net_ifaddrs4j_InterfaceBrowser_00024NativeBrowser_getInte
 
     try
     {
-        return convert_to_java( env, (*browser)[ index ] );
+        return convert_to_java( env, (*browser)[ static_cast< ::std::uint32_t >( index ) ] );
     }
     catch ( ::std::out_of_range const & )
     {

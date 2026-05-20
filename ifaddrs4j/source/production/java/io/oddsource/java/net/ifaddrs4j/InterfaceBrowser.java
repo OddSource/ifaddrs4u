@@ -83,7 +83,7 @@ import java.util.stream.Stream;
  * @implNote
  *     This browser's data does not become "exhausted," though it could become stale. Upon first post-construction
  *     use of {@link #interfaces()}, {@link #iterator()}, {@link #forEachInterface(Function)},
- *     {@link #getInterfaces()}, {@link #getInterface(String)}, or {@link #getInterface(int)}, the browser holds
+ *     {@link #getInterfaces()}, {@link #getInterface(String)}, or {@link #getInterface(long)}, the browser holds
  *     a snapshot-in-time of the system's network interface configuration, which may immediately become stale. These
  *     six accessor methods can be used any number of times, in any order, in any combination, and by multiple
  *     threads if necessary.
@@ -158,7 +158,7 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
      * @param index The interface index
      * @return the matched interface or {@code null}.
      */
-    public Interface getInterface(final int index)
+    public Interface getInterface(final long index)
     {
         this.ready();
         return this.internal.getInterface(index);
@@ -351,7 +351,7 @@ public final class InterfaceBrowser implements AutoCloseable, Iterable<Interface
 
         synchronized native Interface getInterface(String name);
 
-        synchronized native Interface getInterface(int index);
+        synchronized native Interface getInterface(long index);
 
         synchronized List<Interface> getInterfaces()
         {

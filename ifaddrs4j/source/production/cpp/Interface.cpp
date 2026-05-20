@@ -142,7 +142,7 @@ convert_to_java(JNIEnv * env, OddSource::Interfaces::Interface const & iface)
 {
     using namespace OddSource::Interfaces;
 
-    jint index(iface.index());
+    auto const index( static_cast< jlong >( iface.index() ) );
 
     jstring name(env->NewStringUTF(iface.name().c_str()));
     IF_NULL_RETURN_NULL(name)
