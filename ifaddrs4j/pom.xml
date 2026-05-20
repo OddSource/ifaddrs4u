@@ -157,8 +157,6 @@
                                 <sourcePath>${project.basedir}</sourcePath>
                                 <targetPath>${project.basedir}/target/cmake-build-release</targetPath>
                                 <options>
-                                    <option>--preset</option>
-                                    <option>default</option>
                                     <option>-DCLASSIFIER=-${platform.specific.classifier}</option>
                                     <option>-DCMAKE_BUILD_TYPE=${cpp.config}</option>
                                     <option>-DENABLE_ADDRESS_SANITIZER:BOOL=${enable.asan}</option>
@@ -191,8 +189,6 @@
                                 <config>${cpp.config}</config>
                                 <projectDirectory>${project.basedir}/target/cmake-build-release</projectDirectory>
                                 <options>
-                                    <option>--preset</option>
-                                    <option>default</option>
                                     <option>-j</option>
                                     <option>14</option>
                                 </options>
