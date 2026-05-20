@@ -187,12 +187,12 @@ namespace OddSource::Interfaces
 
             iface._ipv4Addresses.emplace_back(
                 IPv4Address( "192.168.0.52" ),
-                static_cast< ::std::uint64_t >( 0u ),
-                static_cast< ::std::uint64_t >( 24u ) );
+                static_cast< ::std::uint16_t >( 0u ),
+                static_cast< ::std::uint16_t >( 24u ) );
             iface._ipv4Addresses.emplace_back(
                 IPv4Address( "192.168.0.53" ),
-                static_cast< ::std::uint64_t >( 0u ),
-                static_cast< ::std::uint64_t >( 24u ) );
+                static_cast< ::std::uint16_t >( 0u ),
+                static_cast< ::std::uint16_t >( 24u ) );
 
             assert_not_that( iface.hasMacAddress() );
             assert_not_that( static_cast< bool >( iface.macAddress() ) );
@@ -219,16 +219,16 @@ namespace OddSource::Interfaces
 
             iface._ipv6Addresses.emplace_back(
                 IPv6Address( "2001::dead:beef" ),
-                static_cast< ::std::uint64_t >( 0u ),
-                static_cast< ::std::uint64_t >( 64u ) );
+                static_cast< ::std::uint16_t >( 0u ),
+                static_cast< ::std::uint16_t >( 64u ) );
             iface._ipv6Addresses.emplace_back(
                 IPv6Address( "2001:471:c2bd:bb61:6d7b:48a5:6304:31e5" ),
-                static_cast< ::std::uint64_t >( 0u ),
-                static_cast< ::std::uint64_t >( 64u ) );
+                static_cast< ::std::uint16_t >( 0u ),
+                static_cast< ::std::uint16_t >( 64u ) );
             iface._ipv6Addresses.emplace_back(
                 IPv6Address( "fe80::f1:1612:447b:70c5%en0" ),
-                static_cast< ::std::uint64_t >( 0u ),
-                static_cast< ::std::uint64_t >( 64u ) );
+                static_cast< ::std::uint16_t >( 0u ),
+                static_cast< ::std::uint16_t >( 64u ) );
 
             assert_not_that( iface.hasMacAddress() );
             assert_not_that( static_cast< bool >( iface.macAddress() ) );
