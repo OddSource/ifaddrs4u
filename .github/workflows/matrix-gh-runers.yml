@@ -48,9 +48,18 @@ jobs:
             python: "3.12"
           - java: "25"
             python: "3.14"
+          - os: ubuntu-22.04
+            java: "21"
+            python: "3.12"
+            boost: true
     runs-on: ${{ matrix.os }}
-    name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}"
+    name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}${{ matrix.boost && ' + Boost' || '' }}"
     steps:
+      - name: Install Boost Headers If Applicable
+        if: matrix.boost
+        shell: sudo bash
+        run: apt-get update && apt-get install -y libboost-dev
+
       - name: Checkout ifaddrs4u
         uses: actions/checkout@v6
 
