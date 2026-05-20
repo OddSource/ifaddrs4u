@@ -88,7 +88,7 @@ add_library(${PROJECT_NAME}_compiler_flags INTERFACE)
 target_compile_features(${PROJECT_NAME}_compiler_flags INTERFACE cxx_std_17)
 target_compile_options(${PROJECT_NAME}_compiler_flags INTERFACE
                        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wdeprecated;-Wextra;-Wpedantic;-Wshadow;-Wunused;-Werror>>"
-                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3;-wd4275;-wd4251;-wd4455>>")
+                       "$<${msvc_cxx}:$<BUILD_INTERFACE:-diagnostics:caret;-Qspectre;-external:W0;-external:env:MSVC_SYSTEM_INCLUDE_ROOTS;-W4;-Wall;-WX;-wd4251;-wd4275;-wd4464;-wd4514;-wd4710;-wd4711;-wd4820;-wd5045>>")
 target_compile_definitions(${PROJECT_NAME}_compiler_flags INTERFACE IFADDRS4CPP_INLINE_SOURCE=1)
 set_target_properties(${PROJECT_NAME}_compiler_flags PROPERTIES
                       CXX_STANDARD_REQUIRED ON
