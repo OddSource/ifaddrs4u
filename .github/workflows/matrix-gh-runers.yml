@@ -30,9 +30,6 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  WIN_CMAKE_BOOST_ROOT_ARG: ""
-
 jobs:
   build:
     permissions:
@@ -81,7 +78,7 @@ jobs:
         run: |
              Invoke-WebRequest -Uri "https://archives.boost.io/release/1.91.0/source/boost_1_91_0.7z" -OutFile "${{ runner.workspace }}/boost_1_91_0.7z"
              7z x "${{ runner.workspace }}/boost_1_91_0.7z" -o"${{ runner.workspace }}/boost_1_91_0" -y
-             echo "WIN_CMAKE_BOOST_ROOT_ARG=-DBoost_ROOT=${{ runner.workspace }}/boost_1_91_0" >> $env:GITHUB_ENV
+             echo "BOOST_ROOT=${{ runner.workspace }}/boost_1_91_0" >> $env:GITHUB_ENV
 
       - name: Install Boost Headers If Applicable (POSIX)
         if: matrix.boost && runner.os != 'Windows'
@@ -97,8 +94,8 @@ jobs:
         working-directory: ifaddrs4cpp
         shell: bash
         run: |
-             cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS:BOOL=ON ${{ env.WIN_CMAKE_BOOST_ROOT_ARG }} -S . -B ./cmake-release-test-build
-             cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON ${{ env.WIN_CMAKE_BOOST_ROOT_ARG }} -S . -B ./cmake-debug-test-build
+             cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-release-test-build
+             cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON -S . -B ./cmake-debug-test-build
 
       - name: Compile ifaddrs4cpp Debug
         working-directory: ifaddrs4cpp
