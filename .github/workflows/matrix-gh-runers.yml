@@ -52,33 +52,39 @@ jobs:
             java: "21"
             python: "3.12"
             boost: true
+            boost_cmake_arg: ""
             boost_install: sudo apt-get update && sudo apt-get install -y libboost-dev
-            boost_cmake: ""
           - os: macos-26
             java: "21"
             python: "3.12"
             boost: true
+            boost_cmake_arg: ""
             boost_install: brew install boost
-            boost_cmake: ""
           - os: windows-2022
             java: "21"
             python: "3.12"
             boost: true
-            boost_install: Invoke-WebRequest -Uri "https://archives.boost.io/release/1.91.0/source/boost_1_91_0.7z" -OutFile "${{ runner.workspace }}/boost_1_91_0.7z" && 7z x boost_1_91_0.7z -o"${{ runner.workspace }}/boost_1_91_0" -y
-            boost_cmake: "-DBOOST_ROOT=${{ runner.workspace }}/boost_1_91_0"
+            boost_cmake_arg: "-DBOOST_ROOT=$env:BOOST_ROOT_CMAKE"
     runs-on: ${{ matrix.os }}
     name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}${{ matrix.boost && ' + Boost' || '' }}"
     steps:
-      - name: Cache Boost Headers If Applicable
+      - name: Cache Boost Headers If Applicable (Windows)
         if: matrix.boost && runner.os == 'Windows'
-        id: cache-boost
+        id: cache-boost-windows
         uses: actions/cache@v5
         with:
-          path: ${{ github.workspace }}/boost_1_91_0
+          path: ${{ runner.workspace }}/boost_1_91_0
           key: boost-1.91.0-windows
 
-      - name: Install Boost Headers If Applicable
-        if: matrix.boost && ( runner.os != 'Windows' || steps.cache-boost.outputs.cache-hit != 'true' )
+      - name: Install Boost Headers If Applicable (Windows)
+        if: matrix.boost && runner.os == 'Windows' && steps.cache-boost-windows.outputs.cache-hit != 'true'
+        run: |
+             Invoke-WebRequest -Uri "https://archives.boost.io/release/1.91.0/source/boost_1_91_0.7z" -OutFile "${{ runner.workspace }}/boost_1_91_0.7z"
+             7z x boost_1_91_0.7z -o"${{ runner.workspace }}/boost_1_91_0" -y
+             echo "BOOST_ROOT_CMAKE=${{ runner.workspace }}/boost_1_91_0" >> $env:GITHUB_ENV
+
+      - name: Install Boost Headers If Applicable (POSIX)
+        if: matrix.boost && runner.os != 'Windows'
         run: ${{ matrix.boost_install }}
 
       - name: Checkout ifaddrs4u
@@ -91,8 +97,8 @@ jobs:
         working-directory: ifaddrs4cpp
         shell: bash
         run: |
-             cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS:BOOL=ON {{ matrix.boost_cmake }} -S . -B ./cmake-release-test-build
-             cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON {{ matrix.boost_cmake }} -S . -B ./cmake-debug-test-build
+             cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS:BOOL=ON ${{ matrix.boost_cmake_arg }} -S . -B ./cmake-release-test-build
+             cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS:BOOL=ON ${{ matrix.boost_cmake_arg }} -S . -B ./cmake-debug-test-build
 
       - name: Compile ifaddrs4cpp Debug
         working-directory: ifaddrs4cpp
