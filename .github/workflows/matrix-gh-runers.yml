@@ -52,14 +52,18 @@ jobs:
             java: "21"
             python: "3.12"
             boost: true
+            boost_install: sudo apt-get update && sudo apt-get install -y libboost-dev
+          - os: macos-26
+            java: "21"
+            python: "3.12"
+            boost: true
+            boost_install: brew install boost
     runs-on: ${{ matrix.os }}
     name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}${{ matrix.boost && ' + Boost' || '' }}"
     steps:
       - name: Install Boost Headers If Applicable
         if: matrix.boost
-        run: |
-             sudo apt-get update
-             sudo apt-get install -y libboost-dev
+        run: ${{ matrix.boost_install }}
 
       - name: Checkout ifaddrs4u
         uses: actions/checkout@v6
