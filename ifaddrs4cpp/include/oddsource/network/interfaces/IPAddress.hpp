@@ -130,11 +130,11 @@ namespace OddSource::Interfaces
 
     ODDSOURCE_BITWISE_ENUM_OPERATORS_DECL( MulticastV6Flag );
 
-    class OddSource_Export IPAddress
+    class OddSource_PartialExport_Class IPAddress
     {
     public:
         virtual
-        OddSource_Inline
+        OddSource_PartialExport_Function
         ~IPAddress() noexcept;
 
         [[nodiscard]]
@@ -175,7 +175,7 @@ namespace OddSource::Interfaces
          */
         [[nodiscard]]
         virtual
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         operator ::std::string() const;
 
@@ -186,7 +186,7 @@ namespace OddSource::Interfaces
          */
         [[nodiscard]]
         virtual
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         operator char const *() const;
 
@@ -197,7 +197,7 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isUnspecified() const;
 
@@ -208,7 +208,7 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isLoopback() const;
 
@@ -219,7 +219,7 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isLinkLocal() const;
 
@@ -235,7 +235,7 @@ namespace OddSource::Interfaces
          * @return
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isPrivate() const;
 
@@ -246,7 +246,7 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isMulticast() const;
 
@@ -263,44 +263,44 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isReserved() const;
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         ::std::optional< MulticastScope > const &
         multicastScope() const;
 
         [[nodiscard]]
         static
-        OddSource_Inline
+        OddSource_PartialExport_Function
         ::std::unique_ptr< IPAddress >
         create(
         ::std::string_view repr );
 
     protected:
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         IPAddress(
             ::std::string_view const & repr );
 
         // copy constructor
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPAddress(
             IPAddress const & other );
 
         // move constructor
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPAddress(
             IPAddress && other ) noexcept;
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPAddress &
         operator=(
             IPAddress const & rhs );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPAddress &
         operator=(
             IPAddress && rhs ) noexcept;
@@ -315,24 +315,24 @@ namespace OddSource::Interfaces
         ::std::optional< MulticastScope > _multicastScope;
     };
 
-    class OddSource_Export IPv4Address : public IPAddress
+    class OddSource_PartialExport_Class IPv4Address : public IPAddress
     {
     public:
         IPv4Address() = delete;
 
         // conversion constructor
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         IPv4Address(
             ::std::string_view const & repr );
 
         // conversion constructor
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         IPv4Address(
             in_addr const * data );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         IPv4Address(
             ::std::uint32_t data );
@@ -350,25 +350,25 @@ namespace OddSource::Interfaces
 #endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
         // copy constructor
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv4Address(
             IPv4Address const & );
 
         // move constructor
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv4Address(
             IPv4Address && ) noexcept;
 
         virtual
-        OddSource_Inline
+        OddSource_PartialExport_Function
         ~IPv4Address() noexcept; // NOLINT(*-use-override)[[nodiscard]]
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv4Address &
         operator=(
             IPv4Address const & rhs );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv4Address &
         operator=(
             IPv4Address && rhs ) noexcept;
@@ -411,29 +411,29 @@ namespace OddSource::Interfaces
 #endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         operator in_addr const *() const;
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         operator ::std::uint32_t() const;
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         operator==(
             IPv4Address const & ) const;
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         operator!=(
             IPv4Address const & ) const;
 
     private:
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         IPv4Address(
             ::std::unique_ptr< in_addr const > && );
@@ -447,7 +447,7 @@ namespace OddSource::Interfaces
         ::std::optional< ::std::string > scopeName = ::std::nullopt;
     };
 
-    class OddSource_Export IPv6Address : public IPAddress
+    class OddSource_PartialExport_Class IPv6Address : public IPAddress
     {
     public:
         using Bytes = ::std::array< ::std::uint8_t, 16 >;
@@ -455,48 +455,48 @@ namespace OddSource::Interfaces
         IPv6Address() = delete;
 
         // conversion constructor
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         IPv6Address(
             ::std::string_view const & repr );
 
         // conversion constructor
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         IPv6Address(
             in6_addr const * data );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address(
             in6_addr const * data,
             ::std::uint32_t scopeId );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address(
             in6_addr const * data,
             ::std::string_view const & scopeName );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address(
             in6_addr const * data,
             v6Scope const & scope );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         IPv6Address(
             Bytes const & data );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address(
             Bytes const & data,
             ::std::uint32_t scopeId );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address(
             Bytes const & data,
             ::std::string_view const & scopeName );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address(
             Bytes const & data,
             v6Scope const & scope );
@@ -514,25 +514,25 @@ namespace OddSource::Interfaces
 #endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
         // copy constructor
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address(
             IPv6Address const & other );
 
         // move constructor
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address(
             IPv6Address && other ) noexcept;
 
         virtual
-        OddSource_Inline
+        OddSource_PartialExport_Function
         ~IPv6Address() noexcept; // NOLINT(*-use-override)
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address &
         operator=(
             IPv6Address const & rhs );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address &
         operator=(
             IPv6Address && rhs ) noexcept;
@@ -575,12 +575,12 @@ namespace OddSource::Interfaces
 #endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         operator in6_addr const *() const;
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         explicit
         operator Bytes() const;
 
@@ -596,7 +596,7 @@ namespace OddSource::Interfaces
          * @return a normalized copy of this address.
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address
         normalize() const;
 
@@ -607,7 +607,7 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isUniqueLocal() const;
 
@@ -618,7 +618,7 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isSiteLocal() const;
 
@@ -629,7 +629,7 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isV4Mapped() const;
 
@@ -640,7 +640,7 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isV4Translated() const;
 
@@ -653,7 +653,7 @@ namespace OddSource::Interfaces
          * @return true or false.
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isV4Compatible() const;
 
@@ -664,70 +664,70 @@ namespace OddSource::Interfaces
          * @return true or false;
          */
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         is6to4() const;
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         hasScopeId() const;
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         ::std::string
         withoutScopeId() const;
 
         [[nodiscard]]
-        OddSource_Inline
-        ::std::optional<::std::uint32_t> const &
+        OddSource_PartialExport_Function
+        ::std::optional< ::std::uint32_t > const &
         scopeId() const;
 
         [[nodiscard]]
-        OddSource_Inline
-        ::std::optional<::std::string> const &
+        OddSource_PartialExport_Function
+        ::std::optional< ::std::string > const &
         scopeName() const;
 
         [[nodiscard]]
-        OddSource_Inline
-        ::std::optional<::std::string>
+        OddSource_PartialExport_Function
+        ::std::optional< ::std::string >
         scopeNameOrId() const;
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         ::std::optional<::std::string>
         scopeIdOrName() const;
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         isMulticastFlagEnabled(
             MulticastV6Flag const & flag ) const;
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         operator==(
             IPv6Address const & ) const;
 
         [[nodiscard]]
-        OddSource_Inline
+        OddSource_PartialExport_Function
         bool
         operator!=(
             IPv6Address const & ) const;
 
     private:
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address(
             ::std::string_view const & reprWithScope,
             ::std::string_view const & reprWithoutScope );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address(
             ::std::unique_ptr< in6_addr const > && data,
             ::std::optional< v6Scope > && scope );
 
-        OddSource_Inline
+        OddSource_PartialExport_Function
         IPv6Address(
             ::std::string && reprWithoutScope,
             ::std::unique_ptr< in6_addr const > && data,

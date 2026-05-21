@@ -22,6 +22,8 @@
 #ifdef IFADDRS4CPP_INLINE_SOURCE
 
 #define OddSource_Export
+#define OddSource_PartialExport_Class
+#define OddSource_PartialExport_Function inline
 #define OddSource_Extern
 #define OddSource_Inline inline
 
@@ -32,18 +34,28 @@
 #if defined( ODDSOURCE_BUILDING_SHARED_LIBRARY )
 #  pragma message("COMPILATION DEBUG: Defining OddSource_Export as __declspec(dllexport) in DLL")
 #  define OddSource_Export __declspec(dllexport)
+#  define OddSource_PartialExport_Class
+#  define OddSource_PartialExport_Function __declspec(dllexport)
 #elif defined( ODDSOURCE_BUILDING_STATIC_LIBRARY ) /* ODDSOURCE_BUILDING_SHARED_LIBRARY */
 #  pragma message("COMPILATION DEBUG: Defining OddSource_Export as [nothing] in static library")
 #  define OddSource_Export
+#  define OddSource_PartialExport_Class
+#  define OddSource_PartialExport_Function
 #elif defined( IFADDRS4CPP_STATIC_LINKAGE ) /* ODDSOURCE_BUILDING_STATIC_LIBRARY */
 #  define OddSource_Export
+#  define OddSource_PartialExport_Class
+#  define OddSource_PartialExport_Function
 #else /* IFADDRS4CPP_STATIC_LINKAGE */
 #  define OddSource_Export __declspec(dllimport)
+#  define OddSource_PartialExport_Class
+#  define OddSource_PartialExport_Function __declspec(dllimport)
 #endif /* !anything */
 
 #else /* ODDSOURCE_IS_WINDOWS */
 
 #define OddSource_Export __attribute((visibility("default")))
+#define OddSource_PartialExport_Class __attribute((visibility("default")))
+#define OddSource_PartialExport_Function
 
 #endif /* !ODDSOURCE_IS_WINDOWS */
 

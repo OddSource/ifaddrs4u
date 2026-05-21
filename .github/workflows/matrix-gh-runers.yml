@@ -71,8 +71,7 @@ jobs:
         id: install-boost
         with:
           boost_version: 1.89.0  # see https://raw.githubusercontent.com/MarkusJx/prebuilt-boost/main/versions-manifest.json
-          boost_install_dir: ${{ runner.workspace }}\boost_1_91_0
-          platform: windows
+          boost_install_dir: ${{ runner.workspace }}\boost_1_89_0
           platform_version: 2022
           toolset: msvc
           link: shared  # we don't care about this, we're only using the headers
@@ -81,9 +80,14 @@ jobs:
       - name: Configure CMake to Find Boost (Windows)
         if: matrix.boost && runner.os == 'Windows'
         run: |
-             echo BOOST_ROOT=${{ steps.install-boost.outputs.BOOST_ROOT }}
+             echo "BOOST_ROOT=${{ steps.install-boost.outputs.BOOST_ROOT }}"
              echo "BOOST_ROOT=${{ steps.install-boost.outputs.BOOST_ROOT }}" >> $env:GITHUB_ENV
+             Get-ChildItem -Force -LiteralPath ${{ runner.workspace }}\boost_1_89_0
+             Get-ChildItem -Force -LiteralPath ${{ runner.workspace }}\boost_1_89_0\boost
              Get-ChildItem -Force -LiteralPath ${{ steps.install-boost.outputs.BOOST_ROOT }}
+             Get-ChildItem -Force -LiteralPath ${{ steps.install-boost.outputs.BOOST_ROOT }}\boost
+             Get-ChildItem -Force -LiteralPath ${{ steps.install-boost.outputs.BOOST_ROOT }}\lib
+             Get-ChildItem -Recurse -LiteralPath ${{ runner.workspace }}\boost_1_89_0 -Filter '*.cmake'
 
       - name: Install Boost Headers If Applicable (POSIX)
         if: matrix.boost && runner.os != 'Windows'
