@@ -80,7 +80,7 @@ jobs:
         if: matrix.boost && runner.os == 'Windows' && steps.cache-boost-windows.outputs.cache-hit != 'true'
         run: |
              Invoke-WebRequest -Uri "https://archives.boost.io/release/1.91.0/source/boost_1_91_0.7z" -OutFile "${{ runner.workspace }}/boost_1_91_0.7z"
-             7z x boost_1_91_0.7z -o"${{ runner.workspace }}/boost_1_91_0" -y
+             7z x "${{ runner.workspace }}/boost_1_91_0.7z" -o"${{ runner.workspace }}/boost_1_91_0" -y
              echo "BOOST_ROOT_CMAKE=${{ runner.workspace }}/boost_1_91_0" >> $env:GITHUB_ENV
 
       - name: Install Boost Headers If Applicable (POSIX)
