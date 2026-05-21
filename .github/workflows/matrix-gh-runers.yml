@@ -57,7 +57,7 @@ jobs:
             java: "21"
             python: "3.12"
             boost: true
-            boost_install: brew install boost && (ls -al /usr/local/include/boost || true) && (ls -al /usr/local/Cellar/boost/*/include || true)
+            boost_install: brew install boost
     runs-on: ${{ matrix.os }}
     name: "${{ matrix.os }} / Java ${{ matrix.java }} / Python ${{ matrix.python }}${{ matrix.boost && ' + Boost' || '' }}"
     steps:
