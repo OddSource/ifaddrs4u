@@ -105,7 +105,7 @@ compilation include path, and define :code:`IFADDRS4CPP_INCLUDE_BOOST` in the *t
 additional tests are executed to verify the Boost.ASIO IP address integration. If you do not want it to do this,
 include :code:`-DSKIP_BOOST:BOOL=ON` in the CMake configuration commands above. If you do want to test Boost code but
 Boost is in a non-standard location that CMake cannot automatically find, include :code:`-DBOOST_ROOT=/path/to/boot`
-or :code:`-DBoost_DIR=/path/to/boost` in the CMake configuration commands above.
+or :code:`-DBOOST_INCLUDEDIR=/path/to/boost/include` in the CMake configuration commands above.
 
 Usage
 *****
