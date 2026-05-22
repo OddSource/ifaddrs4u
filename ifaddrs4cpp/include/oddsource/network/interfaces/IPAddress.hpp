@@ -432,7 +432,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         inline
         explicit
-        operator A() const override;
+        operator A() const;
 
         template< class A, ::std::enable_if_t<
             ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 >,
@@ -630,7 +630,7 @@ namespace OddSource::Interfaces
         [[nodiscard]]
         inline
         explicit
-        operator A() const override;
+        operator A() const;
 
         template< class A, ::std::enable_if_t<
             ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >,

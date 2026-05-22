@@ -76,7 +76,7 @@ namespace OddSource::Interfaces
 #  else
     template< class A, ::std::enable_if_t<
         ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address >,
-        bool > = true >
+        bool > >
     IPv4Address::
     IPv4Address(
         A const & other )
@@ -86,7 +86,7 @@ namespace OddSource::Interfaces
 
     template< class A, ::std::enable_if_t<
         ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 >,
-        bool > = true >
+        bool > >
     IPv4Address::
     IPv4Address(
         A const & other )
@@ -148,7 +148,7 @@ namespace OddSource::Interfaces
 #  else
     template< class A, ::std::enable_if_t<
         ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address >,
-        bool > = true >
+        bool > >
     inline
     IPv4Address::
     operator A() const
@@ -159,7 +159,7 @@ namespace OddSource::Interfaces
 
     template< class A, ::std::enable_if_t<
         ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 >,
-        bool > = true >
+        bool > >
     inline
     IPv4Address::
     operator A() const
@@ -189,7 +189,7 @@ namespace OddSource::Interfaces
 #  else
     template< class A, ::std::enable_if_t<
         ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address >,
-        bool > = true >
+        bool > >
     IPv6Address::
     IPv6Address(
         A const & other )
@@ -199,7 +199,7 @@ namespace OddSource::Interfaces
 
     template< class A, ::std::enable_if_t<
         ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >,
-        bool > = true >
+        bool > >
     IPv6Address::
     IPv6Address(
         A const & other )
@@ -261,7 +261,7 @@ namespace OddSource::Interfaces
 #  else
     template< class A, ::std::enable_if_t<
         ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address >,
-        bool > = true >
+        bool > >
     inline
     IPv6Address::
     operator A() const
@@ -272,7 +272,7 @@ namespace OddSource::Interfaces
 
     template< class A, ::std::enable_if_t<
         ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >,
-        bool > = true >
+        bool > >
     inline
     IPv6Address::
     operator A() const
