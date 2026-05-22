@@ -161,7 +161,7 @@ namespace OddSource::Interfaces
         size_t
         dataLength() const noexcept = 0;
 
-#if defined( IFADDRS4CPP_INCLUDE_BOOST ) && ( !defined( ODDSOURCE_IS_WINDOWS ) || defined( ODDSOURCE_BUILDING_STATIC_LIBRARY ) )
+#if defined( IFADDRS4CPP_INCLUDE_BOOST ) && !defined( ODDSOURCE_IS_WINDOWS )
         [[nodiscard]]
         virtual
         explicit
@@ -338,7 +338,7 @@ namespace OddSource::Interfaces
             ::std::uint32_t data );
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined( ODDSOURCE_BUILDING_STATIC_LIBRARY )
+#  ifndef ODDSOURCE_IS_WINDOWS
         inline
         explicit
         IPv4Address(
@@ -414,7 +414,7 @@ namespace OddSource::Interfaces
         dataLength() const noexcept override;
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined( ODDSOURCE_BUILDING_STATIC_LIBRARY )
+#  ifndef ODDSOURCE_IS_WINDOWS
         [[nodiscard]]
         virtual
         inline
@@ -426,18 +426,18 @@ namespace OddSource::Interfaces
         explicit
         operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4() const;
 #  else
-        [[nodiscard]]
         template< class A, ::std::enable_if_t<
             ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address >,
             bool > = true >
+        [[nodiscard]]
         inline
         explicit
         operator A() const override;
 
-        [[nodiscard]]
         template< class A, ::std::enable_if_t<
             ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 >,
             bool > = true >
+        [[nodiscard]]
         inline
         explicit
         operator A() const;
@@ -536,7 +536,7 @@ namespace OddSource::Interfaces
             v6Scope const & scope );
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined( ODDSOURCE_BUILDING_STATIC_LIBRARY )
+#  ifndef ODDSOURCE_IS_WINDOWS
         inline
         explicit
         IPv6Address(
@@ -612,7 +612,7 @@ namespace OddSource::Interfaces
         dataLength() const noexcept override;
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined( ODDSOURCE_BUILDING_STATIC_LIBRARY )
+#  ifndef ODDSOURCE_IS_WINDOWS
         [[nodiscard]]
         virtual
         inline
@@ -624,18 +624,18 @@ namespace OddSource::Interfaces
         explicit
         operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6() const;
 #  else
-        [[nodiscard]]
         template< class A, ::std::enable_if_t<
             ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address >,
             bool > = true >
+        [[nodiscard]]
         inline
         explicit
         operator A() const override;
 
-        [[nodiscard]]
         template< class A, ::std::enable_if_t<
             ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >,
             bool > = true >
+        [[nodiscard]]
         inline
         explicit
         operator A() const;
