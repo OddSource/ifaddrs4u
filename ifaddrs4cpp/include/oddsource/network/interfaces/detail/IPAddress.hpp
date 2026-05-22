@@ -57,6 +57,7 @@ namespace
 namespace OddSource::Interfaces
 {
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined( ODDSOURCE_BUILDING_STATIC_LIBRARY )
     inline
     IPv4Address::
     IPv4Address(
@@ -72,6 +73,27 @@ namespace OddSource::Interfaces
         : IPv4Address( other.to_uint() )
     {
     }
+#  else
+    template< class A, ::std::enable_if_t<
+        ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address >,
+        bool > = true >
+    IPv4Address::
+    IPv4Address(
+        A const & other )
+        : IPv4Address( toV4( other ) )
+    {
+    }
+
+    template< class A, ::std::enable_if_t<
+        ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 >,
+        bool > = true >
+    IPv4Address::
+    IPv4Address(
+        A const & other )
+        : IPv4Address( other.to_uint() )
+    {
+    }
+#  endif
 #endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
     inline
@@ -108,6 +130,7 @@ namespace OddSource::Interfaces
     }
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined( ODDSOURCE_BUILDING_STATIC_LIBRARY )
     inline
     IPv4Address::
     operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address() const
@@ -122,7 +145,32 @@ namespace OddSource::Interfaces
     {
         return IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4( static_cast< ::std::uint32_t >( *this ) );
     }
+#  else
+    template< class A, ::std::enable_if_t<
+        ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address >,
+        bool > = true >
+    inline
+    IPv4Address::
+    operator A() const
+    {
+        return IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address(
+            static_cast< IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 >( *this ) );
+    }
 
+    template< class A, ::std::enable_if_t<
+        ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4 >,
+        bool > = true >
+    inline
+    IPv4Address::
+    operator A() const
+    {
+        return IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v4( static_cast< ::std::uint32_t >( *this ) );
+    }
+#  endif
+#endif /* IFADDRS4CPP_INCLUDE_BOOST */
+
+#ifdef IFADDRS4CPP_INCLUDE_BOOST
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined( ODDSOURCE_BUILDING_STATIC_LIBRARY )
     inline
     IPv6Address::
     IPv6Address(
@@ -138,6 +186,27 @@ namespace OddSource::Interfaces
         : IPv6Address( other.to_bytes(), other.scope_id() )
     {
     }
+#  else
+    template< class A, ::std::enable_if_t<
+        ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address >,
+        bool > = true >
+    IPv6Address::
+    IPv6Address(
+        A const & other )
+        : IPv6Address( toV6( other ) )
+    {
+    }
+
+    template< class A, ::std::enable_if_t<
+        ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >,
+        bool > = true >
+    IPv6Address::
+    IPv6Address(
+        A const & other )
+        : IPv6Address( other.to_bytes(), other.scope_id() )
+    {
+    }
+#  endif
 #endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
     inline
@@ -174,6 +243,7 @@ namespace OddSource::Interfaces
     }
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined( ODDSOURCE_BUILDING_STATIC_LIBRARY )
     inline
     IPv6Address::
     operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address() const
@@ -188,5 +258,27 @@ namespace OddSource::Interfaces
     {
         return IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6( static_cast< Bytes >( *this ) );
     }
+#  else
+    template< class A, ::std::enable_if_t<
+        ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address >,
+        bool > = true >
+    inline
+    IPv6Address::
+    operator A() const
+    {
+        return IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address(
+            static_cast< IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >( *this ) );
+    }
+
+    template< class A, ::std::enable_if_t<
+        ::std::is_same_v< A, IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6 >,
+        bool > = true >
+    inline
+    IPv6Address::
+    operator A() const
+    {
+        return IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address_v6( static_cast< Bytes >( *this ) );
+    }
+#  endif
 #endif /* IFADDRS4CPP_INCLUDE_BOOST */
 }
