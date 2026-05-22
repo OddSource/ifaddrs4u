@@ -161,7 +161,7 @@ namespace OddSource::Interfaces
         size_t
         dataLength() const noexcept = 0;
 
-#if defined( IFADDRS4CPP_INCLUDE_BOOST ) && !defined( ODDSOURCE_IS_WINDOWS )
+#if defined( IFADDRS4CPP_INCLUDE_BOOST ) && ( !defined( ODDSOURCE_IS_WINDOWS ) || defined ( IFADDRS4CPP_INLINE_SOURCE ) )
         [[nodiscard]]
         virtual
         explicit
@@ -338,7 +338,7 @@ namespace OddSource::Interfaces
             ::std::uint32_t data );
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  ifndef ODDSOURCE_IS_WINDOWS
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined ( IFADDRS4CPP_INLINE_SOURCE )
         inline
         explicit
         IPv4Address(
@@ -414,7 +414,7 @@ namespace OddSource::Interfaces
         dataLength() const noexcept override;
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  ifndef ODDSOURCE_IS_WINDOWS
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined ( IFADDRS4CPP_INLINE_SOURCE )
         [[nodiscard]]
         virtual
         inline
@@ -536,7 +536,7 @@ namespace OddSource::Interfaces
             v6Scope const & scope );
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  ifndef ODDSOURCE_IS_WINDOWS
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined ( IFADDRS4CPP_INLINE_SOURCE )
         inline
         explicit
         IPv6Address(
@@ -612,7 +612,7 @@ namespace OddSource::Interfaces
         dataLength() const noexcept override;
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  ifndef ODDSOURCE_IS_WINDOWS
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined ( IFADDRS4CPP_INLINE_SOURCE )
         [[nodiscard]]
         virtual
         inline

@@ -57,7 +57,7 @@ namespace
 namespace OddSource::Interfaces
 {
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  ifndef ODDSOURCE_IS_WINDOWS
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined ( IFADDRS4CPP_INLINE_SOURCE )
     inline
     IPv4Address::
     IPv4Address(
@@ -130,7 +130,7 @@ namespace OddSource::Interfaces
     }
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  ifndef ODDSOURCE_IS_WINDOWS
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined ( IFADDRS4CPP_INLINE_SOURCE )
     inline
     IPv4Address::
     operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address() const
@@ -170,7 +170,7 @@ namespace OddSource::Interfaces
 #endif /* IFADDRS4CPP_INCLUDE_BOOST */
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  ifndef ODDSOURCE_IS_WINDOWS
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined ( IFADDRS4CPP_INLINE_SOURCE )
     inline
     IPv6Address::
     IPv6Address(
@@ -243,7 +243,7 @@ namespace OddSource::Interfaces
     }
 
 #ifdef IFADDRS4CPP_INCLUDE_BOOST
-#  ifndef ODDSOURCE_IS_WINDOWS
+#  if !defined( ODDSOURCE_IS_WINDOWS ) || defined ( IFADDRS4CPP_INLINE_SOURCE )
     inline
     IPv6Address::
     operator IFADDRS4CPP_BOOST_NAMESPACE_ROOT::asio::ip::address() const
