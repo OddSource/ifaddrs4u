@@ -29,6 +29,12 @@ else
 fi
 
 echo "#######################################"
+echo "#  Running ASAN inline library tests  #"
+echo "#######################################"
+./cmake-build-test-with-asan/ifaddrs4cpp_inline_tests
+echo
+
+echo "#######################################"
 echo "#  Running ASAN shared library tests  #"
 echo "#######################################"
 ./cmake-build-test-with-asan/ifaddrs4cpp_shared_tests
