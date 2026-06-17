@@ -45,7 +45,7 @@ This is an incomplete work in progress. More information soon.
 :code:`ifaddrs4py`
 ------------------
 
-This is a Pyton library that majes use of a combination of standard Python classes and Python native wrappers
+This is a Python library that majes use of a combination of standard Python classes and Python native wrappers
 around :code:`ifaddrs4cpp`. It is designed to be API-similar to :code:`ifaddrs4cpp`, but there are some necessary
 differences to meet Python rules, requirements, and best practices. For specific information about building
 and using this library, see `ifaddrs4py/README.rst`_.
